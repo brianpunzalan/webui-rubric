@@ -1,38 +1,44 @@
 <!--
 Sync Impact Report
 ==================
-Version change: (uninitialized template) → 1.0.0
-Bump rationale: Initial ratification. The constitution moves from
-unfilled placeholder template to a concrete, enforceable document.
+Version change: 1.0.0 → 1.1.0
+Bump rationale: MINOR — two new principles added (IV. Code Commentary
+for Intent; V. JSDoc as Standard API Documentation Format). No
+backward-incompatible changes to existing principles I–III; principle
+II's docstring requirement is clarified (not narrowed) by the new
+principle V which specifies JSDoc as the mandated format.
 
 Modified principles:
-- (none — initial population)
+- II. API Documentation Per Module — clarifying cross-reference added
+  to principle V (the docstring format is now explicitly JSDoc).
 
 Added principles:
-- I. Documentation Per Feature (NON-NEGOTIABLE)
-- II. API Documentation Per Module (NON-NEGOTIABLE)
-- III. README as Project Reference Hub (NON-NEGOTIABLE)
+- IV. Code Commentary for Intent (NON-NEGOTIABLE)
+- V. JSDoc as Standard API Documentation Format (NON-NEGOTIABLE)
 
 Added sections:
-- Documentation Standards
-- Development Workflow & Quality Gates
-- Governance
+- (none — Documentation Standards section expanded in place to cover
+  the new code-commentary and JSDoc requirements)
 
 Removed sections:
 - (none)
 
 Templates requiring updates:
-- ✅ .specify/templates/plan-template.md — Constitution Check section
-  refined to gate the three documentation principles before Phase 0.
-- ✅ .specify/templates/tasks-template.md — Polish phase strengthened
-  to require (not "optional") documentation tasks per principle I & II,
-  plus README cross-link task per principle III.
-- ✅ .specify/templates/spec-template.md — no change required; specs
-  capture WHAT/WHY and remain implementation-agnostic. Documentation
-  artifacts are produced by /speckit-plan and /speckit-implement.
+- ✅ .specify/templates/tasks-template.md — Polish phase updated to
+  include a JSDoc-coverage task and a code-comments task per the new
+  principles IV and V.
+- ✅ .specify/templates/plan-template.md — Constitution Check expanded
+  to gate principles IV and V at plan time.
+- ✅ .specify/templates/spec-template.md — no change required (specs
+  remain implementation-agnostic).
 - ✅ .specify/templates/checklist-template.md — no change required.
-- ⚠ README.md — repository root README does not yet exist; flagged as
-  follow-up in Governance § Compliance.
+- ⚠ README.md — repository root README does not yet exist; remains a
+  carryover follow-up from v1.0.0 under Principle III.
+
+Prior version history:
+- v1.0.0 (2026-05-22): Initial ratification. Added principles I–III
+  (Documentation Per Feature; API Documentation Per Module; README as
+  Project Reference Hub).
 
 Deferred TODOs:
 - (none)
@@ -80,9 +86,10 @@ interface contract.
 Required for every public interface:
 
 - Every public symbol (command, function, type, schema field, flag, option)
-  MUST carry an in-source documentation comment (docstring or equivalent for
-  the chosen language) describing purpose, inputs, outputs, errors, and
-  observable side effects.
+  MUST carry an in-source documentation comment describing purpose,
+  inputs, outputs, errors, and observable side effects. The required
+  format for in-source documentation is **JSDoc**, as specified by
+  Principle V.
 - A generated or hand-maintained API reference document MUST exist under a
   predictable location (`docs/api/<module>.md` is the default convention)
   and MUST be regenerated or updated in the same change that modifies the
@@ -128,6 +135,89 @@ Centralizing discovery in `README.md` prevents the silent fragmentation
 that occurs when guides accumulate in unrelated directories with no
 common index.
 
+### IV. Code Commentary for Intent (NON-NEGOTIABLE)
+
+Code blocks MUST carry comments that describe the **intent** of the code
+and **how it is used**. The requirement targets the WHY and the
+contract — not a line-by-line restatement of the WHAT.
+
+Required:
+
+- Every non-trivial code block (function body, conditional branch,
+  loop, regex, configuration block, schema definition) MUST be prefixed
+  by a short comment stating its intent and, where the call-site is not
+  obvious from context, how the block is intended to be used.
+- Comments MUST be written in full sentences in English and MUST be
+  kept in sync with the code in the same commit; stale comments are
+  treated as defects equal in severity to incorrect code.
+- "Magic" values (non-obvious constants, thresholds, regular
+  expressions, encoded states) MUST carry a comment explaining where
+  the value comes from and why it was chosen — e.g., a WCAG contrast
+  threshold MUST be commented with the standard it derives from.
+- Workarounds, fixes for specific bugs, and code that exists only to
+  satisfy an external constraint MUST be commented with the trigger
+  (issue ID, ticket, external requirement) and a removal condition.
+
+Prohibited:
+
+- Comments that only restate the immediately adjacent code in
+  natural language (e.g., `// increment i` next to `i++`). Comments
+  exist to add information that the code does not already convey.
+- Commented-out code in committed work; deleted code MUST be deleted,
+  not parked behind `//`.
+
+**Rationale**: This project ships an evaluator–generator agent loop
+whose correctness depends on a large amount of policy encoded directly
+in code (rubric anchors, weight floors, severity thresholds, bias
+mitigations). Readers — human or AI — cannot infer the policy from
+the syntax alone. Intent comments preserve the reasoning so future
+edits do not silently violate the constitution.
+
+### V. JSDoc as Standard API Documentation Format (NON-NEGOTIABLE)
+
+All in-source documentation comments required by Principle II (API
+Documentation Per Module) MUST use the **JSDoc** syntax — i.e.,
+`/** … */` blocks with standard JSDoc tags — for every module, public
+function, class, type/interface, and exported constant in the project.
+
+Required for every public symbol:
+
+- A `/** … */` JSDoc block immediately preceding the declaration.
+- A leading summary sentence describing what the symbol does.
+- `@param` tags for every parameter with type and description, and
+  `@returns` (or `@return`) with type and description for any
+  non-void return value.
+- `@throws` tags enumerating the error classes the symbol may raise,
+  with the conditions that trigger each.
+- `@example` block(s) for any non-trivial public API — at minimum
+  one example for every public CLI command and every Generator-
+  consumed schema producer.
+- Module-level JSDoc (`@module` or top-of-file block) MUST describe
+  the module's purpose and its place in the system; it MUST also link
+  back to the relevant `docs/api/<module>.md` reference produced under
+  Principle II.
+
+Additional rules:
+
+- Deprecated symbols MUST carry `@deprecated` with a migration note
+  and the version in which removal is planned.
+- Where the project uses TypeScript or a typed dialect, the JSDoc
+  `@param`/`@returns` types MAY be omitted in favor of the language's
+  native type annotations, but the descriptive prose for each
+  parameter and return value MUST still be present.
+- JSDoc blocks MUST be the source the API reference under `docs/api/`
+  is generated or distilled from; the generator/maintainer is free to
+  use any tool, but the JSDoc remains the canonical source.
+
+**Rationale**: A single, well-known documentation format makes API
+references mechanically extractable, makes IDE and editor tooling
+useful out of the box, and removes ambiguity about where a public
+symbol's contract is recorded. JSDoc is the most widely supported
+in-source documentation format for the JavaScript / TypeScript
+ecosystems this CLI is most likely to live in; standardizing on it
+keeps the per-module API documentation under Principle II coherent
+across the codebase.
+
 ## Documentation Standards
 
 The following standards apply to all documentation produced under the three
@@ -156,6 +246,15 @@ core principles:
 - **Examples**: Code samples in documentation MUST be runnable (or
   clearly marked as illustrative pseudocode) and SHOULD be exercised by
   CI where feasible so they cannot rot silently.
+- **In-source documentation format**: All in-source documentation
+  comments required by Principles II and V MUST use JSDoc `/** … */`
+  blocks with standard JSDoc tags (`@param`, `@returns`, `@throws`,
+  `@example`, `@deprecated`, `@module`). See Principle V for the full
+  contract.
+- **Code commentary**: Intent comments required by Principle IV MUST
+  state WHY the block exists or HOW it is used, not WHAT it does
+  line-by-line. Magic values, workarounds, and policy-bearing
+  thresholds MUST cite their source (standard, ticket, decision).
 
 ## Development Workflow & Quality Gates
 
@@ -177,9 +276,15 @@ core principles:
     `docs/api/`.
   - The repository root `README.md` exists and links to every directory
     listed in the Documentation Standards section that is non-empty.
-- **Severity**: Documentation defects under principles I, II, III are
-  treated as blocking — equivalent in severity to a failing test or a
-  WCAG-AA accessibility regression in the Evaluator CLI's rubric.
+  - Every public symbol carries a JSDoc `/** … */` block per Principle V,
+    with `@param`, `@returns`, `@throws`, and (where applicable)
+    `@example` populated.
+  - Every non-trivial code block carries an intent comment per
+    Principle IV; magic values and workarounds cite their source.
+- **Severity**: Documentation defects under principles I, II, III, IV,
+  and V are treated as blocking — equivalent in severity to a failing
+  test or a WCAG-AA accessibility regression in the Evaluator CLI's
+  rubric.
 
 ## Governance
 
@@ -207,4 +312,4 @@ core principles:
   `CLAUDE.md` (and equivalents). Those files MUST point back to this
   constitution and MUST NOT contradict it.
 
-**Version**: 1.0.0 | **Ratified**: 2026-05-22 | **Last Amended**: 2026-05-22
+**Version**: 1.1.0 | **Ratified**: 2026-05-22 | **Last Amended**: 2026-05-22

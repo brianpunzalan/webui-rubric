@@ -55,8 +55,17 @@ Verify the plan addresses each non-negotiable principle from
   the specific `README.md` updates required (new links to per-feature
   docs, API references, guides, examples) and confirm those updates
   are in scope for this feature.
+- **Principle IV — Code Commentary for Intent**: Plan MUST flag any
+  modules or code blocks that will encode policy (rubric anchors,
+  thresholds, weight floors, severity rules, bias mitigations,
+  workarounds) and confirm those blocks will land with intent
+  comments citing the source of each magic value.
+- **Principle V — JSDoc as Standard API Documentation Format**: Plan
+  MUST confirm every public symbol introduced or modified will carry a
+  JSDoc `/** … */` block (`@param`, `@returns`, `@throws`, `@example`,
+  module-level `@module`) at the time of merge.
 
-If any of the three checks cannot be satisfied, document the gap under
+If any of the five checks cannot be satisfied, document the gap under
 **Complexity Tracking** with justification and a remediation plan
 before proceeding to Phase 0 research.
 

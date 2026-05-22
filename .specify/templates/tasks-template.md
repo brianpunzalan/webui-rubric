@@ -152,8 +152,8 @@ Examples of foundational tasks (adjust based on your project):
 **Purpose**: Improvements that affect multiple user stories
 
 **⚠️ Documentation tasks below are MANDATORY per the project constitution
-(Principles I, II, III) — they MUST land in the same change as the feature
-and MUST NOT be deferred to a follow-up.**
+(Principles I, II, III, IV, V) — they MUST land in the same change as the
+feature and MUST NOT be deferred to a follow-up.**
 
 - [ ] TXXX [P] **[Principle I]** Author per-feature user-facing guide
       (e.g., `specs/NNN-<feature>/quickstart.md`) covering primary user
@@ -162,8 +162,15 @@ and MUST NOT be deferred to a follow-up.**
 - [ ] TXXX [P] **[Principle II]** Add/update API reference documentation
       under `docs/api/<module>.md` for every public CLI command, library
       function, schema, and plugin extension point introduced or modified
-- [ ] TXXX [P] **[Principle II]** Ensure every public symbol carries an
-      in-source docstring (purpose, inputs, outputs, errors, side effects)
+- [ ] TXXX [P] **[Principle V]** Ensure every public symbol carries a
+      JSDoc `/** … */` block with `@param`, `@returns`, `@throws`, and
+      (where applicable) `@example`; module files carry a top-level
+      `@module` block linking back to `docs/api/<module>.md`
+- [ ] TXXX [P] **[Principle IV]** Audit non-trivial code blocks for
+      intent comments: every policy-bearing constant (rubric anchors,
+      thresholds, weight floors, severity rules, bias-mitigation toggles)
+      cites its source; every workaround cites the trigger and removal
+      condition; no `// restate the code` noise comments remain
 - [ ] TXXX **[Principle III]** Update repository root `README.md` to link
       the new per-feature guide, API references, examples, and any guides
       under the categories defined in the constitution
