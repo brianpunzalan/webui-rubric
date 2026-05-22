@@ -40,7 +40,25 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+Verify the plan addresses each non-negotiable principle from
+`.specify/memory/constitution.md`:
+
+- **Principle I — Documentation Per Feature**: Plan MUST schedule a
+  user-facing document (default: `specs/NNN-<feature>/quickstart.md`)
+  and at least one worked example per P1 user story. List the planned
+  document paths here.
+- **Principle II — API Documentation Per Module**: Plan MUST enumerate
+  every public interface (CLI commands, library functions, schemas,
+  plugin extension points) introduced or modified, and the
+  `docs/api/<module>.md` reference that will land in the same change.
+- **Principle III — README as Project Reference Hub**: Plan MUST list
+  the specific `README.md` updates required (new links to per-feature
+  docs, API references, guides, examples) and confirm those updates
+  are in scope for this feature.
+
+If any of the three checks cannot be satisfied, document the gap under
+**Complexity Tracking** with justification and a remediation plan
+before proceeding to Phase 0 research.
 
 ## Project Structure
 

@@ -151,12 +151,28 @@ Examples of foundational tasks (adjust based on your project):
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] TXXX [P] Documentation updates in docs/
-- [ ] TXXX Code cleanup and refactoring
+**⚠️ Documentation tasks below are MANDATORY per the project constitution
+(Principles I, II, III) — they MUST land in the same change as the feature
+and MUST NOT be deferred to a follow-up.**
+
+- [ ] TXXX [P] **[Principle I]** Author per-feature user-facing guide
+      (e.g., `specs/NNN-<feature>/quickstart.md`) covering primary user
+      journey, expected outputs, limitations, and worked examples for each
+      P1 user story
+- [ ] TXXX [P] **[Principle II]** Add/update API reference documentation
+      under `docs/api/<module>.md` for every public CLI command, library
+      function, schema, and plugin extension point introduced or modified
+- [ ] TXXX [P] **[Principle II]** Ensure every public symbol carries an
+      in-source docstring (purpose, inputs, outputs, errors, side effects)
+- [ ] TXXX **[Principle III]** Update repository root `README.md` to link
+      the new per-feature guide, API references, examples, and any guides
+      under the categories defined in the constitution
+- [ ] TXXX [P] Code cleanup and refactoring
 - [ ] TXXX Performance optimization across all stories
 - [ ] TXXX [P] Additional unit tests (if requested) in tests/unit/
 - [ ] TXXX Security hardening
-- [ ] TXXX Run quickstart.md validation
+- [ ] TXXX Run quickstart.md validation (verify every code sample and
+      cross-reference)
 
 ---
 
