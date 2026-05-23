@@ -17,6 +17,7 @@ This CLI is a **tool** invoked by an external **Evaluator agent (LLM)**. The CLI
 ### Session 2026-05-23
 
 - Q: Output contract — how should the JSON artifact and the one-line summary share stdout/stderr? → A: JSON to stdout, summary to stderr by default; with `--out <file>`, JSON goes to the file and the one-line summary moves to stdout.
+- Q: Privacy of captured artifacts (HAR, DOM, evidence strings, debug dir) — how should the CLI handle high-risk bytes flowing into the LLM-consumed JSON and on-disk debug dir? → A: Default-on redaction with `--no-redact` opt-out (redact auth/cookie headers and write-method bodies in HAR; redact values of password/email/tel and `autocomplete=cc-*` inputs in DOM; never include raw cookie/header/form-value substrings in evidence; create debug dir with permissions 0700; reference image referenced by path, not echoed in evidence).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -119,6 +120,7 @@ The CLI accepts and emits loop-metadata fields (`iteration`, `previous_composite
 - **Operator supplies a custom sub-criterion missing anchor descriptors for one or more 0–4 levels, or missing a bound deterministic check**: CLI rejects the config until all five anchors are present and a check is bound.
 - **Operator passes an attempted-fixes file that is malformed**: CLI logs a warning and treats it as empty rather than failing the run, because a malformed history file should not block evaluation.
 - **Composite improves but a blocking issue appears**: The JSON still flags the run as not ship-ready regardless of composite improvement.
+- **Operator passes `--no-redact`**: The CLI proceeds without redaction, records `meta.redaction = "disabled"` in the output, and writes the unredacted artifacts into the debug directory (still under mode 0700); the Evaluator agent is expected to gate or scrub on `meta.redaction` before forwarding evidence to the Generator agent.
 
 ## Requirements *(mandatory)*
 
@@ -174,7 +176,7 @@ The CLI accepts and emits loop-metadata fields (`iteration`, `previous_composite
 #### Output and loop metadata
 
 - **FR-030**: The CLI MUST emit its result as a single JSON document conforming to a published, versioned evaluator output schema, including `rubric_version`, `target`, `composite_score`, `blocking`, per-dimension scores and sub-criteria, `top_issues`, `pixel_comparison` (when applicable), and `meta`.
-- **FR-031**: Every sub-criterion entry in the output MUST contain `score` (or `null` with a `status`), `evidence` (a verbatim tool output, rule ID, or concrete numeric measurement, ≤ 300 characters), `evidence_source` (tool / check identifier), `severity`, `suggested_fix` (≤ 280 characters), and optionally `location` and `confidence`. Evidence and suggested_fix MUST come from the deterministic check's templated outputs, never from an LLM.
+- **FR-031**: Every sub-criterion entry in the output MUST contain `score` (or `null` with a `status`), `evidence` (a verbatim tool output, rule ID, or concrete numeric measurement, ≤ 300 characters), `evidence_source` (tool / check identifier), `severity`, `suggested_fix` (≤ 280 characters), and optionally `location` and `confidence`. Evidence and suggested_fix MUST come from the deterministic check's templated outputs, never from an LLM. Evidence strings MUST be sanitized per FR-039 before emission — i.e., they MUST NOT contain raw `Set-Cookie` / `Cookie` / `Authorization` header values, raw HAR request bodies for write methods, or raw values from password / email / tel / `autocomplete=cc-*` form inputs; the reference design image MUST be referenced by path only, never base64-embedded or otherwise echoed into the evidence string.
 - **FR-032**: The CLI MUST accept loop-metadata inputs (`--iteration`, `--previous-composite`, `--attempted-fixes <path>`) and populate the output's `meta.iteration`, `meta.previous_composite`, and `meta.delta` accordingly.
 - **FR-033**: When an `attempted-fixes` list is supplied, the CLI MUST exclude any fix whose hash matches a prior attempt from the `top_issues` list (oscillation prevention).
 - **FR-034**: The CLI MUST refuse iterations beyond a documented cap (default 5) unless an explicit override flag is supplied.
@@ -183,8 +185,10 @@ The CLI accepts and emits loop-metadata fields (`iteration`, `previous_composite
 #### Errors and observability
 
 - **FR-036**: On any unrecoverable error (malformed config, schema-validation failure on emitted output, target unreachable, missing bound check, reference image mismatch under default policy), the CLI MUST exit non-zero with a single actionable error message and MUST NOT emit a partial evaluation JSON.
-- **FR-037**: The CLI MUST optionally persist debugging artifacts (captured screenshots per viewport, reference image as captured, pixelmatch diff PNGs, raw scanner/lab-tool reports, HAR, console-error log) to a user-specified directory so that disagreements and failures are auditable.
+- **FR-037**: The CLI MUST optionally persist debugging artifacts (captured screenshots per viewport, reference image as captured, pixelmatch diff PNGs, raw scanner/lab-tool reports, HAR, console-error log) to a user-specified directory so that disagreements and failures are auditable. The debug directory MUST be created with restrictive permissions (mode 0700 on POSIX systems) and all persisted HAR / DOM-snapshot artifacts MUST be redacted per FR-039 before being written to disk.
 - **FR-038**: The CLI MUST emit a one-line, machine-friendly summary (composite score, blocking count, top-issue count, ship-ready flag) suitable for piping into an Evaluator/Generator agent's tool-use harness or a CI pipeline. Per the output contract in FR-002, this summary is written to stderr by default and switches to stdout when `--out <file>` is used (i.e., it is always written to the stream that does NOT carry the JSON artifact).
+
+- **FR-039**: The CLI MUST apply default-on redaction to every byte stream that flows into the emitted JSON or the debug directory. Specifically, by default the CLI MUST: (a) redact the values of `Set-Cookie`, `Cookie`, and `Authorization` headers and any header whose name matches `*-csrf-*` / `x-api-key` / `x-auth-*` (case-insensitive) in the network HAR (request and response); (b) redact request bodies of HAR entries whose method is `POST`, `PUT`, or `PATCH`; (c) redact the `value` attribute of DOM elements matching `input[type=password]`, `input[type=email]`, `input[type=tel]`, or `[autocomplete^=cc-]`; (d) ensure no evidence string (FR-031) contains a raw cookie value, raw auth-header value, or raw form-input value substring; (e) reference the supplied reference design image by path only (never embed or echo its bytes into evidence). Redaction MUST replace the offending value with a fixed placeholder (e.g., `"<redacted>"`) so that structural shape is preserved and downstream JSON parsing is unaffected. The operator MAY opt out of redaction by passing `--no-redact`; when `--no-redact` is in effect, the CLI MUST record `meta.redaction = "disabled"` in the output so the Evaluator agent can detect that sensitive bytes may be present.
 
 ### Key Entities
 
