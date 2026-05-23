@@ -12,6 +12,12 @@
 
 This CLI is a **tool** invoked by an external **Evaluator agent (LLM)**. The CLI itself does **not** call any LLM. Its job is to produce a deterministic, reproducible evaluation artifact from objective measurements (accessibility scans, performance/lab metrics, structural / DOM / CSS checks, and pixel-diff against an optional reference design image). The artifact is consumed by the Evaluator agent and then fed back to a **Generator agent (LLM)** which uses the prioritized issues and blocking list to improve its UI output. The CLI's contract is therefore: deterministic in, deterministic out — no model variance, no LLM calls, no API keys for model providers.
 
+## Clarifications
+
+### Session 2026-05-23
+
+- Q: Output contract — how should the JSON artifact and the one-line summary share stdout/stderr? → A: JSON to stdout, summary to stderr by default; with `--out <file>`, JSON goes to the file and the one-line summary moves to stdout.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 — Deterministic Single-Pass Evaluation of a Live URL (Priority: P1)
@@ -121,7 +127,7 @@ The CLI accepts and emits loop-metadata fields (`iteration`, `previous_composite
 #### Architecture and invocation
 
 - **FR-001**: The CLI MUST NOT invoke any LLM, hosted model API, or other non-deterministic scoring service. All scoring decisions MUST come from deterministic checks (scanners, lab tools, structural DOM/CSS checks, pixel-diff measurements).
-- **FR-002**: The CLI MUST be invocable as a standalone command from a shell and from an Evaluator agent's tool-use harness, taking all inputs via command-line flags / arguments / a config file and emitting its evaluation artifact to stdout (or a specified file).
+- **FR-002**: The CLI MUST be invocable as a standalone command from a shell and from an Evaluator agent's tool-use harness, taking all inputs via command-line flags / arguments / a config file. Default output contract: the JSON evaluation artifact is written to stdout and the one-line summary (see FR-038) is written to stderr. When `--out <file>` is supplied, the JSON artifact is written to that file and the one-line summary is written to stdout. Diagnostic / progress logs (when enabled) MUST go to stderr in both modes so they never contaminate the JSON stream.
 - **FR-003**: The CLI MUST be deterministic: re-running with identical inputs (URL, config, optional reference image, optional loop metadata) MUST produce identical per-sub-criterion scores and an identical composite score (timestamps and run IDs excepted).
 
 #### Inputs and capture
@@ -178,7 +184,7 @@ The CLI accepts and emits loop-metadata fields (`iteration`, `previous_composite
 
 - **FR-036**: On any unrecoverable error (malformed config, schema-validation failure on emitted output, target unreachable, missing bound check, reference image mismatch under default policy), the CLI MUST exit non-zero with a single actionable error message and MUST NOT emit a partial evaluation JSON.
 - **FR-037**: The CLI MUST optionally persist debugging artifacts (captured screenshots per viewport, reference image as captured, pixelmatch diff PNGs, raw scanner/lab-tool reports, HAR, console-error log) to a user-specified directory so that disagreements and failures are auditable.
-- **FR-038**: The CLI MUST emit a one-line, machine-friendly summary (composite score, blocking count, top-issue count, ship-ready flag) to standard output suitable for piping into an Evaluator/Generator agent's tool-use harness or a CI pipeline.
+- **FR-038**: The CLI MUST emit a one-line, machine-friendly summary (composite score, blocking count, top-issue count, ship-ready flag) suitable for piping into an Evaluator/Generator agent's tool-use harness or a CI pipeline. Per the output contract in FR-002, this summary is written to stderr by default and switches to stdout when `--out <file>` is used (i.e., it is always written to the stream that does NOT carry the JSON artifact).
 
 ### Key Entities
 
