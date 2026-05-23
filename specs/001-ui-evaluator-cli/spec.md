@@ -8,6 +8,12 @@
 
 **Input**: User description: "CLI tool for the Evaluator agent that evaluates the web UI with a multi-dimensional rubric. The output is consumed by a Generator agent to improve its output. Based on the provided research: 10 weighted dimensions anchored in Nielsen, Shneiderman, WCAG 2.2, and Gestalt; 0–4 Likert with anchor descriptors; bias-mitigated LLM-as-judge; structured JSON output with per-criterion evidence, severity, and suggested fix; prioritized top-N issues; blocking flag for WCAG AA failures; configurable per project."
 
+## Clarifications
+
+### Session 2026-05-23
+
+- Q: What implementation language/runtime should the CLI use? → A: Node.js / TypeScript
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 — Single Evaluation Pass on a Target UI (Priority: P1)
@@ -207,6 +213,10 @@ For higher-stakes runs, the operator opts into a second independent evaluator pa
 - **SC-010**: In a wrapped Generator loop, the CLI's loop-metadata enables the loop to halt within at most 5 iterations on a representative target — verified by a loop test where the CLI is invoked iteratively and the loop detects either ship-readiness, no-progress, or iteration-cap exhaustion.
 - **SC-011**: When the evaluator and the declared generator share a model family, the CLI refuses to run on 100 % of such configurations unless an explicit override flag is supplied.
 - **SC-012**: All ten dimensions plus their full set of sub-criteria appear in every successful output, even when some sub-criteria are marked "not applicable" — measured by a structural completeness check on the output JSON.
+
+## Constraints
+
+- **TC-001**: The CLI MUST be implemented in TypeScript targeting Node.js (LTS). Headless browser integration uses Playwright (Node.js variant); LLM provider SDKs must be available as npm packages; the tool is distributed via npm. This choice enables native Playwright, TypeScript-first tooling, and the full npm ecosystem for AI/agent integrations.
 
 ## Assumptions
 
