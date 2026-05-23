@@ -18,6 +18,7 @@ This CLI is a **tool** invoked by an external **Evaluator agent (LLM)**. The CLI
 
 - Q: Output contract — how should the JSON artifact and the one-line summary share stdout/stderr? → A: JSON to stdout, summary to stderr by default; with `--out <file>`, JSON goes to the file and the one-line summary moves to stdout.
 - Q: Privacy of captured artifacts (HAR, DOM, evidence strings, debug dir) — how should the CLI handle high-risk bytes flowing into the LLM-consumed JSON and on-disk debug dir? → A: Default-on redaction with `--no-redact` opt-out (redact auth/cookie headers and write-method bodies in HAR; redact values of password/email/tel and `autocomplete=cc-*` inputs in DOM; never include raw cookie/header/form-value substrings in evidence; create debug dir with permissions 0700; reference image referenced by path, not echoed in evidence).
+- Q: How is the FR-003 determinism guarantee protected against drift in third-party deterministic tools (axe-core, Lighthouse, pixelmatch, etc.)? → A: Pin exact tool versions inside the rubric definition; the CLI verifies the installed versions at startup and refuses to run on mismatch unless `--allow-tool-version-drift` is passed, in which case the drift is recorded in `meta`.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -121,6 +122,7 @@ The CLI accepts and emits loop-metadata fields (`iteration`, `previous_composite
 - **Operator passes an attempted-fixes file that is malformed**: CLI logs a warning and treats it as empty rather than failing the run, because a malformed history file should not block evaluation.
 - **Composite improves but a blocking issue appears**: The JSON still flags the run as not ship-ready regardless of composite improvement.
 - **Operator passes `--no-redact`**: The CLI proceeds without redaction, records `meta.redaction = "disabled"` in the output, and writes the unredacted artifacts into the debug directory (still under mode 0700); the Evaluator agent is expected to gate or scrub on `meta.redaction` before forwarding evidence to the Generator agent.
+- **Installed deterministic-tool version does not match the rubric's pin**: The CLI exits non-zero by default with an error naming the tool, the pinned version, and the resolved version; with `--allow-tool-version-drift` the CLI proceeds and records the drift in `meta.tool_version_drift` with `meta.determinism = "drifted"`, signalling to the Evaluator agent that FR-003 no longer holds for this run.
 
 ## Requirements *(mandatory)*
 
@@ -130,7 +132,7 @@ The CLI accepts and emits loop-metadata fields (`iteration`, `previous_composite
 
 - **FR-001**: The CLI MUST NOT invoke any LLM, hosted model API, or other non-deterministic scoring service. All scoring decisions MUST come from deterministic checks (scanners, lab tools, structural DOM/CSS checks, pixel-diff measurements).
 - **FR-002**: The CLI MUST be invocable as a standalone command from a shell and from an Evaluator agent's tool-use harness, taking all inputs via command-line flags / arguments / a config file. Default output contract: the JSON evaluation artifact is written to stdout and the one-line summary (see FR-038) is written to stderr. When `--out <file>` is supplied, the JSON artifact is written to that file and the one-line summary is written to stdout. Diagnostic / progress logs (when enabled) MUST go to stderr in both modes so they never contaminate the JSON stream.
-- **FR-003**: The CLI MUST be deterministic: re-running with identical inputs (URL, config, optional reference image, optional loop metadata) MUST produce identical per-sub-criterion scores and an identical composite score (timestamps and run IDs excepted).
+- **FR-003**: The CLI MUST be deterministic: re-running with identical inputs (URL, config, optional reference image, optional loop metadata) MUST produce identical per-sub-criterion scores and an identical composite score (timestamps and run IDs excepted). This guarantee is scoped to runs where every bound deterministic tool's installed version matches the rubric's pinned version per FR-026a (i.e., `meta.determinism = "pinned"`). Runs that proceed under `--allow-tool-version-drift` are NOT covered by this guarantee.
 
 #### Inputs and capture
 
@@ -166,12 +168,13 @@ The CLI accepts and emits loop-metadata fields (`iteration`, `previous_composite
 - **FR-024**: When a deterministic tool sets a sub-criterion score, the CLI MUST populate `evidence_source` to indicate the tool, MUST record the tool's rule identifier in the evidence field, and MUST include a structural location reference (selector, bounding box, or file:line) when the tool exposes one.
 - **FR-025**: When a configured deterministic tool is unavailable at runtime (binary missing, scanner crash, network failure to a lab service), the CLI MUST follow a configurable fallback policy: either mark the affected sub-criteria `status = "tool_unavailable"` and re-weight, or fail fast — defaulting to fail-fast for any blocking-eligible criterion.
 - **FR-026**: Performance sub-criteria scored from lab analysis MUST be marked as `"predicted"` rather than `"measured"` to distinguish lab signals from real-user monitoring.
+- **FR-026a**: The rubric definition MUST pin an exact version (not a range) for every deterministic tool whose output backs a sub-criterion score (e.g., `axe-core@4.10.2`, `pixelmatch@7.1.0`, `lighthouse@12.2.1`). At startup, the CLI MUST resolve the installed version of each pinned tool and compare it byte-for-byte to the rubric's pin. On any mismatch the CLI MUST refuse to run and exit non-zero with an error naming the tool, the pinned version, and the resolved version — unless the operator passes `--allow-tool-version-drift`, in which case the CLI proceeds and MUST record each drifted tool in `meta.tool_version_drift` (with pinned and resolved versions) and set `meta.determinism = "drifted"`. When no drift is present, `meta.determinism` MUST be `"pinned"`. The FR-003 determinism guarantee applies only when `meta.determinism = "pinned"`.
 
 #### Configuration
 
 - **FR-027**: The CLI MUST accept a declarative project configuration file that can override default dimension weights, toggle `blocking_if_zero` on individual sub-criteria, add custom sub-criteria (each bound to a named deterministic check) under existing dimensions, select / configure the bound check for any sub-criterion, set viewport(s) for capture and pixel comparison, and set tool fallback policy.
 - **FR-028**: The CLI MUST reject configurations whose weights do not sum to 100, whose custom sub-criteria are missing anchor descriptors for any of the score levels 0–4, whose custom sub-criteria are missing a bound deterministic check, or whose Accessibility-dimension weight falls below a documented floor (10) without an explicit, named override flag.
-- **FR-029**: The CLI MUST record the effective configuration (resolved weights, blocking toggles, custom sub-criteria, bound check identifiers per sub-criterion, viewports, rubric version, tool versions) in the output's `meta`.
+- **FR-029**: The CLI MUST record the effective configuration (resolved weights, blocking toggles, custom sub-criteria, bound check identifiers per sub-criterion, viewports, rubric version, both the pinned tool versions from the rubric and the resolved installed versions, and the `meta.determinism` state from FR-026a) in the output's `meta`.
 
 #### Output and loop metadata
 
