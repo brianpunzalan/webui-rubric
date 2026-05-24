@@ -139,9 +139,7 @@ describe('output modules', () => {
       const dimensions = [
         makeDimension({
           id: 'd1',
-          sub_criteria: [
-            makeSubCriterion({ id: 'sub-1', blocking_if_zero: true }),
-          ],
+          sub_criteria: [makeSubCriterion({ id: 'sub-1', blocking_if_zero: true })],
         }),
       ];
       const findings = new Map<string, SubCriterionFinding[]>([
@@ -155,9 +153,7 @@ describe('output modules', () => {
       const dimensions = [
         makeDimension({
           id: 'd1',
-          sub_criteria: [
-            makeSubCriterion({ id: 'sub-1', blocking_if_zero: false }),
-          ],
+          sub_criteria: [makeSubCriterion({ id: 'sub-1', blocking_if_zero: false })],
         }),
       ];
       const findings = new Map<string, SubCriterionFinding[]>([
@@ -171,9 +167,7 @@ describe('output modules', () => {
       const dimensions = [
         makeDimension({
           id: 'd1',
-          sub_criteria: [
-            makeSubCriterion({ id: 'sub-1', blocking_if_zero: true }),
-          ],
+          sub_criteria: [makeSubCriterion({ id: 'sub-1', blocking_if_zero: true })],
         }),
       ];
       const findings = new Map<string, SubCriterionFinding[]>([
