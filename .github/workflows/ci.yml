@@ -22,20 +22,17 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Enable Corepack
-        run: corepack enable
-
       - name: Install dependencies
-        run: yarn install
+        run: npm install
 
       - name: Build
-        run: yarn build
+        run: npm run build
 
       - name: Lint
-        run: yarn lint
+        run: npm run lint
 
       - name: Format check
-        run: yarn format
+        run: npm run format
 
       - name: Test
-        run: yarn test
+        run: npm run test

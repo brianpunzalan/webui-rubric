@@ -12,7 +12,7 @@ export function validateProjectConfig(raw: unknown): ValidationResult {
   if (!result.success) {
     return {
       valid: false,
-      errors: result.error.errors.map(e => `${e.path.join('.')}: ${e.message}`),
+      errors: result.error.errors.map((e) => `${e.path.join('.')}: ${e.message}`),
     };
   }
   return { valid: true, errors: [], config: result.data as ProjectConfig };
@@ -35,7 +35,7 @@ export function validateWeights(
         if (!ack || !ack.includes(dim.id)) {
           errors.push(
             `${dim.name} weight (${weights[dim.id]}) is below the floor of ${dim.weight_floor}. ` +
-            `Add "${dim.id}" to weight_overrides_ack to override.`
+              `Add "${dim.id}" to weight_overrides_ack to override.`,
           );
         }
       }
@@ -44,14 +44,20 @@ export function validateWeights(
   return errors;
 }
 
-export function validateCustomSubCriteria(customs: Array<{dimension: string; id: string; anchors?: unknown[]; bound_check?: unknown}>): string[] {
+export function validateCustomSubCriteria(
+  customs: Array<{ dimension: string; id: string; anchors?: unknown[]; bound_check?: unknown }>,
+): string[] {
   const errors: string[] = [];
   for (const sub of customs) {
     if (!sub.anchors || sub.anchors.length !== 5) {
-      errors.push(`Custom sub-criterion "${sub.id}" must have exactly 5 anchor descriptors (scores 0-4)`);
+      errors.push(
+        `Custom sub-criterion "${sub.id}" must have exactly 5 anchor descriptors (scores 0-4)`,
+      );
     }
     if (!sub.bound_check) {
-      errors.push(`Custom sub-criterion "${sub.id}" must have a bound_check with valid check_family and check_id`);
+      errors.push(
+        `Custom sub-criterion "${sub.id}" must have a bound_check with valid check_family and check_id`,
+      );
     }
   }
   return errors;

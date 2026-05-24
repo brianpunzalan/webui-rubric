@@ -41,7 +41,9 @@ export const checkToolsCommand = new Command('check-tools')
     } else {
       for (const [tool, info] of Object.entries(results)) {
         const status = info.match ? '✓' : '✗';
-        process.stdout.write(`${status} ${tool}: pinned=${info.pinned} resolved=${info.resolved}\n`);
+        process.stdout.write(
+          `${status} ${tool}: pinned=${info.pinned} resolved=${info.resolved}\n`,
+        );
       }
     }
 

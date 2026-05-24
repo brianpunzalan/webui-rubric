@@ -21,7 +21,11 @@ export const validateConfigCommand = new Command('validate-config')
 
       // Additional weight validation
       if (result.config?.weights) {
-        const weightErrors = validateWeights(result.config.weights, V1_RUBRIC, result.config.weight_overrides_ack);
+        const weightErrors = validateWeights(
+          result.config.weights,
+          V1_RUBRIC,
+          result.config.weight_overrides_ack,
+        );
         if (weightErrors.length > 0) {
           for (const err of weightErrors) {
             process.stderr.write(`Error: ${err}\n`);
@@ -32,7 +36,9 @@ export const validateConfigCommand = new Command('validate-config')
 
       process.stdout.write('Configuration is valid.\n');
     } catch (error) {
-      process.stderr.write(`Error reading config: ${error instanceof Error ? error.message : String(error)}\n`);
+      process.stderr.write(
+        `Error reading config: ${error instanceof Error ? error.message : String(error)}\n`,
+      );
       process.exit(2);
     }
   });

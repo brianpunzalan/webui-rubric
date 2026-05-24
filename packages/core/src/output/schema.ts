@@ -1,16 +1,21 @@
 import { z } from 'zod';
 
-const LocationReferenceSchema = z.object({
-  type: z.enum(['selector', 'bounding_box', 'coordinates']),
-  selector: z.string().nullable().optional(),
-  bounding_box: z.object({
-    x: z.number(),
-    y: z.number(),
-    width: z.number(),
-    height: z.number(),
-  }).nullable().optional(),
-  viewport: z.string().nullable().optional(),
-}).nullable();
+const LocationReferenceSchema = z
+  .object({
+    type: z.enum(['selector', 'bounding_box', 'coordinates']),
+    selector: z.string().nullable().optional(),
+    bounding_box: z
+      .object({
+        x: z.number(),
+        y: z.number(),
+        width: z.number(),
+        height: z.number(),
+      })
+      .nullable()
+      .optional(),
+    viewport: z.string().nullable().optional(),
+  })
+  .nullable();
 
 const SubCriterionFindingSchema = z.object({
   id: z.string(),
@@ -73,9 +78,11 @@ const PixelComparisonViewportSchema = z.object({
   reference_dimensions: ViewportDimsSchema,
 });
 
-const PixelComparisonResultSchema = z.object({
-  viewports: z.array(PixelComparisonViewportSchema).min(1),
-}).nullable();
+const PixelComparisonResultSchema = z
+  .object({
+    viewports: z.array(PixelComparisonViewportSchema).min(1),
+  })
+  .nullable();
 
 const EffectiveConfigSchema = z.object({
   weights: z.record(z.string(), z.number()),

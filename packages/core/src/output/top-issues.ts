@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import type { TopIssue, SubCriterionFinding, DimensionResult } from '../types/index.js';
+import type { TopIssue, DimensionResult } from '../types/index.js';
 
 export function buildTopIssues(
   dimensionResults: DimensionResult[],
@@ -30,7 +30,7 @@ export function buildTopIssues(
   }
 
   return candidates
-    .filter(issue => !attemptedFixHashes || !attemptedFixHashes.has(issue.fix_hash))
+    .filter((issue) => !attemptedFixHashes || !attemptedFixHashes.has(issue.fix_hash))
     .sort((a, b) => b.priority_score - a.priority_score)
     .slice(0, cap)
     .map((issue, i) => ({ ...issue, rank: i + 1 }));

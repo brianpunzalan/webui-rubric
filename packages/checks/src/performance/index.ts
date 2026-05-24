@@ -59,10 +59,14 @@ export async function runLighthouseChecks(url: string): Promise<PerformanceCheck
       findings.push({
         score: s,
         status: 'scored',
-        evidence: `${metric.metric_id}: ${value.toFixed(1)}${metric.unit} (score: ${s}/4)`.slice(0, 300),
+        evidence: `${metric.metric_id}: ${value.toFixed(1)}${metric.unit} (score: ${s}/4)`.slice(
+          0,
+          300,
+        ),
         evidence_source: `lighthouse.${metric.metric_id}`,
         severity,
-        suggested_fix: s < 4 ? metric.fix_template.replace('{value}', value.toFixed(1)).slice(0, 280) : '',
+        suggested_fix:
+          s < 4 ? metric.fix_template.replace('{value}', value.toFixed(1)).slice(0, 280) : '',
         location: null,
         confidence: 'predicted',
       });
@@ -70,10 +74,14 @@ export async function runLighthouseChecks(url: string): Promise<PerformanceCheck
 
     return findings;
   } catch (error) {
-    return PERFORMANCE_METRICS.map(m => ({
+    return PERFORMANCE_METRICS.map((m) => ({
       score: null,
       status: 'tool_unavailable' as const,
-      evidence: `Lighthouse analysis failed: ${error instanceof Error ? error.message : 'unknown error'}`.slice(0, 300),
+      evidence:
+        `Lighthouse analysis failed: ${error instanceof Error ? error.message : 'unknown error'}`.slice(
+          0,
+          300,
+        ),
       evidence_source: `lighthouse.${m.metric_id}`,
       severity: 0,
       suggested_fix: '',

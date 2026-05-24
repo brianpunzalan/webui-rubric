@@ -37,7 +37,10 @@ export const PERFORMANCE_METRICS: MetricThresholds[] = [
   },
 ];
 
-export function scoreFromMetric(value: number, thresholds: [number, number, number, number]): number {
+export function scoreFromMetric(
+  value: number,
+  thresholds: [number, number, number, number],
+): number {
   if (value <= thresholds[0]) return 4;
   if (value <= thresholds[1]) return 3;
   if (value <= thresholds[2]) return 2;

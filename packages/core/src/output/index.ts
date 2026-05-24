@@ -18,7 +18,7 @@ export function validateOutput(result: EvaluationResult): OutputValidationResult
   if (!parsed.success) {
     return {
       valid: false,
-      errors: parsed.error.errors.map(e => `${e.path.join('.')}: ${e.message}`),
+      errors: parsed.error.errors.map((e) => `${e.path.join('.')}: ${e.message}`),
     };
   }
   return { valid: true, errors: [] };

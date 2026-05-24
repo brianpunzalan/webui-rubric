@@ -6,9 +6,9 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "yarn workspaces foreach -Apt run build",
-    "test": "yarn workspaces foreach -Ap run test",
-    "lint": "yarn workspaces foreach -Ap run lint",
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
     "format": "prettier --check .",
     "format:fix": "prettier --write ."
   },
@@ -22,6 +22,5 @@
     "typescript-eslint": "^8.0.0",
     "vite": "^6.0.0",
     "vitest": "^3.0.0"
-  },
-  "packageManager": "yarn@4.6.0"
+  }
 }

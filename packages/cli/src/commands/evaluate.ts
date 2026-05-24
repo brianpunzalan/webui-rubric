@@ -29,8 +29,9 @@ export const evaluateCommand = new Command('evaluate')
       const { setLogLevel, setQuiet, logger } = await import('@webui-rubric/core');
       const { V1_RUBRIC } = await import('@webui-rubric/core');
       const { validateOutput } = await import('@webui-rubric/core');
-      const { computeDimensionScore, computeCompositeScore, buildDimensionResult } = await import('@webui-rubric/core');
-      const { redactHarHeaders, redactDomSnapshot, isRedactionEnabled } = await import('@webui-rubric/core');
+      const { computeCompositeScore, buildDimensionResult } = await import('@webui-rubric/core');
+      const { redactHarHeaders, redactDomSnapshot, isRedactionEnabled } =
+        await import('@webui-rubric/core');
       const { validateProjectConfig, validateWeights } = await import('@webui-rubric/core');
 
       // Configure logger
@@ -58,7 +59,11 @@ export const evaluateCommand = new Command('evaluate')
 
       // Validate weights if custom
       if (config.weights) {
-        const weightErrors = validateWeights(config.weights, V1_RUBRIC, config.weight_overrides_ack);
+        const weightErrors = validateWeights(
+          config.weights,
+          V1_RUBRIC,
+          config.weight_overrides_ack,
+        );
         if (weightErrors.length > 0) {
           logger.error(`Weight validation: ${weightErrors.join('; ')}`);
           process.exit(2);
@@ -69,7 +74,9 @@ export const evaluateCommand = new Command('evaluate')
       if (options.iteration !== undefined) {
         const cap = config.iteration_cap ?? 5;
         if (options.iteration > cap && !options.allowOverrun) {
-          logger.error(`Iteration ${options.iteration} exceeds cap of ${cap}. Use --allow-overrun to proceed.`);
+          logger.error(
+            `Iteration ${options.iteration} exceeds cap of ${cap}. Use --allow-overrun to proceed.`,
+          );
           process.exit(4);
         }
       }
@@ -99,8 +106,16 @@ export const evaluateCommand = new Command('evaluate')
       }
 
       // Run checks
-      const { checkHeadingOrder, checkLandmarkUsage, checkLinkDescriptiveness, checkImageAlt, checkFormLabels, checkMetaViewport } = await import('@webui-rubric/checks');
-      const { checkUniqueColorCount, checkFontFamilyCount, checkSpacingConsistency } = await import('@webui-rubric/checks');
+      const {
+        checkHeadingOrder,
+        checkLandmarkUsage,
+        checkLinkDescriptiveness,
+        checkImageAlt,
+        checkFormLabels,
+        checkMetaViewport,
+      } = await import('@webui-rubric/checks');
+      const { checkUniqueColorCount, checkFontFamilyCount, checkSpacingConsistency } =
+        await import('@webui-rubric/checks');
       const { checkConsoleErrors, checkResourceCount } = await import('@webui-rubric/checks');
 
       // Run structural checks on captured artifacts
@@ -125,7 +140,14 @@ export const evaluateCommand = new Command('evaluate')
       };
 
       // Run Lighthouse for performance metrics
-      let lighthouseResults: any[] = [];
+      let lighthouseResults: Array<{
+        evidence_source: string;
+        score: number | null;
+        status: string;
+        evidence: string;
+        severity: number;
+        suggested_fix: string;
+      }> = [];
       try {
         const { runLighthouseChecks } = await import('@webui-rubric/checks');
         lighthouseResults = await runLighthouseChecks(url);
@@ -134,31 +156,19 @@ export const evaluateCommand = new Command('evaluate')
         logger.warn(`Lighthouse failed: ${error instanceof Error ? error.message : 'unknown'}`);
       }
 
-      // Run axe checks (would need the Playwright page, but it's closed)
-      // In a real implementation, axe runs during the capture phase
-      // For now, mark as tool_unavailable if we can't run it
-      let axeResults: any[] = [];
-      try {
-        // Axe would have run during the capture phase with the live page
-        // The capture pipeline should integrate this
-        logger.info('Axe checks would run during capture phase.');
-      } catch {
-        // Will use default empty results
-      }
-
       // Build sub-criterion findings for each dimension
       const allCheckResults = { ...domChecks, ...cssChecks, ...runtimeChecks };
 
       // Map check results to dimension sub-criteria findings
-      const dimensionResults = V1_RUBRIC.dimensions.map(dim => {
-        const findings = dim.sub_criteria.map(sub => {
+      const dimensionResults = V1_RUBRIC.dimensions.map((dim) => {
+        const findings = dim.sub_criteria.map((sub) => {
           const checkId = sub.bound_check.full_id;
 
           // Find matching check result
           const checkResult = allCheckResults[checkId as keyof typeof allCheckResults];
 
           // Check lighthouse results
-          const lhResult = lighthouseResults.find(r => r.evidence_source === checkId);
+          const lhResult = lighthouseResults.find((r) => r.evidence_source === checkId);
 
           if (checkResult) {
             return {
@@ -223,14 +233,21 @@ export const evaluateCommand = new Command('evaluate')
       const compositeScore = computeCompositeScore(dimensionResults, effectiveWeights);
 
       // Build blocking list (US2 - T040)
-      const blocking: any[] = [];
+      const blocking: Array<{
+        criterion_id: string;
+        reason: string;
+        wcag_ref: string;
+        evidence: string;
+        location: unknown;
+        severity: number;
+      }> = [];
       for (const dim of V1_RUBRIC.dimensions) {
         for (const sub of dim.sub_criteria) {
           if (sub.blocking_if_zero) {
-            const dimResult = dimensionResults.find(d => d.id === dim.id);
-            const finding = dimResult?.sub_criteria.find(f => f.id === sub.id);
+            const dimResult = dimensionResults.find((d) => d.id === dim.id);
+            const finding = dimResult?.sub_criteria.find((f) => f.id === sub.id);
             if (finding && finding.score === 0 && finding.status === 'scored') {
-              const wcagRef = sub.references.find(r => r.startsWith('WCAG')) ?? '';
+              const wcagRef = sub.references.find((r) => r.startsWith('WCAG')) ?? '';
               blocking.push({
                 criterion_id: sub.id,
                 reason: `${sub.name} failed (score 0)`,
@@ -245,7 +262,17 @@ export const evaluateCommand = new Command('evaluate')
       }
 
       // Build top issues list (US2 - T041)
-      const allFindings: Array<{ finding: any; dimensionId: string; weight: number }> = [];
+      const allFindings: Array<{
+        finding: {
+          id: string;
+          severity: number;
+          suggested_fix: string;
+          score: number | null;
+          status: string;
+        };
+        dimensionId: string;
+        weight: number;
+      }> = [];
       for (const dimResult of dimensionResults) {
         for (const finding of dimResult.sub_criteria) {
           if (finding.status === 'scored' && finding.score !== null && finding.score < 4) {
@@ -292,7 +319,7 @@ export const evaluateCommand = new Command('evaluate')
             expected_impact: null,
           };
         })
-        .filter(issue => !attemptedFixHashes.has(issue.fix_hash))
+        .filter((issue) => !attemptedFixHashes.has(issue.fix_hash))
         .sort((a, b) => b.priority_score - a.priority_score)
         .slice(0, topIssuesCap)
         .map((issue, i) => ({ ...issue, rank: i + 1 }));
@@ -332,19 +359,25 @@ export const evaluateCommand = new Command('evaluate')
           cli_version: '0.0.0',
           rubric_version: V1_RUBRIC.rubric_version,
           tool_versions: Object.fromEntries(
-            Object.entries(V1_RUBRIC.tool_versions).map(([k, v]) => [k, { pinned: v, resolved: v }])
+            Object.entries(V1_RUBRIC.tool_versions).map(([k, v]) => [
+              k,
+              { pinned: v, resolved: v },
+            ]),
           ),
           determinism: 'pinned' as const,
           tool_version_drift: null,
-          redaction: redactionEnabled ? 'enabled' as const : 'disabled' as const,
+          redaction: redactionEnabled ? ('enabled' as const) : ('disabled' as const),
           effective_config: {
             weights: effectiveWeights,
             blocking_toggles: Object.fromEntries(
-              V1_RUBRIC.dimensions.flatMap(d =>
-                d.sub_criteria.filter(s => s.blocking_if_zero).map(s => [s.id, true])
-              )
+              V1_RUBRIC.dimensions.flatMap((d) =>
+                d.sub_criteria.filter((s) => s.blocking_if_zero).map((s) => [s.id, true]),
+              ),
             ),
-            viewports: config.viewports ?? { desktop: { width: 1280, height: 800 }, mobile: { width: 375, height: 812 } },
+            viewports: config.viewports ?? {
+              desktop: { width: 1280, height: 800 },
+              mobile: { width: 375, height: 812 },
+            },
             ship_threshold: shipThreshold,
             iteration_cap: config.iteration_cap ?? 5,
             top_issues_cap: topIssuesCap,
@@ -377,9 +410,15 @@ export const evaluateCommand = new Command('evaluate')
         }
         await writeFile(resolve(debugDir, 'dom-snapshot.html'), domSnapshot);
         if (captureResult.har) {
-          await writeFile(resolve(debugDir, 'recording.har'), JSON.stringify(captureResult.har, null, 2));
+          await writeFile(
+            resolve(debugDir, 'recording.har'),
+            JSON.stringify(captureResult.har, null, 2),
+          );
         }
-        await writeFile(resolve(debugDir, 'console-errors.json'), JSON.stringify(captureResult.console_errors, null, 2));
+        await writeFile(
+          resolve(debugDir, 'console-errors.json'),
+          JSON.stringify(captureResult.console_errors, null, 2),
+        );
         logger.info(`Debug artifacts saved to ${debugDir}`);
       }
 

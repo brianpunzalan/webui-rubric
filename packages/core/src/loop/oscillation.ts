@@ -9,5 +9,5 @@ export function filterAttemptedFixes(
   issues: TopIssue[],
   attemptedFixHashes: Set<string>,
 ): TopIssue[] {
-  return issues.filter(issue => !attemptedFixHashes.has(issue.fix_hash));
+  return issues.filter((issue) => !attemptedFixHashes.has(issue.fix_hash));
 }

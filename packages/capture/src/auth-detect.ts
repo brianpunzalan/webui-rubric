@@ -6,8 +6,13 @@ export interface AuthDetectionResult {
 }
 
 const LOGIN_INDICATORS = [
-  /\/login/i, /\/signin/i, /\/sign-in/i, /\/auth/i,
-  /\/sso/i, /\/oauth/i, /\/cas\/login/i,
+  /\/login/i,
+  /\/signin/i,
+  /\/sign-in/i,
+  /\/auth/i,
+  /\/sso/i,
+  /\/oauth/i,
+  /\/cas\/login/i,
 ];
 
 export async function detectAuthWall(
@@ -43,7 +48,10 @@ export async function detectAuthWall(
   });
 
   if (hasLoginForm && currentUrl !== originalUrl) {
-    return { detected: true, reason: 'Page contains password input and URL changed (likely auth wall)' };
+    return {
+      detected: true,
+      reason: 'Page contains password input and URL changed (likely auth wall)',
+    };
   }
 
   return { detected: false };

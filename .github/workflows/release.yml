@@ -19,26 +19,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Enable Corepack
-        run: corepack enable
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: yarn
 
       - name: Install dependencies
-        run: yarn install --immutable
+        run: npm install
 
       - name: Build
-        run: yarn build
+        run: npm run build
 
       - name: Create Release Pull Request or Publish
         uses: changesets/action@v1
         with:
-          publish: yarn changeset publish
-          version: yarn changeset version
+          publish: npx changeset publish
+          version: npx changeset version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

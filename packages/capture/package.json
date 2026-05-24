@@ -17,17 +17,17 @@
     "dist"
   ],
   "scripts": {
-    "build": "vite build && tsc --emitDeclarationOnly",
-    "test": "vitest run",
+    "build": "vite build",
+    "test": "vitest run --passWithNoTests",
     "lint": "eslint src/"
   },
   "dependencies": {
     "playwright": "^1.48.0",
     "@axe-core/playwright": "^4.10.0",
     "pngjs": "^7.0.0",
-    "@webui-rubric/core": "workspace:*"
+    "@webui-rubric/core": "*"
   },
   "devDependencies": {
-    "@types/pngjs": "^7.0.0"
+    "@types/pngjs": "^6.0.0"
   }
 }

@@ -36,7 +36,6 @@ export async function injectStabilizationCSS(page: Page): Promise<void> {
 export async function captureScreenshots(
   page: Page,
   viewports: ViewportSpec[],
-  _deviceScaleFactor: number = 1,
 ): Promise<Map<string, Buffer>> {
   const screenshots = new Map<string, Buffer>();
 

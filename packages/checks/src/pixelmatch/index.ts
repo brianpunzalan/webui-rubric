@@ -29,14 +29,9 @@ export function runPixelmatch(input: PixelComparisonInput): PixelComparisonOutpu
 
   const diff = new PNG({ width, height });
 
-  const mismatchCount = pixelmatch(
-    screenshot.data,
-    reference.data,
-    diff.data,
-    width,
-    height,
-    { threshold },
-  );
+  const mismatchCount = pixelmatch(screenshot.data, reference.data, diff.data, width, height, {
+    threshold,
+  });
 
   const totalPixels = width * height;
   const diffRatio = totalPixels > 0 ? mismatchCount / totalPixels : 0;

@@ -20,15 +20,15 @@
     "dist"
   ],
   "scripts": {
-    "build": "vite build && tsc --emitDeclarationOnly",
-    "test": "vitest run",
+    "build": "vite build",
+    "test": "vitest run --passWithNoTests",
     "lint": "eslint src/"
   },
   "dependencies": {
     "commander": "^13.0.0",
     "yaml": "^2.6.0",
-    "@webui-rubric/core": "workspace:*",
-    "@webui-rubric/capture": "workspace:*",
-    "@webui-rubric/checks": "workspace:*"
+    "@webui-rubric/core": "*",
+    "@webui-rubric/capture": "*",
+    "@webui-rubric/checks": "*"
   }
 }

@@ -10,9 +10,9 @@ export function buildBlockingList(
     const findings = dimensionFindings.get(dim.id) ?? [];
     for (const sub of dim.sub_criteria) {
       if (!sub.blocking_if_zero) continue;
-      const finding = findings.find(f => f.id === sub.id);
+      const finding = findings.find((f) => f.id === sub.id);
       if (finding && finding.score === 0 && finding.status === 'scored') {
-        const wcagRef = sub.references.find(r => r.startsWith('WCAG')) ?? '';
+        const wcagRef = sub.references.find((r) => r.startsWith('WCAG')) ?? '';
         blocking.push({
           criterion_id: sub.id,
           reason: `${sub.name} failed (score 0)`,

@@ -15,7 +15,6 @@ import type {
   SubCriterionFinding,
   DimensionResult,
   Dimension,
-  CheckResult,
   BoundCheck,
   AnchorScore,
 } from '../types/index.js';
@@ -46,10 +45,7 @@ import type {
  * // Returns the highest score whose threshold range contains 0.005
  * ```
  */
-export function scoreFromThreshold(
-  value: number,
-  boundCheck: BoundCheck,
-): AnchorScore {
+export function scoreFromThreshold(value: number, boundCheck: BoundCheck): AnchorScore {
   // Check scores from 4 down to 0, returning the first (highest) match.
   for (let s = 4; s >= 0; s--) {
     const threshold = boundCheck.threshold_map[s];
@@ -154,9 +150,7 @@ export function computeDimensionScore(findings: SubCriterionFinding[]): {
   applicable_count: number;
   excluded_count: number;
 } {
-  const applicable = findings.filter(
-    (f) => f.status === 'scored' && f.score !== null,
-  );
+  const applicable = findings.filter((f) => f.status === 'scored' && f.score !== null);
   const excludedCount = findings.filter((f) => f.status !== 'scored').length;
 
   if (applicable.length === 0) {
@@ -218,10 +212,7 @@ export function computeCompositeScore(
   }
 
   // Re-normalize weights among included dimensions so they sum to 100.
-  const totalIncludedWeight = included.reduce(
-    (acc, d) => acc + (weights[d.id] ?? 0),
-    0,
-  );
+  const totalIncludedWeight = included.reduce((acc, d) => acc + (weights[d.id] ?? 0), 0);
 
   if (totalIncludedWeight === 0) {
     return 0;
@@ -266,8 +257,7 @@ export function buildDimensionResult(
   findings: SubCriterionFinding[],
   effectiveWeight: number,
 ): DimensionResult {
-  const { score, applicable_count, excluded_count } =
-    computeDimensionScore(findings);
+  const { score, applicable_count, excluded_count } = computeDimensionScore(findings);
 
   return {
     id: dimension.id,

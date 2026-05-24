@@ -33,6 +33,7 @@ webui-rubric evaluate https://example.com
 ```
 
 Output (stdout): a JSON document containing:
+
 - `composite_score`: 0–100 weighted average
 - `dimensions`: all 10 dimensions with per-sub-criterion scores, evidence, and suggested fixes
 - `blocking`: WCAG AA failures (empty if compliant)
@@ -40,6 +41,7 @@ Output (stdout): a JSON document containing:
 - `ship_ready`: boolean indicating if the UI passes the ship threshold
 
 Summary (stderr):
+
 ```
 score=82 blocking=0 issues=5 ship_ready=true
 ```
@@ -95,6 +97,7 @@ webui-rubric evaluate https://my-app.dev \
 ```
 
 The CLI captures a desktop screenshot, runs `pixelmatch` against `homepage-desktop.png`, and:
+
 - Scores visual-parity sub-criteria based on `diff_ratio` thresholds
 - Persists a side-by-side diff PNG to `./debug-output/`
 - Includes `pixel_comparison` in the JSON with `diff_ratio`, `diff_pixel_count`, and paths

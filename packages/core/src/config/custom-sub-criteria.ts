@@ -5,12 +5,14 @@ export function applyCustomSubCriteria(
   customs: CustomSubCriterion[],
 ): { dimensions: Dimension[]; errors: string[] } {
   const errors: string[] = [];
-  const updated = dimensions.map(d => ({ ...d, sub_criteria: [...d.sub_criteria] }));
+  const updated = dimensions.map((d) => ({ ...d, sub_criteria: [...d.sub_criteria] }));
 
   for (const custom of customs) {
-    const dim = updated.find(d => d.id === custom.dimension);
+    const dim = updated.find((d) => d.id === custom.dimension);
     if (!dim) {
-      errors.push(`Custom sub-criterion "${custom.id}" references unknown dimension "${custom.dimension}"`);
+      errors.push(
+        `Custom sub-criterion "${custom.id}" references unknown dimension "${custom.dimension}"`,
+      );
       continue;
     }
 
@@ -20,13 +22,17 @@ export function applyCustomSubCriteria(
     }
 
     if (!custom.bound_check || !custom.bound_check.check_family || !custom.bound_check.check_id) {
-      errors.push(`Custom sub-criterion "${custom.id}" must have a bound_check with check_family and check_id`);
+      errors.push(
+        `Custom sub-criterion "${custom.id}" must have a bound_check with check_family and check_id`,
+      );
       continue;
     }
 
     const boundCheck: BoundCheck = {
       ...custom.bound_check,
-      full_id: custom.bound_check.full_id ?? `${custom.bound_check.check_family}.${custom.bound_check.check_id}`,
+      full_id:
+        custom.bound_check.full_id ??
+        `${custom.bound_check.check_family}.${custom.bound_check.check_id}`,
       threshold_map: custom.bound_check.threshold_map ?? {},
       pinned_tool_version: custom.bound_check.pinned_tool_version ?? '1.0.0',
       fix_template: custom.bound_check.fix_template ?? '',

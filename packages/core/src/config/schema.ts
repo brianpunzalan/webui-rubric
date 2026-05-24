@@ -43,7 +43,12 @@ export const BoundCheckSchema = z.object({
   threshold_map: z.record(z.string(), ThresholdRangeSchema).optional(),
   pinned_tool_version: z.string().optional(),
   fix_template: z.string().max(280).optional(),
-  severity_map: z.record(z.string(), z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3), z.literal(4)])).optional(),
+  severity_map: z
+    .record(
+      z.string(),
+      z.union([z.literal(0), z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
+    )
+    .optional(),
 });
 
 export const CustomSubCriterionSchema = z.object({

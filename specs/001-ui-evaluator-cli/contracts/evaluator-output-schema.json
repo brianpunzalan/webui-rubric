@@ -90,7 +90,15 @@
       "maxItems": 10,
       "items": {
         "type": "object",
-        "required": ["id", "name", "weight", "score", "sub_criteria", "applicable_count", "excluded_count"],
+        "required": [
+          "id",
+          "name",
+          "weight",
+          "score",
+          "sub_criteria",
+          "applicable_count",
+          "excluded_count"
+        ],
         "additionalProperties": false,
         "properties": {
           "id": { "type": "string" },
@@ -113,7 +121,16 @@
       "maxItems": 50,
       "items": {
         "type": "object",
-        "required": ["rank", "criterion_id", "dimension_id", "priority_score", "score", "severity", "fix", "fix_hash"],
+        "required": [
+          "rank",
+          "criterion_id",
+          "dimension_id",
+          "priority_score",
+          "score",
+          "severity",
+          "fix",
+          "fix_hash"
+        ],
         "additionalProperties": false,
         "properties": {
           "rank": { "type": "integer", "minimum": 1 },
@@ -141,7 +158,16 @@
               "minItems": 1,
               "items": {
                 "type": "object",
-                "required": ["viewport", "diff_pixel_count", "total_pixel_count", "diff_ratio", "threshold", "reference_image_path", "screenshot_dimensions", "reference_dimensions"],
+                "required": [
+                  "viewport",
+                  "diff_pixel_count",
+                  "total_pixel_count",
+                  "diff_ratio",
+                  "threshold",
+                  "reference_image_path",
+                  "screenshot_dimensions",
+                  "reference_dimensions"
+                ],
                 "additionalProperties": false,
                 "properties": {
                   "viewport": { "type": "string" },
@@ -162,7 +188,15 @@
     },
     "meta": {
       "type": "object",
-      "required": ["cli_version", "rubric_version", "tool_versions", "determinism", "redaction", "effective_config", "duration_ms"],
+      "required": [
+        "cli_version",
+        "rubric_version",
+        "tool_versions",
+        "determinism",
+        "redaction",
+        "effective_config",
+        "duration_ms"
+      ],
       "additionalProperties": false,
       "properties": {
         "cli_version": { "type": "string" },
@@ -198,7 +232,16 @@
         "redaction": { "type": "string", "enum": ["enabled", "disabled"] },
         "effective_config": {
           "type": "object",
-          "required": ["weights", "blocking_toggles", "viewports", "ship_threshold", "iteration_cap", "top_issues_cap", "tool_fallback_policy", "pixelmatch_threshold"],
+          "required": [
+            "weights",
+            "blocking_toggles",
+            "viewports",
+            "ship_threshold",
+            "iteration_cap",
+            "top_issues_cap",
+            "tool_fallback_policy",
+            "pixelmatch_threshold"
+          ],
           "additionalProperties": false,
           "properties": {
             "weights": {
@@ -228,7 +271,17 @@
   "$defs": {
     "sub_criterion_finding": {
       "type": "object",
-      "required": ["id", "name", "score", "status", "evidence", "evidence_source", "severity", "suggested_fix", "confidence"],
+      "required": [
+        "id",
+        "name",
+        "score",
+        "status",
+        "evidence",
+        "evidence_source",
+        "severity",
+        "suggested_fix",
+        "confidence"
+      ],
       "additionalProperties": false,
       "properties": {
         "id": { "type": "string" },

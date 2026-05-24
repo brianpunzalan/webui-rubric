@@ -47,10 +47,7 @@ export interface CaptureResult {
   session: BrowserSession;
 }
 
-async function dismissConsentBanners(
-  page: Page,
-  selectors: string[],
-): Promise<void> {
+async function dismissConsentBanners(page: Page, selectors: string[]): Promise<void> {
   for (const selector of selectors) {
     try {
       const element = await page.$(selector);
@@ -66,7 +63,10 @@ async function dismissConsentBanners(
   }
 }
 
-export async function capturePage(url: string, options: CaptureOptions = {}): Promise<CaptureResult> {
+export async function capturePage(
+  url: string,
+  options: CaptureOptions = {},
+): Promise<CaptureResult> {
   const viewports = options.viewports ?? DEFAULT_VIEWPORTS;
   const autoDismiss = options.autoDismiss ?? true;
   const dismissSelectors = options.dismissSelectors ?? DEFAULT_DISMISS_SELECTORS;
@@ -110,7 +110,7 @@ export async function capturePage(url: string, options: CaptureOptions = {}): Pr
     }
 
     // 6. Inject stabilization CSS and capture screenshots
-    const screenshots = await captureScreenshots(session.page, viewports, options.deviceScaleFactor);
+    const screenshots = await captureScreenshots(session.page, viewports);
 
     // 7. Capture DOM snapshot and computed styles
     const dom_snapshot = await captureDomSnapshot(session.page);
@@ -142,7 +142,7 @@ export async function capturePage(url: string, options: CaptureOptions = {}): Pr
       url,
       captured_at: new Date().toISOString(),
       content_hash,
-      viewports_captured: viewports.map(v => v.name),
+      viewports_captured: viewports.map((v) => v.name),
       screenshots,
       dom_snapshot,
       computed_styles,
@@ -173,5 +173,17 @@ export { captureDomSnapshot } from './dom.js';
 export { readHarFile } from './har.js';
 export { captureComputedStyles } from './styles.js';
 export { setupConsoleCapture } from './console.js';
-export { loadReferenceImage, inferDpr, validateReferenceDimensions, normalizeRgbaBuffer, type ReferenceImageInfo } from './reference-image.js';
-export { resolveMaskSelectors, applyMaskToPng, countMaskedPixels, parseMaskColor, type MaskRegion } from './mask.js';
+export {
+  loadReferenceImage,
+  inferDpr,
+  validateReferenceDimensions,
+  normalizeRgbaBuffer,
+  type ReferenceImageInfo,
+} from './reference-image.js';
+export {
+  resolveMaskSelectors,
+  applyMaskToPng,
+  countMaskedPixels,
+  parseMaskColor,
+  type MaskRegion,
+} from './mask.js';

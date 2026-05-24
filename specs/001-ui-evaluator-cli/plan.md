@@ -13,6 +13,7 @@ A deterministic CLI tool that evaluates a live web UI against a 10-dimension wei
 **Language/Version**: TypeScript 5.x, Node.js ≥ 20 LTS
 
 **Primary Dependencies**:
+
 - CLI framework: `commander` (commander.js)
 - Headless browser: `playwright` (Chromium only — capture, DOM, HAR, axe injection)
 - Accessibility: `@axe-core/playwright` + `axe-core`
@@ -23,6 +24,7 @@ A deterministic CLI tool that evaluates a live web UI against a 10-dimension wei
 - Logging: custom leveled logger (debug/info/warn/error → stderr)
 
 **Build/Dev Tooling**:
+
 - Build: `vite` (library mode per package)
 - Test: `vitest`
 - Lint: `eslint` (flat config)
@@ -41,6 +43,7 @@ A deterministic CLI tool that evaluates a live web UI against a 10-dimension wei
 **Performance Goals**: ≤ 90 seconds end-to-end per evaluation (SC-001)
 
 **Constraints**:
+
 - Local-only runtime egress — only the target URL + its transitively-loaded resources (FR-026b)
 - Deterministic scoring with rubric-pinned tool versions (FR-003, FR-026a)
 - Default-on redaction of sensitive data in HAR/DOM/evidence (FR-039)
@@ -50,7 +53,7 @@ A deterministic CLI tool that evaluates a live web UI against a 10-dimension wei
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+_GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 
 - **Principle I — Documentation Per Feature**: **PASS**
   - `specs/001-ui-evaluator-cli/quickstart.md` — user-facing guide (produced in Phase 1)

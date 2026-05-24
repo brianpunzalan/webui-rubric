@@ -180,10 +180,7 @@ export function redactDomSnapshot(html: string): string {
     }
 
     // Replace value="…" or value='…' within the matched tag.
-    return tag.replace(
-      /(\bvalue\s*=\s*)(["'])(.*?)\2/gi,
-      `$1$2${REDACTED_PLACEHOLDER}$2`,
-    );
+    return tag.replace(/(\bvalue\s*=\s*)(["'])(.*?)\2/gi, `$1$2${REDACTED_PLACEHOLDER}$2`);
   });
 }
 
@@ -214,24 +211,15 @@ export function redactEvidenceString(evidence: string): string {
 
   // Redact values following "Cookie:" or "Set-Cookie:" (case-insensitive).
   // The value runs to end-of-line or end-of-string.
-  result = result.replace(
-    /((?:Set-)?Cookie\s*:\s*).+/gi,
-    `$1${REDACTED_PLACEHOLDER}`,
-  );
+  result = result.replace(/((?:Set-)?Cookie\s*:\s*).+/gi, `$1${REDACTED_PLACEHOLDER}`);
 
   // Redact values following "Authorization:" (case-insensitive).
   // This also covers "Authorization: Bearer …" in one pass.
-  result = result.replace(
-    /(Authorization\s*:\s*).+/gi,
-    `$1${REDACTED_PLACEHOLDER}`,
-  );
+  result = result.replace(/(Authorization\s*:\s*).+/gi, `$1${REDACTED_PLACEHOLDER}`);
 
   // Redact standalone "Bearer <token>" that may appear without the
   // "Authorization:" prefix (e.g. in logged evidence snippets).
-  result = result.replace(
-    /(Bearer\s+)\S+/gi,
-    `$1${REDACTED_PLACEHOLDER}`,
-  );
+  result = result.replace(/(Bearer\s+)\S+/gi, `$1${REDACTED_PLACEHOLDER}`);
 
   return result;
 }

@@ -90,9 +90,7 @@ function buildBoundCheck(
   };
 }
 
-function anchors(
-  tuples: [number, string, string, ThresholdRange][],
-): AnchorTuple {
+function anchors(tuples: [number, string, string, ThresholdRange][]): AnchorTuple {
   return tuples.map(([score, label, description, threshold]) => ({
     score: score as 0 | 1 | 2 | 3 | 4,
     label,
@@ -310,18 +308,13 @@ const dimensions: Dimension[] = [
       'layout.viewport-meta',
       'Viewport Meta Tag',
       'Presence and correctness of viewport meta tag',
-      buildBoundCheck(
-        'dom.meta-viewport',
-        'Add proper viewport meta tag',
-        INVERSE_SCORE_SEVERITY,
-        {
-          0: eq(0),
-          1: eq(1),
-          2: eq(2),
-          3: eq(3),
-          4: eq(4),
-        },
-      ),
+      buildBoundCheck('dom.meta-viewport', 'Add proper viewport meta tag', INVERSE_SCORE_SEVERITY, {
+        0: eq(0),
+        1: eq(1),
+        2: eq(2),
+        3: eq(3),
+        4: eq(4),
+      }),
       anchors([
         [0, 'Critical', 'No viewport meta tag', eq(0)],
         [1, 'Poor', 'Incomplete viewport meta tag', eq(1)],
@@ -523,18 +516,13 @@ const dimensions: Dimension[] = [
       'performance.lcp',
       'Largest Contentful Paint',
       'Time until the largest content element is rendered',
-      buildBoundCheck(
-        'lighthouse.lcp',
-        'Reduce LCP (target: ≤2500ms)',
-        INVERSE_SCORE_SEVERITY,
-        {
-          0: gt(6000),
-          1: lte(6000),
-          2: lte(4000),
-          3: lte(2500),
-          4: lte(1200),
-        },
-      ),
+      buildBoundCheck('lighthouse.lcp', 'Reduce LCP (target: ≤2500ms)', INVERSE_SCORE_SEVERITY, {
+        0: gt(6000),
+        1: lte(6000),
+        2: lte(4000),
+        3: lte(2500),
+        4: lte(1200),
+      }),
       anchors([
         [0, 'Critical', 'LCP > 6000ms', gt(6000)],
         [1, 'Poor', 'LCP ≤ 6000ms', lte(6000)],
@@ -547,18 +535,13 @@ const dimensions: Dimension[] = [
       'performance.fcp',
       'First Contentful Paint',
       'Time until the first content element is rendered',
-      buildBoundCheck(
-        'lighthouse.fcp',
-        'Reduce FCP (target: ≤1800ms)',
-        INVERSE_SCORE_SEVERITY,
-        {
-          0: gt(6000),
-          1: lte(6000),
-          2: lte(4000),
-          3: lte(1800),
-          4: lte(1000),
-        },
-      ),
+      buildBoundCheck('lighthouse.fcp', 'Reduce FCP (target: ≤1800ms)', INVERSE_SCORE_SEVERITY, {
+        0: gt(6000),
+        1: lte(6000),
+        2: lte(4000),
+        3: lte(1800),
+        4: lte(1000),
+      }),
       anchors([
         [0, 'Critical', 'FCP > 6000ms', gt(6000)],
         [1, 'Poor', 'FCP ≤ 6000ms', lte(6000)],
@@ -571,18 +554,13 @@ const dimensions: Dimension[] = [
       'performance.cls',
       'Cumulative Layout Shift',
       'Visual stability of the page during loading',
-      buildBoundCheck(
-        'lighthouse.cls',
-        'Reduce CLS (target: ≤0.1)',
-        INVERSE_SCORE_SEVERITY,
-        {
-          0: gt(0.5),
-          1: lte(0.5),
-          2: lte(0.25),
-          3: lte(0.1),
-          4: lte(0.05),
-        },
-      ),
+      buildBoundCheck('lighthouse.cls', 'Reduce CLS (target: ≤0.1)', INVERSE_SCORE_SEVERITY, {
+        0: gt(0.5),
+        1: lte(0.5),
+        2: lte(0.25),
+        3: lte(0.1),
+        4: lte(0.05),
+      }),
       anchors([
         [0, 'Critical', 'CLS > 0.5', gt(0.5)],
         [1, 'Poor', 'CLS ≤ 0.5', lte(0.5)],
@@ -595,18 +573,13 @@ const dimensions: Dimension[] = [
       'performance.tbt',
       'Total Blocking Time',
       'Total time the main thread was blocked during load',
-      buildBoundCheck(
-        'lighthouse.tbt',
-        'Reduce TBT (target: ≤300ms)',
-        INVERSE_SCORE_SEVERITY,
-        {
-          0: gt(2000),
-          1: lte(2000),
-          2: lte(600),
-          3: lte(300),
-          4: lte(150),
-        },
-      ),
+      buildBoundCheck('lighthouse.tbt', 'Reduce TBT (target: ≤300ms)', INVERSE_SCORE_SEVERITY, {
+        0: gt(2000),
+        1: lte(2000),
+        2: lte(600),
+        3: lte(300),
+        4: lte(150),
+      }),
       anchors([
         [0, 'Critical', 'TBT > 2000ms', gt(2000)],
         [1, 'Poor', 'TBT ≤ 2000ms', lte(2000)],

@@ -12,7 +12,7 @@ export interface ViewportComparisonInput {
 export function runMultiViewportComparison(
   inputs: ViewportComparisonInput[],
 ): Array<PixelComparisonOutput & { viewport: string; reference_image_path: string }> {
-  return inputs.map(input => {
+  return inputs.map((input) => {
     const result = runPixelmatch({
       screenshotBuffer: input.screenshotBuffer,
       referenceBuffer: input.referenceBuffer,

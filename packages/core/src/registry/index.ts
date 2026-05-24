@@ -83,9 +83,7 @@ export class CheckRegistry {
    * ```
    */
   getChecksByFamily(family: string): CheckAdapter[] {
-    return Array.from(this.adapters.values()).filter(
-      (adapter) => adapter.check_family === family,
-    );
+    return Array.from(this.adapters.values()).filter((adapter) => adapter.check_family === family);
   }
 }
 

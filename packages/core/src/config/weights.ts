@@ -22,7 +22,7 @@ export function applyWeightOverrides(
       if (!ack || !ack.includes(dim.id)) {
         errors.push(
           `${dim.name} weight (${effectiveWeights[dim.id]}) is below the floor of ${dim.weight_floor}. ` +
-          `Add "${dim.id}" to weight_overrides_ack to override.`,
+            `Add "${dim.id}" to weight_overrides_ack to override.`,
         );
       }
     }

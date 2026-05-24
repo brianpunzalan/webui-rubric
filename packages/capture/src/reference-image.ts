@@ -45,8 +45,8 @@ export function validateReferenceDimensions(
     if (policy === 'fail-fast') {
       throw new Error(
         `Reference image dimensions (${reference.width}x${reference.height}) do not match ` +
-        `screenshot dimensions (${screenshotWidth}x${screenshotHeight}). ` +
-        `Set reference_image_mismatch_policy to "resize" to allow automatic resizing.`
+          `screenshot dimensions (${screenshotWidth}x${screenshotHeight}). ` +
+          `Set reference_image_mismatch_policy to "resize" to allow automatic resizing.`,
       );
     }
   }

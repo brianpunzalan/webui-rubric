@@ -8,10 +8,7 @@ export interface MaskRegion {
   height: number;
 }
 
-export async function resolveMaskSelectors(
-  page: Page,
-  selectors: string[],
-): Promise<MaskRegion[]> {
+export async function resolveMaskSelectors(page: Page, selectors: string[]): Promise<MaskRegion[]> {
   const regions: MaskRegion[] = [];
 
   for (const selector of selectors) {

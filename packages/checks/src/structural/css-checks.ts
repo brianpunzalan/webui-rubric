@@ -52,7 +52,10 @@ export function checkFontFamilyCount(styles: ComputedStylesSnapshot): CssCheckRe
     evidence: `${count} distinct font families found`,
     evidence_source: 'css.font-family-count',
     severity: 4 - score,
-    suggested_fix: score < 4 ? `Reduce font families for consistency; ${count} distinct families found (target: ≤3)` : '',
+    suggested_fix:
+      score < 4
+        ? `Reduce font families for consistency; ${count} distinct families found (target: ≤3)`
+        : '',
     location: null,
   };
 }
@@ -60,7 +63,16 @@ export function checkFontFamilyCount(styles: ComputedStylesSnapshot): CssCheckRe
 // css.spacing-consistency
 export function checkSpacingConsistency(styles: ComputedStylesSnapshot): CssCheckResult {
   const spacingValues: number[] = [];
-  const spacingProps = ['margin-top', 'margin-bottom', 'padding-top', 'padding-bottom', 'margin-left', 'margin-right', 'padding-left', 'padding-right'];
+  const spacingProps = [
+    'margin-top',
+    'margin-bottom',
+    'padding-top',
+    'padding-bottom',
+    'margin-left',
+    'margin-right',
+    'padding-left',
+    'padding-right',
+  ];
 
   for (const props of Object.values(styles)) {
     for (const prop of spacingProps) {
@@ -72,11 +84,19 @@ export function checkSpacingConsistency(styles: ComputedStylesSnapshot): CssChec
   }
 
   if (spacingValues.length < 2) {
-    return { score: 4, evidence: 'Insufficient spacing data', evidence_source: 'css.spacing-consistency', severity: 0, suggested_fix: '', location: null };
+    return {
+      score: 4,
+      evidence: 'Insufficient spacing data',
+      evidence_source: 'css.spacing-consistency',
+      severity: 0,
+      suggested_fix: '',
+      location: null,
+    };
   }
 
   const mean = spacingValues.reduce((a, b) => a + b, 0) / spacingValues.length;
-  const variance = spacingValues.reduce((sum, v) => sum + (v - mean) ** 2, 0) / spacingValues.length;
+  const variance =
+    spacingValues.reduce((sum, v) => sum + (v - mean) ** 2, 0) / spacingValues.length;
   const stddev = Math.sqrt(variance);
 
   const score = stddev <= 5 ? 4 : stddev <= 15 ? 3 : stddev <= 30 ? 2 : stddev <= 50 ? 1 : 0;
@@ -85,7 +105,10 @@ export function checkSpacingConsistency(styles: ComputedStylesSnapshot): CssChec
     evidence: `Spacing standard deviation: ${stddev.toFixed(1)}px across ${spacingValues.length} values`,
     evidence_source: 'css.spacing-consistency',
     severity: 4 - score,
-    suggested_fix: score < 4 ? `Standardize spacing values; high variance (${stddev.toFixed(1)}) indicates inconsistent spacing system` : '',
+    suggested_fix:
+      score < 4
+        ? `Standardize spacing values; high variance (${stddev.toFixed(1)}) indicates inconsistent spacing system`
+        : '',
     location: null,
   };
 }
