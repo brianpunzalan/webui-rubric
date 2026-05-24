@@ -1,0 +1,33 @@
+{
+  "name": "@webui-rubric/capture",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build && tsc --emitDeclarationOnly",
+    "test": "vitest run",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "playwright": "^1.48.0",
+    "@axe-core/playwright": "^4.10.0",
+    "pngjs": "^7.0.0",
+    "@webui-rubric/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/pngjs": "^7.0.0"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "@webui-rubric/cli",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "webui-rubric": "./dist/index.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build && tsc --emitDeclarationOnly",
+    "test": "vitest run",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "commander": "^13.0.0",
+    "yaml": "^2.6.0",
+    "@webui-rubric/core": "workspace:*",
+    "@webui-rubric/capture": "workspace:*",
+    "@webui-rubric/checks": "workspace:*"
+  }
+}
