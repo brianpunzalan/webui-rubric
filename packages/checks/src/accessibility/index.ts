@@ -30,7 +30,8 @@ export async function runAxeChecks(page: unknown): Promise<AxeCheckResult[]> {
   // For now, provide the adapter structure
   try {
     const { AxeBuilder } = await import('@axe-core/playwright');
-    const results = await new AxeBuilder({ page: page as any }).analyze();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const results = await new AxeBuilder({ page: page as Record<string, any> }).analyze();
 
     const findings: AxeCheckResult[] = [];
 

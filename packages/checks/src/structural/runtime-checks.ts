@@ -30,9 +30,11 @@ export function checkConsoleErrors(consoleErrors: ConsoleEntry[]): RuntimeCheckR
 export function checkResourceCount(har: unknown): RuntimeCheckResult {
   let requestCount = 0;
   try {
-    const log = (har as any)?.log;
-    if (log?.entries) {
-      requestCount = log.entries.length;
+    const harObj = har as Record<string, unknown>;
+    const log = harObj?.log as Record<string, unknown> | undefined;
+    const entries = log?.entries;
+    if (Array.isArray(entries)) {
+      requestCount = entries.length;
     }
   } catch {
     return { score: 4, evidence: 'HAR data unavailable', evidence_source: 'har.resource-count', severity: 0, suggested_fix: '', location: null };

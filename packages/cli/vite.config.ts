@@ -1,5 +1,8 @@
 import { defineConfig } from 'vite';
-import { resolve } from 'path';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   build: {
@@ -16,6 +19,12 @@ export default defineConfig({
         '@webui-rubric/core',
         '@webui-rubric/capture',
         '@webui-rubric/checks',
+        'node:crypto',
+        'node:fs',
+        'node:fs/promises',
+        'node:path',
+        'node:os',
+        'node:url',
       ],
     },
   },

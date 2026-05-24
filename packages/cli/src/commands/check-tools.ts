@@ -1,4 +1,16 @@
 import { Command } from 'commander';
+import { createRequire } from 'node:module';
+
+const require = createRequire(import.meta.url);
+
+function getPackageVersion(packageName: string): string {
+  try {
+    const pkg = require(`${packageName}/package.json`) as { version: string };
+    return pkg.version;
+  } catch {
+    return 'not found';
+  }
+}
 
 export const checkToolsCommand = new Command('check-tools')
   .description('Verify installed tool versions match rubric pins')
@@ -6,28 +18,19 @@ export const checkToolsCommand = new Command('check-tools')
   .action(async (options: { json?: boolean }) => {
     const { V1_RUBRIC } = await import('@webui-rubric/core');
 
+    const toolPackageMap: Record<string, string> = {
+      'axe-core': '@axe-core/playwright',
+      lighthouse: 'lighthouse',
+      pixelmatch: 'pixelmatch',
+      playwright: 'playwright',
+    };
+
     const results: Record<string, { pinned: string; resolved: string; match: boolean }> = {};
     let allMatch = true;
 
     for (const [tool, pinned] of Object.entries(V1_RUBRIC.tool_versions)) {
-      let resolved = 'not found';
-      try {
-        if (tool === 'axe-core') {
-          const pkg = await import('@axe-core/playwright/package.json', { with: { type: 'json' } }).catch(() => null);
-          resolved = pkg?.default?.version ?? 'unknown';
-        } else if (tool === 'lighthouse') {
-          const pkg = await import('lighthouse/package.json', { with: { type: 'json' } }).catch(() => null);
-          resolved = pkg?.default?.version ?? 'unknown';
-        } else if (tool === 'pixelmatch') {
-          resolved = pinned; // Will be resolved at runtime
-        } else if (tool === 'playwright') {
-          const pkg = await import('playwright/package.json', { with: { type: 'json' } }).catch(() => null);
-          resolved = pkg?.default?.version ?? 'unknown';
-        }
-      } catch {
-        resolved = 'not found';
-      }
-
+      const packageName = toolPackageMap[tool] ?? tool;
+      const resolved = getPackageVersion(packageName);
       const match = resolved === pinned;
       if (!match) allMatch = false;
       results[tool] = { pinned, resolved, match };

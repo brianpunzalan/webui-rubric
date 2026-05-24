@@ -20,6 +20,7 @@ export const evaluateCommand = new Command('evaluate')
   .option('--no-redact', 'Disable redaction of sensitive data')
   .option('--log-level <level>', 'Log verbosity', 'info')
   .option('-q, --quiet', 'Suppress logs below error', false)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   .action(async (url: string, options: Record<string, any>) => {
     const startTime = Date.now();
 
@@ -87,8 +88,8 @@ export const evaluateCommand = new Command('evaluate')
 
       logger.info('Capture complete. Running checks...');
 
-      // Apply redaction
-      const redactionEnabled = isRedactionEnabled(config);
+      // Apply redaction — CLI --no-redact overrides config
+      const redactionEnabled = options.redact !== false && isRedactionEnabled(config);
       if (redactionEnabled && captureResult.har) {
         redactHarHeaders(captureResult.har);
       }
@@ -359,6 +360,7 @@ export const evaluateCommand = new Command('evaluate')
       };
 
       // Validate output against schema
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const validation = validateOutput(result as any);
       if (!validation.valid) {
         logger.error(`Output schema validation failed: ${validation.errors.join('; ')}`);

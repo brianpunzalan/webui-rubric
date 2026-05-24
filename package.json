@@ -7,14 +7,15 @@
   ],
   "scripts": {
     "build": "yarn workspaces foreach -Apt run build",
-    "test": "yarn workspaces foreach -Apt run test",
-    "lint": "yarn workspaces foreach -Apt run lint",
+    "test": "yarn workspaces foreach -Ap run test",
+    "lint": "yarn workspaces foreach -Ap run lint",
     "format": "prettier --check .",
     "format:fix": "prettier --write ."
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",
     "@eslint/js": "^9.0.0",
+    "@types/node": "^22.0.0",
     "eslint": "^9.0.0",
     "prettier": "^3.2.0",
     "typescript": "^5.5.0",

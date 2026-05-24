@@ -1,5 +1,5 @@
 export interface FocusVisibleResult {
-  score: number;
+  score: number | null;
   evidence: string;
   evidence_source: string;
   severity: number;
@@ -47,7 +47,7 @@ export async function checkFocusVisible(page: unknown): Promise<FocusVisibleResu
     };
   } catch {
     return {
-      score: null as any,
+      score: null,
       evidence: 'Focus-visible check could not be executed',
       evidence_source: 'playwright.focus-visible',
       severity: 0,

@@ -4,13 +4,13 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "strict": true,
-    "composite": true,
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
+    "isolatedModules": true,
     "outDir": "dist",
     "rootDir": "src"
   }

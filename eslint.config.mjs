@@ -5,15 +5,6 @@ export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    ignores: ['**/dist/**', '**/node_modules/**', '**/*.config.*'],
-  },
-  {
-    files: ['**/*.ts'],
-    languageOptions: {
-      parserOptions: {
-        projectService: true,
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
+    ignores: ['**/dist/**', '**/node_modules/**', '**/*.config.*', '**/*.config.mjs'],
   },
 );
