@@ -7,6 +7,7 @@ export interface ValidationResult {
   config?: ProjectConfig;
 }
 
+/** Validate raw input against the project config schema, returning parsed config or errors. */
 export function validateProjectConfig(raw: unknown): ValidationResult {
   const result = ProjectConfigSchema.safeParse(raw);
   if (!result.success) {
@@ -18,6 +19,7 @@ export function validateProjectConfig(raw: unknown): ValidationResult {
   return { valid: true, errors: [], config: result.data as ProjectConfig };
 }
 
+/** Validate that dimension weights sum to 100 and respect weight floors. */
 export function validateWeights(
   weights: Record<string, number>,
   rubric: RubricDefinition,

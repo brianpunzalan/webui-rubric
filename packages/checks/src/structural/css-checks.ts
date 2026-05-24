@@ -9,7 +9,7 @@ export interface CssCheckResult {
   location: null;
 }
 
-// css.unique-color-count
+/** Score the page's color palette size; fewer distinct colors indicates better design consistency. */
 export function checkUniqueColorCount(styles: ComputedStylesSnapshot): CssCheckResult {
   const colors = new Set<string>();
   for (const props of Object.values(styles)) {
@@ -34,7 +34,7 @@ export function checkUniqueColorCount(styles: ComputedStylesSnapshot): CssCheckR
   };
 }
 
-// css.font-family-count
+/** Score the number of distinct font families; fewer families indicates better typographic consistency. */
 export function checkFontFamilyCount(styles: ComputedStylesSnapshot): CssCheckResult {
   const families = new Set<string>();
   for (const props of Object.values(styles)) {
@@ -60,7 +60,7 @@ export function checkFontFamilyCount(styles: ComputedStylesSnapshot): CssCheckRe
   };
 }
 
-// css.spacing-consistency
+/** Score spacing consistency by measuring standard deviation of margin/padding values. */
 export function checkSpacingConsistency(styles: ComputedStylesSnapshot): CssCheckResult {
   const spacingValues: number[] = [];
   const spacingProps = [

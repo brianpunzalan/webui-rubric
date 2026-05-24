@@ -3,6 +3,7 @@ export interface CapCheckResult {
   message?: string;
 }
 
+/** Check whether the current iteration exceeds the configured cap, unless overrun is allowed. */
 export function checkIterationCap(
   iteration: number | null,
   cap: number = 5,

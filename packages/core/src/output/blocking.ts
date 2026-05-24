@@ -1,5 +1,6 @@
 import type { BlockingEntry, SubCriterionFinding, Dimension } from '../types/index.js';
 
+/** Build the list of blocking entries from sub-criteria marked blocking_if_zero that scored 0. */
 export function buildBlockingList(
   dimensions: Dimension[],
   dimensionFindings: Map<string, SubCriterionFinding[]>,

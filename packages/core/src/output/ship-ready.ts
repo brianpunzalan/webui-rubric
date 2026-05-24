@@ -1,5 +1,6 @@
 import type { BlockingEntry } from '../types/index.js';
 
+/** Determine if the UI is ship-ready: no blocking issues and composite score meets threshold. */
 export function isShipReady(
   blocking: BlockingEntry[],
   compositeScore: number,

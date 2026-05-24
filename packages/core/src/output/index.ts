@@ -13,6 +13,7 @@ export interface OutputValidationResult {
   errors: string[];
 }
 
+/** Validate a complete evaluation result against the output schema. */
 export function validateOutput(result: EvaluationResult): OutputValidationResult {
   const parsed = EvaluationResultSchema.safeParse(result);
   if (!parsed.success) {

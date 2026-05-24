@@ -63,6 +63,7 @@ async function dismissConsentBanners(page: Page, selectors: string[]): Promise<v
   }
 }
 
+/** Capture a full page snapshot: screenshots, DOM, HAR, styles, and console errors. */
 export async function capturePage(
   url: string,
   options: CaptureOptions = {},

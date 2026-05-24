@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import type { TopIssue, DimensionResult } from '../types/index.js';
 
+/** Build a prioritized list of top issues, ranked by weight x severity, excluding attempted fixes. */
 export function buildTopIssues(
   dimensionResults: DimensionResult[],
   cap: number = 10,

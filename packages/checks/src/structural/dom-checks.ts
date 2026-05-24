@@ -12,7 +12,7 @@ export interface StructuralCheckResult {
   } | null;
 }
 
-// dom.heading-order: Check heading hierarchy for skipped levels
+/** Check heading hierarchy for skipped levels (e.g., h1 to h3). */
 export function checkHeadingOrder(html: string): StructuralCheckResult {
   const headingRegex = /<h([1-6])[^>]*>/gi;
   const levels: number[] = [];
@@ -43,7 +43,7 @@ export function checkHeadingOrder(html: string): StructuralCheckResult {
   };
 }
 
-// dom.landmark-usage: Check for semantic landmarks (main, nav, header, footer)
+/** Check for presence of semantic landmark elements (main, nav, header, footer). */
 export function checkLandmarkUsage(html: string): StructuralCheckResult {
   const landmarks = ['main', 'nav', 'header', 'footer'];
   let count = 0;
@@ -63,7 +63,7 @@ export function checkLandmarkUsage(html: string): StructuralCheckResult {
   };
 }
 
-// dom.link-descriptiveness: Detect generic link text
+/** Detect generic link text like "click here" or "read more". */
 export function checkLinkDescriptiveness(html: string): StructuralCheckResult {
   const linkRegex = /<a[^>]*>(.*?)<\/a>/gi;
   const genericPatterns = /^(click here|here|read more|learn more|more|link|this)$/i;
@@ -110,7 +110,7 @@ export function checkLinkDescriptiveness(html: string): StructuralCheckResult {
   };
 }
 
-// dom.image-alt: Check for missing alt attributes on images
+/** Check for missing alt attributes on img elements. */
 export function checkImageAlt(html: string): StructuralCheckResult {
   const imgRegex = /<img[^>]*>/gi;
   const images: string[] = [];
@@ -150,7 +150,7 @@ export function checkImageAlt(html: string): StructuralCheckResult {
   };
 }
 
-// dom.form-labels: Check form inputs have associated labels
+/** Check that form inputs have associated labels via for/id, aria-label, or aria-labelledby. */
 export function checkFormLabels(html: string): StructuralCheckResult {
   const inputRegex =
     /<input[^>]*type\s*=\s*["'](?!hidden|submit|button|reset|image)[^"']*["'][^>]*>/gi;
@@ -205,7 +205,7 @@ export function checkFormLabels(html: string): StructuralCheckResult {
   };
 }
 
-// dom.meta-viewport: Check for proper mobile viewport meta tag
+/** Check for a proper mobile viewport meta tag with width=device-width and initial-scale=1. */
 export function checkMetaViewport(html: string): StructuralCheckResult {
   const metaMatch =
     /<meta[^>]*name\s*=\s*["']viewport["'][^>]*content\s*=\s*["']([^"']*)["'][^>]*>/i.exec(html) ||
