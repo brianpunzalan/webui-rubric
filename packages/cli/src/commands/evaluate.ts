@@ -1,5 +1,6 @@
 import { Command } from 'commander';
 import { randomUUID } from 'node:crypto';
+import { existsSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
@@ -156,6 +157,95 @@ export const evaluateCommand = new Command('evaluate')
         logger.warn(`Lighthouse failed: ${error instanceof Error ? error.message : 'unknown'}`);
       }
 
+      // Reference image pixel comparison
+      let pixelComparisonResults: Map<
+        string,
+        { score: number; diffRatio: number; evidence: string }
+      > = new Map();
+      let pixelComparisonOutput: Array<{
+        viewport: string;
+        diff_pixel_count: number;
+        total_pixel_count: number;
+        diff_ratio: number;
+        threshold: number;
+        diff_png_path: string | null;
+        reference_image_path: string;
+        screenshot_dimensions: { width: number; height: number };
+        reference_dimensions: { width: number; height: number };
+      }> = [];
+
+      if (options.reference) {
+        const refPath = resolve(options.reference);
+        if (!existsSync(refPath)) {
+          logger.error(`Reference image not found: ${refPath}`);
+          process.exit(2);
+        }
+
+        const { loadReferenceImage } = await import('@webui-rubric/capture');
+        const { runPixelmatch, scoreFromDiffRatio } = await import('@webui-rubric/checks');
+
+        const referenceImage = loadReferenceImage(refPath);
+        const referenceViewport = options.referenceViewport ?? 'desktop';
+        logger.info(
+          `Loaded reference image (${referenceImage.width}x${referenceImage.height}) for viewport: ${referenceViewport}`,
+        );
+
+        const screenshotBuffer = captureResult.screenshots.get(referenceViewport);
+        if (!screenshotBuffer) {
+          logger.error(
+            `No screenshot captured for viewport "${referenceViewport}". Available: ${[...captureResult.screenshots.keys()].join(', ')}`,
+          );
+          process.exit(2);
+        }
+
+        const diffOutputPath = options.debugDir
+          ? resolve(options.debugDir, `diff-${referenceViewport}.png`)
+          : null;
+
+        const pmResult = runPixelmatch({
+          screenshotBuffer,
+          referenceBuffer: referenceImage.buffer,
+          threshold: config.pixelmatch_threshold ?? 0.1,
+          diffOutputPath,
+        });
+
+        const vpScore = scoreFromDiffRatio(pmResult.diff_ratio);
+        const pctDiff = (pmResult.diff_ratio * 100).toFixed(2);
+
+        pixelComparisonOutput.push({
+          viewport: referenceViewport,
+          diff_pixel_count: pmResult.diff_pixel_count,
+          total_pixel_count: pmResult.total_pixel_count,
+          diff_ratio: pmResult.diff_ratio,
+          threshold: pmResult.threshold,
+          diff_png_path: pmResult.diff_png_path,
+          reference_image_path: refPath,
+          screenshot_dimensions: pmResult.screenshot_dimensions,
+          reference_dimensions: pmResult.reference_dimensions,
+        });
+
+        // Map results to each visual parity sub-criterion by its bound viewport
+        for (const dim of V1_RUBRIC.dimensions) {
+          for (const sub of dim.sub_criteria) {
+            if (!sub.visual_parity) continue;
+            const checkId = sub.bound_check.full_id;
+            const vpMatch = checkId.match(/viewport=(\w+)/);
+            const boundViewport = vpMatch ? vpMatch[1] : 'desktop';
+            if (boundViewport === referenceViewport) {
+              pixelComparisonResults.set(sub.id, {
+                score: vpScore,
+                diffRatio: pmResult.diff_ratio,
+                evidence: `Pixel diff: ${pctDiff}% (${pmResult.diff_pixel_count}/${pmResult.total_pixel_count} pixels differ)`,
+              });
+            }
+          }
+        }
+
+        logger.info(
+          `Pixelmatch complete: ${pctDiff}% diff, score ${vpScore}/4`,
+        );
+      }
+
       // Build sub-criterion findings for each dimension
       const allCheckResults = { ...domChecks, ...cssChecks, ...runtimeChecks };
 
@@ -197,7 +287,24 @@ export const evaluateCommand = new Command('evaluate')
               confidence: 'predicted' as const,
             };
           } else if (sub.visual_parity) {
-            // No reference image -> not_applicable
+            const pmResult = pixelComparisonResults.get(sub.id);
+            if (pmResult) {
+              return {
+                id: sub.id,
+                name: sub.name,
+                score: pmResult.score,
+                status: 'scored' as const,
+                evidence: pmResult.evidence,
+                evidence_source: checkId,
+                severity: pmResult.score < 4 ? 4 - pmResult.score : 0,
+                suggested_fix:
+                  pmResult.score < 4
+                    ? 'Reduce pixel differences to match reference design more closely'
+                    : '',
+                location: null,
+                confidence: 'deterministic' as const,
+              };
+            }
             return {
               id: sub.id,
               name: sub.name,
@@ -354,7 +461,8 @@ export const evaluateCommand = new Command('evaluate')
         blocking,
         dimensions: dimensionResults,
         top_issues: topIssues,
-        pixel_comparison: null,
+        pixel_comparison:
+          pixelComparisonOutput.length > 0 ? { viewports: pixelComparisonOutput } : null,
         meta: {
           cli_version: '0.0.0',
           rubric_version: V1_RUBRIC.rubric_version,
