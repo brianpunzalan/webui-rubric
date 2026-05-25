@@ -1,0 +1,34 @@
+{
+  "name": "webui-rubric",
+  "version": "0.1.0",
+  "description": "Deterministic CLI tool for evaluating live web UIs against a multi-dimensional rubric — no LLM, machine-parseable JSON output.",
+  "keywords": [
+    "ui-evaluation",
+    "accessibility",
+    "rubric",
+    "cli",
+    "wcag",
+    "deterministic"
+  ],
+  "homepage": "https://github.com/brianpunzalan/webui-rubric",
+  "bugs": {
+    "url": "https://github.com/brianpunzalan/webui-rubric/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brianpunzalan/webui-rubric.git"
+  },
+  "license": "MIT",
+  "author": "brianpunzalan",
+  "main": "src/index.js",
+  "bin": {
+    "webui-rubric": "src/cli.js"
+  },
+  "files": [
+    "src/",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  }
+}
