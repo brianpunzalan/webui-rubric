@@ -27,7 +27,7 @@ This CLI is a **tool** invoked by an external **Evaluator agent (LLM)**. The CLI
 - Q: How does the CLI handle cookie/consent banners and GDPR overlays that produce massive false-positive pixel diffs? → A: Auto-dismiss with configurable selectors — the CLI ships with a default list of common consent-banner dismiss-button selectors and clicks the first match before capture. The operator can extend or override the list via `capture.dismiss_selectors` in the project config, or disable auto-dismiss entirely with `capture.auto_dismiss: false`.
 - Q: What device pixel ratio (DPR) does the CLI use for screenshot capture, and how is it determined? → A: Default is `"auto"` — infer DPR from the reference image's pixel dimensions relative to the configured viewport (e.g., 2560×1600 reference for a 1280×800 viewport → DPR 2). When no reference image is supplied, auto mode falls back to DPR 1. The operator may override with an explicit numeric value via `pixel_comparison.device_pixel_ratio` in the project config (e.g., `1` or `2`).
 
-## User Scenarios & Testing *(mandatory)*
+## User Scenarios & Testing _(mandatory)_
 
 ### User Story 1 — Deterministic Single-Pass Evaluation of a Live URL (Priority: P1)
 
@@ -131,7 +131,7 @@ The CLI accepts and emits loop-metadata fields (`iteration`, `previous_composite
 - **Operator passes `--no-redact`**: The CLI proceeds without redaction, records `meta.redaction = "disabled"` in the output, and writes the unredacted artifacts into the debug directory (still under mode 0700); the Evaluator agent is expected to gate or scrub on `meta.redaction` before forwarding evidence to the Generator agent.
 - **Installed deterministic-tool version does not match the rubric's pin**: The CLI exits non-zero by default with an error naming the tool, the pinned version, and the resolved version; with `--allow-tool-version-drift` the CLI proceeds and records the drift in `meta.tool_version_drift` with `meta.determinism = "drifted"`, signalling to the Evaluator agent that FR-003 no longer holds for this run.
 
-## Requirements *(mandatory)*
+## Requirements _(mandatory)_
 
 ### Functional Requirements
 
@@ -216,7 +216,7 @@ The CLI accepts and emits loop-metadata fields (`iteration`, `previous_composite
 - **Top Issue**: A prioritized item in the `top_issues` list — references back to a sub-criterion finding, carries a `priority_score = dimension_weight × severity`, a rank, a concrete fix, and an optional expected-impact note.
 - **Loop Metadata**: The set of fields linking one CLI invocation to the next in an Evaluator/Generator-driven loop: iteration index, previous composite score, delta, hashed list of previously attempted fixes.
 
-## Success Criteria *(mandatory)*
+## Success Criteria _(mandatory)_
 
 ### Measurable Outcomes
 

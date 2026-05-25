@@ -9,6 +9,7 @@
 **Rationale**: Playwright provides native HAR recording (`BrowserContext({ recordHar })`), built-in network idle detection, first-class TypeScript support, and the `@axe-core/playwright` integration for in-browser accessibility scanning without a separate process. Using a single browser for capture + axe minimizes the 90-second time budget. Chromium-only channel avoids installing Firefox/WebKit binaries that will never be used.
 
 **Alternatives considered**:
+
 - **Puppeteer**: Similar capability but narrower ecosystem. No native axe integration package. HAR recording requires third-party libraries. Playwright's API is a superset.
 - **Chrome DevTools Protocol (CDP) directly**: Maximum control but requires building all abstractions (navigation, screenshot, HAR, settle detection) from scratch. Not justified for v1.
 
@@ -28,6 +29,7 @@
 | pass / inapplicable | 0 (not a problem) | No issue detected |
 
 **Alternatives considered**:
+
 - **pa11y**: Wraps HTML_CodeSniffer. Fewer rules than axe-core, less granular impact ratings. Less active maintenance.
 - **Lighthouse accessibility audit**: Uses axe-core internally but reports only a subset of rules and conflates accessibility with other audits. Better to use axe-core directly for full rule coverage.
 
@@ -51,6 +53,7 @@
 Similar anchors for FCP, CLS, TBT, SI, TTI derived from Google's documented CWV thresholds.
 
 **Alternatives considered**:
+
 - **Running Lighthouse through Playwright's Chrome**: Fragile — Lighthouse expects a clean profile and controlled network conditions. Sharing Playwright's browser context introduces non-determinism.
 - **Web Vitals library (RUM)**: Measures real-user metrics, not lab metrics. Cannot run in a headless context reliably. Not applicable for deterministic lab scoring.
 - **WebPageTest API**: Hosted service — violates FR-026b (local-only runtime egress).
@@ -83,6 +86,7 @@ Similar anchors for FCP, CLS, TBT, SI, TTI derived from Google's documented CWV 
 **Config file name**: `.webui-rubric.yml` (root of evaluated project) or `--config <path>` flag.
 
 **Alternatives considered**:
+
 - **JSON**: No comments — operators can't document weight choices inline. More verbose for nested structures.
 - **TOML**: Less common in JS ecosystem, fewer battle-tested parsers, unfamiliar to many users.
 - **JS/TS config**: Turing-complete configs are a security risk and break determinism if they import modules.
@@ -94,6 +98,7 @@ Similar anchors for FCP, CLS, TBT, SI, TTI derived from Google's documented CWV 
 **Rationale**: zod is TypeScript-native, generates static types from schemas (`z.infer<typeof schema>`), provides structured error messages with exact path to the failing field, and runs at runtime without code generation. Used for: (1) validating the parsed YAML config against the ProjectConfig schema (weight sum = 100, anchor completeness, weight-floor enforcement); (2) validating the emitted JSON artifact against the EvaluatorOutput schema before emission (FR-036 — no partial JSON); (3) defining the Rubric Definition schema with sub-criterion shape, bound-check references, and visual_parity flag.
 
 **Alternatives considered**:
+
 - **ajv (JSON Schema)**: More standard but requires maintaining separate JSON Schema files and TypeScript types in parallel. zod co-locates both.
 - **io-ts**: Functional style, steeper learning curve, less ergonomic error messages.
 
@@ -130,6 +135,7 @@ Similar anchors for FCP, CLS, TBT, SI, TTI derived from Google's documented CWV 
 **Rationale**: FR-002 requires all diagnostic output on stderr to avoid contaminating the stdout JSON stream. Existing logging libraries (winston, pino) are feature-rich but heavyweight for a CLI that needs a simple leveled logger. The logger supports: (1) log level set via `--log-level` flag or `LOG_LEVEL` env var (default: `info`); (2) structured prefix with timestamp + level + optional context tag; (3) stderr-only output; (4) quiet mode (`--quiet` / `-q`) that suppresses everything below `error`. The logger is a singleton exported from `@webui-rubric/core`.
 
 **Alternatives considered**:
+
 - **winston / pino**: Heavyweight transports, file rotation, and formatting features that a single-run CLI does not need. Adds dependency weight.
 - **debug**: Namespace-based, no structured levels, outputs to stderr by default (good) but lacks the level filtering we need for `--quiet` and `--log-level`.
 - **console.error**: No level filtering, no structured output, but the simplest option. Not sufficient for the `--log-level` requirement.
@@ -141,6 +147,7 @@ Similar anchors for FCP, CLS, TBT, SI, TTI derived from Google's documented CWV 
 **Rationale**: User requires all PRs to pass build, test, lint, and formatting checks.
 
 **ci.yml** triggers on `pull_request` and `push` to `main`:
+
 1. `yarn install --immutable` (deterministic lockfile)
 2. `yarn workspaces foreach -Apt run build` (build all packages in dependency order)
 3. `yarn workspaces foreach -Apt run lint` (ESLint)
@@ -148,6 +155,7 @@ Similar anchors for FCP, CLS, TBT, SI, TTI derived from Google's documented CWV 
 5. `yarn workspaces foreach -Apt run test` (Vitest)
 
 **release.yml** triggers on `push` to `main`:
+
 1. Uses `changesets/action@v1` to detect pending changesets
 2. If changesets exist: opens a "Version Packages" PR (bumps versions, updates changelogs)
 3. When the version PR merges: publishes packages to npm, creates GitHub releases with tags
@@ -177,6 +185,7 @@ Similar anchors for FCP, CLS, TBT, SI, TTI derived from Google's documented CWV 
 | `har.resource-count` | Network HAR | Total requests, large asset count, uncompressed responses | Performance |
 
 **Alternatives considered**:
+
 - **Cheerio for DOM parsing**: Viable for static DOM checks but doesn't handle computed styles. Would need a separate approach for style-based checks. Using the raw DOM + styles snapshots from capture is simpler.
 
 ## R13 — HAR Recording
@@ -186,6 +195,7 @@ Similar anchors for FCP, CLS, TBT, SI, TTI derived from Google's documented CWV 
 **Rationale**: Native Playwright HAR recording produces a standard HAR 1.2 JSON file with all request/response metadata. `omitContent: true` avoids capturing response bodies (which can be large and are not needed for structural analysis), keeping the HAR file manageable. The HAR is then redacted per FR-039 (removing sensitive headers and POST/PUT/PATCH bodies) before being persisted to the debug directory.
 
 **Alternatives considered**:
+
 - **Manual network event recording**: `page.on('request')` / `page.on('response')` to build HAR manually. More work, same result, higher chance of format bugs.
 - **chrome-har**: Third-party package that converts CDP network events to HAR. Unnecessary when Playwright provides native support.
 
@@ -202,5 +212,6 @@ Similar anchors for FCP, CLS, TBT, SI, TTI derived from Google's documented CWV 
 The two navigations hit the same URL but with different browser instances and profiles, which is intentional: Lighthouse requires a clean profile for accurate metrics, while Playwright needs an unconstrained profile for realistic capture (e.g., cookie banners, consent dialogs that affect the visual result).
 
 **Alternatives considered**:
+
 - **Parallel Playwright + Lighthouse**: Saves ~20s but risks port conflicts and doubles memory usage. The 60s sequential estimate is well within the 90s budget.
 - **Single browser for both**: Lighthouse's throttling and trace-based metrics are unreliable when sharing a browser context with other operations.
