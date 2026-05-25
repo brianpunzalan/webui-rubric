@@ -25,7 +25,7 @@
     "playwright": "^1.48.0",
     "@axe-core/playwright": "^4.10.0",
     "pngjs": "^7.0.0",
-    "@webui-rubric/core": "*"
+    "@webui-rubric/core": "workspace:*"
   },
   "devDependencies": {
     "@types/pngjs": "^6.0.0"

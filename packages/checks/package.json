@@ -26,8 +26,8 @@
     "chrome-launcher": "^1.1.0",
     "pixelmatch": "^6.0.0",
     "pngjs": "^7.0.0",
-    "@webui-rubric/core": "*",
-    "@webui-rubric/capture": "*"
+    "@webui-rubric/core": "workspace:*",
+    "@webui-rubric/capture": "workspace:*"
   },
   "devDependencies": {
     "@types/pngjs": "^6.0.0"

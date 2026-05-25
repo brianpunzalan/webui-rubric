@@ -217,7 +217,8 @@ if (fs.existsSync(changelogPath)) {
   existing = fs.readFileSync(changelogPath, 'utf8');
 }
 
-const HEADER = '# Changelog\n\nAll notable changes to this project will be documented in this file.\n';
+const HEADER =
+  '# Changelog\n\nAll notable changes to this project will be documented in this file.\n';
 
 if (existing.startsWith('# Changelog')) {
   // Splice new section in after the header block
