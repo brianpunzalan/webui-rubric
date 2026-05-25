@@ -4,6 +4,13 @@ on:
   push:
     tags:
       - 'v*.*.*'
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g. 0.1.0) — must match package.json'
+        required: true
 
 permissions:
   contents: read
