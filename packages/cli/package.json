@@ -25,10 +25,14 @@
     "lint": "eslint src/"
   },
   "dependencies": {
-    "commander": "^13.0.0",
-    "yaml": "^2.6.0",
-    "@webui-rubric/core": "workspace:*",
     "@webui-rubric/capture": "workspace:*",
-    "@webui-rubric/checks": "workspace:*"
+    "@webui-rubric/checks": "workspace:*",
+    "@webui-rubric/core": "workspace:*",
+    "commander": "^13.0.0",
+    "yaml": "^2.6.0"
+  },
+  "devDependencies": {
+    "@types/pngjs": "^6.0.5",
+    "pngjs": "^7.0.0"
   }
 }
