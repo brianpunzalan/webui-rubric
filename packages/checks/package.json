@@ -1,0 +1,35 @@
+{
+  "name": "@webui-rubric/checks",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "test": "vitest run --passWithNoTests",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "lighthouse": "^12.0.0",
+    "chrome-launcher": "^1.1.0",
+    "pixelmatch": "^6.0.0",
+    "pngjs": "^7.0.0",
+    "@webui-rubric/core": "*",
+    "@webui-rubric/capture": "*"
+  },
+  "devDependencies": {
+    "@types/pngjs": "^6.0.0"
+  }
+}
