@@ -18,6 +18,7 @@
   ],
   "scripts": {
     "build": "vite build",
+    "postinstall": "npx playwright install chromium",
     "test": "vitest run --passWithNoTests",
     "lint": "eslint src/"
   },
