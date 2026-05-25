@@ -2,15 +2,8 @@
   "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
   "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "fixed": [],
-  "linked": [
-    [
-      "@webui-rubric/core",
-      "@webui-rubric/cli",
-      "@webui-rubric/capture",
-      "@webui-rubric/checks"
-    ]
-  ],
+  "fixed": [["@webui-rubric/*"]],
+  "linked": [],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
