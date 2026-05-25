@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to publish (e.g. 0.1.0) — must match package.json'
+        description: 'Version to publish (e.g. 0.1.0)'
         required: true
 
 permissions:
@@ -28,6 +28,19 @@ jobs:
         with:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Resolve release version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "value=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            # Strip leading 'v' from tag (v1.2.3 → 1.2.3)
+            echo "value=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Stamp version into package.json
+        run: npm version ${{ steps.version.outputs.value }} --no-git-tag-version
 
       - name: Install dependencies
         run: npm ci --ignore-scripts
