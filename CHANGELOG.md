@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.1] - 2026-05-25
+
+### Bug Fixes
+
+- fix: auto-install Chromium browser on @webui-rubric/capture install (`f944323`)
+
 ## [0.1.0] - 2026-05-25
 
 ### Features

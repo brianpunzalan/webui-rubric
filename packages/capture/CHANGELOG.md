@@ -1,5 +1,15 @@
 # @webui-rubric/capture
 
+## 0.1.1
+
+### Patch Changes
+
+- ### Bug Fixes
+  - fix: auto-install Chromium browser on @webui-rubric/capture install (`f944323`)
+
+- Updated dependencies
+  - @webui-rubric/core@0.1.1
+
 ## 0.1.0
 
 ### Minor Changes
