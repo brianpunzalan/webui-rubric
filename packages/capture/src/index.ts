@@ -3,7 +3,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { Page } from 'playwright';
-import { launchBrowser, closeBrowser, type BrowserSession } from './browser.js';
+import { launchBrowser, closeBrowser } from './browser.js';
 import { waitForSettle } from './settle.js';
 import { detectAuthWall } from './auth-detect.js';
 import { captureScreenshots, DEFAULT_VIEWPORTS, type ViewportSpec } from './screenshot.js';
@@ -44,7 +44,6 @@ export interface CaptureResult {
   computed_styles: ComputedStylesSnapshot;
   console_errors: CapturedConsoleEntry[];
   har: unknown;
-  session: BrowserSession;
 }
 
 async function dismissConsentBanners(page: Page, selectors: string[]): Promise<void> {
@@ -136,8 +135,9 @@ export async function capturePage(
     ].join('\n');
     const content_hash = createHash('sha256').update(hashInput).digest('hex');
 
-    // Clean up temp dir
+    // Clean up temp dir and close browser
     await rm(tempDir, { recursive: true, force: true }).catch(() => {});
+    await session.browser.close();
 
     return {
       url,
@@ -149,7 +149,6 @@ export async function capturePage(
       computed_styles,
       console_errors: consoleErrors,
       har,
-      session,
     };
   } catch (error) {
     await closeBrowser(session).catch(() => {});
