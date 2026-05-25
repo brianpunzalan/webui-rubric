@@ -241,9 +241,7 @@ export const evaluateCommand = new Command('evaluate')
           }
         }
 
-        logger.info(
-          `Pixelmatch complete: ${pctDiff}% diff, score ${vpScore}/4`,
-        );
+        logger.info(`Pixelmatch complete: ${pctDiff}% diff, score ${vpScore}/4`);
       }
 
       // Build sub-criterion findings for each dimension

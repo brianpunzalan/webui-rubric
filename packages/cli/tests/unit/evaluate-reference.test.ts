@@ -4,7 +4,11 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { PNG } from 'pngjs';
 
-function createSolidPng(width: number, height: number, rgba: [number, number, number, number]): Buffer {
+function createSolidPng(
+  width: number,
+  height: number,
+  rgba: [number, number, number, number],
+): Buffer {
   const png = new PNG({ width, height });
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -24,7 +28,8 @@ const fakeCaptureResult = {
   content_hash: 'abc123',
   viewports_captured: ['desktop', 'mobile'],
   screenshots: new Map<string, Buffer>(),
-  dom_snapshot: '<html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main><h1>Test</h1></main></body></html>',
+  dom_snapshot:
+    '<html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main><h1>Test</h1></main></body></html>',
   computed_styles: {},
   console_errors: [],
   har: { log: { entries: [] } },
@@ -76,7 +81,9 @@ describe('evaluate --reference integration', () => {
         capturedOutput = json;
       },
     );
-    vi.spyOn(await import('../../src/output/index.js'), 'routeSummary').mockImplementation(() => {});
+    vi.spyOn(await import('../../src/output/index.js'), 'routeSummary').mockImplementation(
+      () => {},
+    );
 
     // Mock config loading to return defaults
     vi.spyOn(await import('../../src/config/index.js'), 'resolveConfigPath').mockReturnValue(
@@ -103,15 +110,13 @@ describe('evaluate --reference integration', () => {
     const refPath = join(tmpDir, 'reference.png');
     writeFileSync(refPath, referencePng);
 
-    const result = await runEvaluate([
-      'http://example.com',
-      '--reference',
-      refPath,
-    ]);
+    const result = await runEvaluate(['http://example.com', '--reference', refPath]);
 
     // pixel_comparison must be populated
     expect(result.pixel_comparison).not.toBeNull();
-    const pc = result.pixel_comparison as { viewports: Array<{ viewport: string; diff_ratio: number }> };
+    const pc = result.pixel_comparison as {
+      viewports: Array<{ viewport: string; diff_ratio: number }>;
+    };
     expect(pc.viewports).toHaveLength(1);
     expect(pc.viewports[0].viewport).toBe('desktop');
 
@@ -125,9 +130,7 @@ describe('evaluate --reference integration', () => {
     );
     expect(visualParityFindings.length).toBeGreaterThan(0);
 
-    const desktopParityFindings = visualParityFindings.filter(
-      (f) => !f.id.includes('mobile'),
-    );
+    const desktopParityFindings = visualParityFindings.filter((f) => !f.id.includes('mobile'));
     for (const finding of desktopParityFindings) {
       expect(finding.status).toBe('scored');
       expect(finding.evidence).not.toContain('No reference image');
@@ -163,11 +166,7 @@ describe('evaluate --reference integration', () => {
     ]);
 
     await expect(
-      runEvaluate([
-        'http://example.com',
-        '--reference',
-        join(tmpDir, 'does-not-exist.png'),
-      ]),
+      runEvaluate(['http://example.com', '--reference', join(tmpDir, 'does-not-exist.png')]),
     ).rejects.toThrow('process.exit');
   });
 
@@ -185,11 +184,7 @@ describe('evaluate --reference integration', () => {
     const refPath = join(tmpDir, 'reference-diff.png');
     writeFileSync(refPath, referencePng);
 
-    const result = await runEvaluate([
-      'http://example.com',
-      '--reference',
-      refPath,
-    ]);
+    const result = await runEvaluate(['http://example.com', '--reference', refPath]);
 
     const pc = result.pixel_comparison as {
       viewports: Array<{ viewport: string; diff_ratio: number; diff_pixel_count: number }>;
