@@ -158,11 +158,11 @@ export const evaluateCommand = new Command('evaluate')
       }
 
       // Reference image pixel comparison
-      let pixelComparisonResults: Map<
+      const pixelComparisonResults: Map<
         string,
         { score: number; diffRatio: number; evidence: string }
       > = new Map();
-      let pixelComparisonOutput: Array<{
+      const pixelComparisonOutput: Array<{
         viewport: string;
         diff_pixel_count: number;
         total_pixel_count: number;
