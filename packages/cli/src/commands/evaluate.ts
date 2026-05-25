@@ -86,12 +86,36 @@ export const evaluateCommand = new Command('evaluate')
       logger.info('Starting capture phase...');
       const { capturePage } = await import('@webui-rubric/capture');
 
+      // Build viewport specs from config, filtered by --viewports CLI option
+      const configViewports = config.viewports ?? {
+        desktop: { width: 1280, height: 800 },
+        mobile: { width: 375, height: 812 },
+      };
+      const requestedNames = (options.viewports as string).split(',').map((s: string) => s.trim());
+      const viewportSpecs: Array<{
+        name: string;
+        width: number;
+        height: number;
+        fullPage?: boolean;
+      }> = [];
+      for (const name of requestedNames) {
+        const dims =
+          (configViewports as Record<string, { width: number; height: number }>)[name] ??
+          configViewports.custom?.[name];
+        if (dims) {
+          viewportSpecs.push({ name, width: dims.width, height: dims.height, fullPage: false });
+        } else {
+          logger.warn(`Unknown viewport "${name}" — skipping`);
+        }
+      }
+
       const captureResult = await capturePage(url, {
         settleTimeoutMs: config.settle_timeout_ms ?? 30000,
         additionalSettleDelay: 5000,
         deviceScaleFactor: 1,
         autoDismiss: config.capture?.auto_dismiss ?? true,
         dismissSelectors: config.capture?.dismiss_selectors,
+        viewports: viewportSpecs.length > 0 ? viewportSpecs : undefined,
       });
 
       logger.info('Capture complete. Running checks...');
