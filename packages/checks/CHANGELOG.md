@@ -1,5 +1,24 @@
 # @webui-rubric/checks
 
+## 0.1.3
+
+### Patch Changes
+
+- ### Bug Fixes
+  - fix: use const for non-reassigned pixel comparison variables (`97d2774`)
+  - fix: wire --reference flag into evaluate command for pixel comparison (`33fc4d4`)
+
+  ### Chores
+  - chore: add husky and lint-staged for pre-commit autofix (`a076099`)
+
+  ### Other Changes
+  - style: fix prettier formatting (`7b6f438`)
+  - test: add regression tests for --reference flag in evaluate command (`3a58405`)
+
+- Updated dependencies
+  - @webui-rubric/capture@0.1.3
+  - @webui-rubric/core@0.1.3
+
 ## 0.1.2
 
 ### Patch Changes

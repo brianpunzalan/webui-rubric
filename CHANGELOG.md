@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.3] - 2026-05-25
+
+### Bug Fixes
+
+- fix: use const for non-reassigned pixel comparison variables (`97d2774`)
+- fix: wire --reference flag into evaluate command for pixel comparison (`33fc4d4`)
+
+### Chores
+
+- chore: add husky and lint-staged for pre-commit autofix (`a076099`)
+
+### Other Changes
+
+- style: fix prettier formatting (`7b6f438`)
+- test: add regression tests for --reference flag in evaluate command (`3a58405`)
+
 ## [0.1.2] - 2026-05-25
 
 ### Bug Fixes
