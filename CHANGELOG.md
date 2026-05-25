@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.2] - 2026-05-25
+
+### Bug Fixes
+
+- fix: remove unused BrowserSession import (`1868584`)
+- fix: close Playwright browser after capture so CLI exits cleanly (`a2cd55f`)
+
 ## [0.1.1] - 2026-05-25
 
 ### Bug Fixes

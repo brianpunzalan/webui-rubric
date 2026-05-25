@@ -1,5 +1,17 @@
 # @webui-rubric/checks
 
+## 0.1.2
+
+### Patch Changes
+
+- ### Bug Fixes
+  - fix: remove unused BrowserSession import (`1868584`)
+  - fix: close Playwright browser after capture so CLI exits cleanly (`a2cd55f`)
+
+- Updated dependencies
+  - @webui-rubric/capture@0.1.2
+  - @webui-rubric/core@0.1.2
+
 ## 0.1.1
 
 ### Patch Changes
