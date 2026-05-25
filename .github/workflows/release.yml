@@ -76,8 +76,7 @@ jobs:
 
       - name: Build all packages
         if: steps.generate.outputs.has_changes == 'true'
-        # pnpm skips packages that don't define a build script
-        run: pnpm -r run build --if-present
+        run: pnpm -r run build
 
       - name: Publish to NPM
         if: steps.generate.outputs.has_changes == 'true'

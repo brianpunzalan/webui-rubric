@@ -27,8 +27,8 @@
   "dependencies": {
     "commander": "^13.0.0",
     "yaml": "^2.6.0",
-    "@webui-rubric/core": "*",
-    "@webui-rubric/capture": "*",
-    "@webui-rubric/checks": "*"
+    "@webui-rubric/core": "workspace:*",
+    "@webui-rubric/capture": "workspace:*",
+    "@webui-rubric/checks": "workspace:*"
   }
 }
