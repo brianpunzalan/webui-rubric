@@ -66,6 +66,26 @@ const ViewportDimsSchema = z.object({
   height: z.number().int().min(1),
 });
 
+const StyleDiffSchema = z.object({
+  property: z.string(),
+  actual: z.string(),
+  expected: z.string(),
+});
+
+const MappedDiffElementSchema = z.object({
+  selector: z.string(),
+  tagName: z.string(),
+  styleDiffs: z.array(StyleDiffSchema),
+});
+
+const MappedDiffRegionSchema = z.object({
+  y_start: z.number().int().min(0),
+  y_end: z.number().int().min(0),
+  diff_pixel_count: z.number().int().min(0),
+  pct_of_total_diff: z.number().min(0).max(1),
+  elements: z.array(MappedDiffElementSchema),
+});
+
 const PixelComparisonViewportSchema = z.object({
   viewport: z.string(),
   diff_pixel_count: z.number().int().min(0),
@@ -76,6 +96,7 @@ const PixelComparisonViewportSchema = z.object({
   reference_image_path: z.string(),
   screenshot_dimensions: ViewportDimsSchema,
   reference_dimensions: ViewportDimsSchema,
+  diff_regions: z.array(MappedDiffRegionSchema).optional(),
 });
 
 const PixelComparisonResultSchema = z
