@@ -1,129 +1,165 @@
 # webui-rubric
 
-Deterministic CLI tool that evaluates a live web UI against a 10-dimension weighted rubric and emits a machine-parseable JSON evaluation artifact. Designed for consumption by an Evaluator/Generator agent loop -- no LLM calls, all scoring from automated checks.
+Deterministic CLI tool that evaluates a live web UI against a 10-dimension weighted rubric and emits a machine-parseable JSON evaluation artifact. Designed for consumption by an Evaluator/Generator agent loop — no LLM calls, all scoring from automated checks.
 
-## Quick Start
+![CI](https://img.shields.io/badge/CI-passing-brightgreen)
+![npm](https://img.shields.io/npm/v/@webui-rubric/cli)
+![Node](https://img.shields.io/node/v/@webui-rubric/cli)
+
+## Installation
+
+**Prerequisites**
+
+- Node.js >= 20 LTS
+- Playwright Chromium browser
+- Chrome/Chromium for Lighthouse (via `chrome-launcher` or system install)
 
 ```bash
 # Install globally
 yarn global add @webui-rubric/cli
 
-# Or run directly
+# Install Playwright's Chromium browser
+npx playwright install chromium
+
+# Or run without installing
 npx @webui-rubric/cli evaluate https://example.com
-
-# Save output to a file
-webui-rubric evaluate https://example.com --out result.json
-
-# With debug artifacts (screenshots, HAR, diffs)
-webui-rubric evaluate https://example.com --debug-dir ./debug-output
-
-# Pixel comparison against a reference design
-webui-rubric evaluate https://example.com --reference ./design/homepage.png
 ```
 
-### Prerequisites
-
-- Node.js >= 20 LTS
-- Playwright Chromium (`npx playwright install chromium`)
-- Chrome/Chromium for Lighthouse (via `chrome-launcher` or system install)
-
-## Features
-
-- 10-dimension rubric: Visual Design, Layout, Usability, Accessibility, Content/IA, Performance, Code Quality, Brand, Consistency, Microinteractions
-- Deterministic scoring from axe-core, Lighthouse, pixelmatch, and structural DOM/CSS checks
-- Generator-consumable output with blocking list, top issues, and ship-ready indicator
-- Per-project configuration via YAML (custom weights, thresholds, viewports)
-- Pixel-level comparison against reference design images
-- Iterative loop metadata for convergence tracking (delta, attempted-fix deduplication, iteration cap)
-
-## Architecture
-
-Yarn workspaces monorepo with 4 packages:
-
-| Package                 | Description                                                                        |
-| ----------------------- | ---------------------------------------------------------------------------------- |
-| `@webui-rubric/core`    | Rubric engine, scoring math, types, config validation, redaction, loop metadata    |
-| `@webui-rubric/cli`     | Commander.js CLI entry point, config loading, output routing                       |
-| `@webui-rubric/capture` | Playwright headless browser capture pipeline (screenshots, DOM, HAR, styles)       |
-| `@webui-rubric/checks`  | Deterministic check adapters: axe-core, Lighthouse, pixelmatch, structural DOM/CSS |
-
-## CLI Commands
-
-### `evaluate` (default)
+## Quick Start
 
 ```bash
-webui-rubric evaluate <url> [options]
+webui-rubric evaluate https://example.com
 ```
 
-Key options: `--config`, `--out`, `--reference`, `--viewports`, `--debug-dir`, `--iteration`, `--previous-composite`, `--attempted-fixes`.
+JSON artifact on stdout, one-line summary on stderr:
 
-### `version`
+```
+score=82 blocking=0 issues=5 ship_ready=true
+```
 
-Print CLI, rubric, and pinned tool versions.
+Save the artifact to a file (summary moves to stdout):
 
-### `validate-config`
+```bash
+webui-rubric evaluate https://example.com --out result.json
+```
 
-Validate a project configuration file without running an evaluation.
+See the [Quickstart Guide](specs/001-ui-evaluator-cli/quickstart.md) for pixel comparison, iteration loop, and custom configuration examples.
 
-### `check-tools`
+## CLI Reference
 
-Verify installed tool versions match the rubric's pinned versions.
+Full documentation: [docs/api/cli.md](docs/api/cli.md) | [CLI Command Reference](specs/001-ui-evaluator-cli/contracts/cli-commands.md)
 
-See the full [CLI Command Reference](specs/001-ui-evaluator-cli/contracts/cli-commands.md) for all flags, exit codes, and output contracts.
+| Command           | Description                                                  |
+| ----------------- | ------------------------------------------------------------ |
+| `evaluate <url>`  | Evaluate a live URL and emit the JSON evaluation artifact    |
+| `version`         | Print CLI, rubric, and pinned tool versions                  |
+| `validate-config` | Validate a project configuration file without running a scan |
+| `check-tools`     | Verify installed tool versions match the rubric's pin set    |
+
+### `evaluate` key options
+
+| Option                       | Description                                               |
+| ---------------------------- | --------------------------------------------------------- |
+| `--config <path>`            | Project config file (default: `.webui-rubric.yml`)        |
+| `--out <path>`               | Write JSON artifact to file; summary goes to stdout       |
+| `--reference <path>`         | Reference PNG for pixel comparison                        |
+| `--reference-viewport <name>`| Viewport the reference image represents (default: desktop)|
+| `--viewports <list>`         | Comma-separated viewports to capture (default: desktop,mobile) |
+| `--debug-dir <path>`         | Persist screenshots, HAR, DOM snapshot, and diff PNGs     |
+| `--iteration <n>`            | Loop iteration index for convergence tracking             |
+| `--previous-composite <n>`   | Previous composite score for delta calculation            |
+| `--attempted-fixes <path>`   | JSON file of attempted fix hashes for deduplication       |
+| `--allow-tool-version-drift` | Proceed when installed tool versions differ from rubric pins |
+| `--no-redact`                | Disable default redaction of sensitive data in HAR/DOM    |
+| `--log-level <level>`        | Log verbosity: debug, info, warn, error (default: info)   |
+| `-q, --quiet`                | Suppress all logs below error                             |
+
+## Architecture Overview
+
+Yarn workspaces monorepo with four packages:
+
+| Package                 | Description                                                                     |
+| ----------------------- | ------------------------------------------------------------------------------- |
+| `@webui-rubric/core`    | Rubric engine, scoring math, config validation, types, redaction, loop metadata |
+| `@webui-rubric/cli`     | Commander.js entry point, config loading, output routing to stdout/file         |
+| `@webui-rubric/capture` | Playwright headless capture pipeline: screenshots, DOM, HAR, computed styles    |
+| `@webui-rubric/checks`  | Deterministic check adapters: axe-core, Lighthouse, pixelmatch, structural DOM/CSS |
+
+The CLI does not invoke any LLM. It captures browser artifacts via Playwright, runs checks locally, scores each sub-criterion deterministically, and emits a single JSON document. The artifact is intended for a downstream Evaluator agent that feeds it to a Generator agent to close the improvement loop.
 
 ## Configuration
 
-Create `.webui-rubric.yml` in your project root:
+Create `.webui-rubric.yml` in your project root to override weights, thresholds, and capture settings:
 
 ```yaml
 weights:
-  visual_design: 10
+  visual_design: 5
   layout: 10
-  usability: 12
-  accessibility: 15
-  content_ia: 8
+  usability: 10
+  accessibility: 25   # floor: 10; lower values require weight_overrides_ack
+  content_ia: 10
   performance: 12
   code_quality: 8
   brand: 5
   consistency: 10
-  microinteractions: 10
+  microinteractions: 5
 
-ship_threshold: 75
-settle_timeout_ms: 5000
+ship_threshold: 80          # composite score required for ship_ready: true
+settle_timeout_ms: 3000     # ms to wait after navigation before capture
 ```
 
-Weights must sum to 100. Accessibility has a weight floor of 10 (overridable via `weight_overrides_ack`). See the [Quickstart Guide](specs/001-ui-evaluator-cli/quickstart.md) for more configuration examples.
+Then pass it explicitly or let the CLI auto-discover it:
 
-## Documentation
+```bash
+webui-rubric evaluate https://example.com --config .webui-rubric.yml
+```
 
-- [Feature Specification](specs/001-ui-evaluator-cli/spec.md)
-- [Implementation Plan](specs/001-ui-evaluator-cli/plan.md)
-- [CLI Command Reference](specs/001-ui-evaluator-cli/contracts/cli-commands.md)
-- [Output Schema](specs/001-ui-evaluator-cli/contracts/evaluator-output-schema.json)
-- [Data Model](specs/001-ui-evaluator-cli/data-model.md)
-- [Quickstart Guide](specs/001-ui-evaluator-cli/quickstart.md)
+See the [Quickstart Guide](specs/001-ui-evaluator-cli/quickstart.md) for the full configuration reference and pixel-comparison mask selectors.
+
+## Links
+
+| Resource                  | Path                                                                              |
+| ------------------------- | --------------------------------------------------------------------------------- |
+| Feature Specification     | [specs/001-ui-evaluator-cli/spec.md](specs/001-ui-evaluator-cli/spec.md)         |
+| Quickstart Guide          | [specs/001-ui-evaluator-cli/quickstart.md](specs/001-ui-evaluator-cli/quickstart.md) |
+| Implementation Plan       | [specs/001-ui-evaluator-cli/plan.md](specs/001-ui-evaluator-cli/plan.md)         |
+| CLI Command Reference     | [specs/001-ui-evaluator-cli/contracts/cli-commands.md](specs/001-ui-evaluator-cli/contracts/cli-commands.md) |
+| Output Schema             | [specs/001-ui-evaluator-cli/contracts/evaluator-output-schema.json](specs/001-ui-evaluator-cli/contracts/evaluator-output-schema.json) |
+| Data Model                | [specs/001-ui-evaluator-cli/data-model.md](specs/001-ui-evaluator-cli/data-model.md) |
+| API Docs: core            | [docs/api/core.md](docs/api/core.md)                                             |
+| API Docs: cli             | [docs/api/cli.md](docs/api/cli.md)                                               |
+| API Docs: capture         | [docs/api/capture.md](docs/api/capture.md)                                       |
+| API Docs: checks          | [docs/api/checks.md](docs/api/checks.md)                                         |
+| Project Constitution      | [.specify/memory/constitution.md](.specify/memory/constitution.md)               |
 
 ## Development
 
 ```bash
-# Install dependencies
-npm install
+# Install all workspace dependencies
+yarn install
 
 # Build all packages
-npm run build
+yarn build
 
-# Run tests
-npm run test
+# Run tests across all packages
+yarn test
 
 # Lint
-npm run lint
+yarn lint
 
 # Format (check)
-npm run format
+yarn format:check
 
 # Format (fix)
-npm run format:fix
+yarn format
 ```
+
+### Contributing
+
+1. Create a feature branch (`git checkout -b feat/my-change`).
+2. Make changes and add tests — `yarn test` must pass.
+3. Add a changeset: `yarn changeset`.
+4. Open a pull request.
 
 ## License
 
