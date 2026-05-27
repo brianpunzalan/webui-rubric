@@ -1,3 +1,4 @@
+/** Output metadata written into the artifact meta block for loop-aware evaluation runs. */
 export interface LoopOutput {
   iteration: number | null;
   previous_composite: number | null;
@@ -5,6 +6,7 @@ export interface LoopOutput {
   attempted_fixes_count: number;
 }
 
+/** Compute the composite delta and assemble the LoopOutput for embedding in artifact meta. */
 export function buildLoopOutput(
   compositeScore: number,
   iteration: number | null,

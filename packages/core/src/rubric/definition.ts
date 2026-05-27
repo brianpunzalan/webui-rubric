@@ -403,6 +403,8 @@ const dimensions: Dimension[] = [
   ]),
 
   /* 4. accessibility — weight 15, floor 10 */
+  // weight_floor=10: legal/regulatory risk of inaccessible UIs makes 0-weight opt-out dangerous;
+  // the floor ensures accessibility is never fully deprioritized even with custom weight configs.
   dim('accessibility', 'Accessibility — WCAG 2.2', 15, 10, [
     sub(
       'accessibility.color-contrast',
@@ -516,6 +518,8 @@ const dimensions: Dimension[] = [
       'performance.lcp',
       'Largest Contentful Paint',
       'Time until the largest content element is rendered',
+      // LCP thresholds: ≤2500ms = Web Vitals "Good" boundary (score 3); ≤1200ms = elite target (score 4).
+      // Source: https://web.dev/articles/lcp — official Google/W3C Core Web Vitals thresholds.
       buildBoundCheck('lighthouse.lcp', 'Reduce LCP (target: ≤2500ms)', INVERSE_SCORE_SEVERITY, {
         0: gt(6000),
         1: lte(6000),

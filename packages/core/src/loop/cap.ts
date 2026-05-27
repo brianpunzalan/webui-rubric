@@ -1,3 +1,4 @@
+/** Result of an iteration cap check, indicating whether the run is allowed to proceed. */
 export interface CapCheckResult {
   allowed: boolean;
   message?: string;
