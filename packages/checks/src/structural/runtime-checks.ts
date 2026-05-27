@@ -8,7 +8,7 @@ export interface RuntimeCheckResult {
   evidence: string;
   evidence_source: string;
   severity: number;
-  suggested_fix: string;
+  suggested_fix: string[];
   location: null;
 }
 
@@ -23,7 +23,7 @@ export function checkConsoleErrors(consoleErrors: ConsoleEntry[]): RuntimeCheckR
     evidence_source: 'console.error-count',
     severity: 4 - score,
     suggested_fix:
-      score < 4 ? `Fix console errors; ${errorCount} errors detected during page load` : '',
+      score < 4 ? [`Fix console errors; ${errorCount} errors detected during page load`] : [],
     location: null,
   };
 }
@@ -44,7 +44,7 @@ export function checkResourceCount(har: unknown): RuntimeCheckResult {
       evidence: 'HAR data unavailable',
       evidence_source: 'har.resource-count',
       severity: 0,
-      suggested_fix: '',
+      suggested_fix: [],
       location: null,
     };
   }
@@ -66,8 +66,8 @@ export function checkResourceCount(har: unknown): RuntimeCheckResult {
     severity: 4 - score,
     suggested_fix:
       score < 4
-        ? `Reduce number of network requests; current count is ${requestCount} (target: ≤40)`
-        : '',
+        ? [`Reduce number of network requests; current count is ${requestCount} (target: ≤40)`]
+        : [],
     location: null,
   };
 }

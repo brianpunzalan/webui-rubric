@@ -7,7 +7,7 @@ describe('checkConsoleErrors', () => {
     expect(result.score).toBe(4);
     expect(result.severity).toBe(0);
     expect(result.evidence_source).toBe('console.error-count');
-    expect(result.suggested_fix).toBe('');
+    expect(result.suggested_fix).toEqual([]);
   });
 
   it('returns score 4 when only warnings exist (no errors)', () => {
@@ -86,7 +86,7 @@ describe('checkResourceCount', () => {
     const result = checkResourceCount(har);
     expect(result.score).toBe(4);
     expect(result.evidence_source).toBe('har.resource-count');
-    expect(result.suggested_fix).toBe('');
+    expect(result.suggested_fix).toEqual([]);
   });
 
   it('returns score 3 for 26-40 requests', () => {

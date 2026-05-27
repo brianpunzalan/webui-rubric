@@ -3,7 +3,7 @@ export interface FocusVisibleResult {
   evidence: string;
   evidence_source: string;
   severity: number;
-  suggested_fix: string;
+  suggested_fix: string[];
   location: null;
 }
 
@@ -38,7 +38,7 @@ export async function checkFocusVisible(page: unknown): Promise<FocusVisibleResu
         evidence: 'No interactive elements found',
         evidence_source: 'playwright.focus-visible',
         severity: 0,
-        suggested_fix: '',
+        suggested_fix: [],
         location: null,
       };
     }
@@ -53,8 +53,8 @@ export async function checkFocusVisible(page: unknown): Promise<FocusVisibleResu
       severity: 4 - score,
       suggested_fix:
         score < 4
-          ? 'Add visible focus indicator to interactive elements missing :focus-visible'
-          : '',
+          ? ['Add visible focus indicator to interactive elements missing :focus-visible']
+          : [],
       location: null,
     };
   } catch {

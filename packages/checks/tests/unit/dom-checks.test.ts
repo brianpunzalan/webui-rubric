@@ -20,7 +20,7 @@ describe('checkHeadingOrder', () => {
     const result = checkHeadingOrder(html);
     expect(result.score).toBe(4);
     expect(result.severity).toBe(0);
-    expect(result.suggested_fix).toBe('');
+    expect(result.suggested_fix).toEqual([]);
   });
 
   it('returns score 4 when heading level goes down (h3 -> h1 is not a skip)', () => {
@@ -34,7 +34,7 @@ describe('checkHeadingOrder', () => {
     const result = checkHeadingOrder(html);
     expect(result.score).toBe(3);
     expect(result.severity).toBe(1);
-    expect(result.suggested_fix).toContain('1 violations');
+    expect(result.suggested_fix[0]).toContain('1 violations');
   });
 
   it('returns score 2 for two skipped levels', () => {
@@ -75,7 +75,7 @@ describe('checkLandmarkUsage', () => {
     const result = checkLandmarkUsage(html);
     expect(result.score).toBe(4);
     expect(result.severity).toBe(0);
-    expect(result.suggested_fix).toBe('');
+    expect(result.suggested_fix).toEqual([]);
   });
 
   it('returns score 3 for 3 landmarks', () => {
@@ -132,7 +132,7 @@ describe('checkLinkDescriptiveness', () => {
     const html = '<a href="/about">About our company</a><a href="/contact">Contact us today</a>';
     const result = checkLinkDescriptiveness(html);
     expect(result.score).toBe(4);
-    expect(result.suggested_fix).toBe('');
+    expect(result.suggested_fix).toEqual([]);
   });
 
   it('returns low score when links use "click here"', () => {
@@ -194,7 +194,7 @@ describe('checkImageAlt', () => {
     const html = '<img src="a.png" alt="Photo A"><img src="b.png" alt="Photo B">';
     const result = checkImageAlt(html);
     expect(result.score).toBe(4);
-    expect(result.suggested_fix).toBe('');
+    expect(result.suggested_fix).toEqual([]);
   });
 
   it('returns proportional score for some missing alt', () => {
@@ -243,7 +243,7 @@ describe('checkFormLabels', () => {
     const html = '<label for="name">Name</label><input type="text" id="name">';
     const result = checkFormLabels(html);
     expect(result.score).toBe(4);
-    expect(result.suggested_fix).toBe('');
+    expect(result.suggested_fix).toEqual([]);
   });
 
   it('returns score 4 when inputs have aria-label', () => {
@@ -304,7 +304,7 @@ describe('checkMetaViewport', () => {
     const result = checkMetaViewport(html);
     expect(result.score).toBe(4);
     expect(result.severity).toBe(0);
-    expect(result.suggested_fix).toBe('');
+    expect(result.suggested_fix).toEqual([]);
   });
 
   it('returns score 0 when no viewport meta tag exists', () => {

@@ -3,7 +3,7 @@ export interface StructuralCheckResult {
   evidence: string;
   evidence_source: string;
   severity: number;
-  suggested_fix: string;
+  suggested_fix: string[];
   location: {
     type: 'selector';
     selector: string | null;
@@ -36,9 +36,7 @@ export function checkHeadingOrder(html: string): StructuralCheckResult {
     evidence_source: 'dom.heading-order',
     severity: 4 - score,
     suggested_fix:
-      score < 4
-        ? `Fix heading hierarchy; headings skip levels (${skips} violations)`.slice(0, 280)
-        : '',
+      score < 4 ? [`Fix heading hierarchy; headings skip levels (${skips} violations)`] : [],
     location: null,
   };
 }
@@ -57,8 +55,7 @@ export function checkLandmarkUsage(html: string): StructuralCheckResult {
     evidence: `Semantic landmarks found: ${count}/4 (main, nav, header, footer)`.slice(0, 300),
     evidence_source: 'dom.landmark-usage',
     severity: 4 - score,
-    suggested_fix:
-      score < 4 ? 'Add semantic landmarks: <main>, <nav>, <header>, <footer>'.slice(0, 280) : '',
+    suggested_fix: score < 4 ? ['Add semantic landmarks: <main>, <nav>, <header>, <footer>'] : [],
     location: null,
   };
 }
@@ -84,7 +81,7 @@ export function checkLinkDescriptiveness(html: string): StructuralCheckResult {
       evidence: 'No links found on page',
       evidence_source: 'dom.link-descriptiveness',
       severity: 0,
-      suggested_fix: '',
+      suggested_fix: [],
       location: null,
     };
   }
@@ -101,11 +98,8 @@ export function checkLinkDescriptiveness(html: string): StructuralCheckResult {
     severity: 4 - score,
     suggested_fix:
       score < 4
-        ? "Replace generic link text ('click here', 'read more') with descriptive text".slice(
-            0,
-            280,
-          )
-        : '',
+        ? ["Replace generic link text ('click here', 'read more') with descriptive text"]
+        : [],
     location: null,
   };
 }
@@ -123,7 +117,7 @@ export function checkImageAlt(html: string): StructuralCheckResult {
       evidence: 'No images found on page',
       evidence_source: 'dom.image-alt',
       severity: 0,
-      suggested_fix: '',
+      suggested_fix: [],
       location: null,
     };
   }
@@ -144,8 +138,7 @@ export function checkImageAlt(html: string): StructuralCheckResult {
       ),
     evidence_source: 'dom.image-alt',
     severity: 4 - score,
-    suggested_fix:
-      score < 4 ? 'Add descriptive alt text to images missing alt attributes'.slice(0, 280) : '',
+    suggested_fix: score < 4 ? ['Add descriptive alt text to images missing alt attributes'] : [],
     location: null,
   };
 }
@@ -168,7 +161,7 @@ export function checkFormLabels(html: string): StructuralCheckResult {
       evidence: 'No form inputs found',
       evidence_source: 'dom.form-labels',
       severity: 0,
-      suggested_fix: '',
+      suggested_fix: [],
       location: null,
     };
   }
@@ -198,9 +191,7 @@ export function checkFormLabels(html: string): StructuralCheckResult {
     evidence_source: 'dom.form-labels',
     severity: 4 - score,
     suggested_fix:
-      score < 4
-        ? 'Associate labels with all form inputs using <label for> or aria-label'.slice(0, 280)
-        : '',
+      score < 4 ? ['Associate labels with all form inputs using <label for> or aria-label'] : [],
     location: null,
   };
 }
@@ -217,7 +208,7 @@ export function checkMetaViewport(html: string): StructuralCheckResult {
       evidence: 'No viewport meta tag found',
       evidence_source: 'dom.meta-viewport',
       severity: 4,
-      suggested_fix: "Add <meta name='viewport' content='width=device-width, initial-scale=1'>",
+      suggested_fix: ["Add <meta name='viewport' content='width=device-width, initial-scale=1'>"],
       location: null,
     };
   }
@@ -238,9 +229,7 @@ export function checkMetaViewport(html: string): StructuralCheckResult {
     evidence_source: 'dom.meta-viewport',
     severity: 4 - score,
     suggested_fix:
-      score < 4
-        ? "Add <meta name='viewport' content='width=device-width, initial-scale=1'>".slice(0, 280)
-        : '',
+      score < 4 ? ["Add <meta name='viewport' content='width=device-width, initial-scale=1'>"] : [],
     location: null,
   };
 }

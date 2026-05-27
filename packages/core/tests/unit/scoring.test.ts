@@ -24,7 +24,10 @@ function makeBoundCheck(
     { operator: string; value?: number | null; min?: number | null; max?: number | null }
   >,
 ): BoundCheck {
-  const mapped: Record<number, any> = {};
+  const mapped: Record<
+    number,
+    { operator: string; value: number | null; min: number | null; max: number | null }
+  > = {};
   for (const [k, v] of Object.entries(thresholdMap)) {
     mapped[Number(k)] = {
       operator: v.operator,
@@ -53,7 +56,7 @@ function makeFinding(overrides: Partial<SubCriterionFinding> = {}): SubCriterion
     evidence: '',
     evidence_source: 'test',
     severity: 1,
-    suggested_fix: '',
+    suggested_fix: [],
     location: null,
     confidence: 'deterministic',
     ...overrides,

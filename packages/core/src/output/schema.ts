@@ -25,7 +25,7 @@ const SubCriterionFindingSchema = z.object({
   evidence: z.string().max(300),
   evidence_source: z.string(),
   severity: z.number().int().min(0).max(4),
-  suggested_fix: z.string().max(280),
+  suggested_fix: z.array(z.string()),
   location: LocationReferenceSchema.optional(),
   confidence: z.enum(['deterministic', 'predicted']),
 });
@@ -56,7 +56,7 @@ const TopIssueSchema = z.object({
   priority_score: z.number().min(0),
   score: z.number().int().min(0).max(4),
   severity: z.number().int().min(0).max(4),
-  fix: z.string().max(280),
+  fix: z.array(z.string()),
   fix_hash: z.string(),
   expected_impact: z.string().nullable(),
 });
@@ -64,6 +64,26 @@ const TopIssueSchema = z.object({
 const ViewportDimsSchema = z.object({
   width: z.number().int().min(1),
   height: z.number().int().min(1),
+});
+
+const StyleDiffSchema = z.object({
+  property: z.string(),
+  actual: z.string(),
+  expected: z.string(),
+});
+
+const MappedDiffElementSchema = z.object({
+  selector: z.string(),
+  tagName: z.string(),
+  styleDiffs: z.array(StyleDiffSchema),
+});
+
+const MappedDiffRegionSchema = z.object({
+  y_start: z.number().int().min(0),
+  y_end: z.number().int().min(0),
+  diff_pixel_count: z.number().int().min(0),
+  pct_of_total_diff: z.number().min(0).max(1),
+  elements: z.array(MappedDiffElementSchema),
 });
 
 const PixelComparisonViewportSchema = z.object({
@@ -76,6 +96,7 @@ const PixelComparisonViewportSchema = z.object({
   reference_image_path: z.string(),
   screenshot_dimensions: ViewportDimsSchema,
   reference_dimensions: ViewportDimsSchema,
+  diff_regions: z.array(MappedDiffRegionSchema).optional(),
 });
 
 const PixelComparisonResultSchema = z

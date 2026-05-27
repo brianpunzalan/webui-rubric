@@ -6,7 +6,7 @@ export interface AxeCheckResult {
   evidence: string;
   evidence_source: string;
   severity: number;
-  suggested_fix: string;
+  suggested_fix: string[];
   location: {
     type: 'selector';
     selector: string | null;
@@ -45,7 +45,7 @@ export async function runAxeChecks(page: unknown): Promise<AxeCheckResult[]> {
         evidence: `${violation.id}: ${violation.help}`.slice(0, 300),
         evidence_source: `axe.${violation.id}`,
         severity: sev,
-        suggested_fix: (violation.nodes?.[0]?.failureSummary ?? violation.help ?? '').slice(0, 280),
+        suggested_fix: [violation.nodes?.[0]?.failureSummary ?? violation.help ?? ''],
         location: selector
           ? { type: 'selector', selector, bounding_box: null, viewport: null }
           : null,
@@ -60,7 +60,7 @@ export async function runAxeChecks(page: unknown): Promise<AxeCheckResult[]> {
         evidence: 'No accessibility violations detected by axe-core',
         evidence_source: 'axe.all-rules',
         severity: 0,
-        suggested_fix: '',
+        suggested_fix: [],
         location: null,
         confidence: 'deterministic',
       });
@@ -75,7 +75,7 @@ export async function runAxeChecks(page: unknown): Promise<AxeCheckResult[]> {
         evidence: 'axe-core analysis could not be executed',
         evidence_source: 'axe.all-rules',
         severity: 0,
-        suggested_fix: '',
+        suggested_fix: [],
         location: null,
         confidence: 'deterministic',
       },

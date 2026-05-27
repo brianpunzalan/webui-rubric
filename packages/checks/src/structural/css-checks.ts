@@ -5,7 +5,7 @@ export interface CssCheckResult {
   evidence: string;
   evidence_source: string;
   severity: number;
-  suggested_fix: string;
+  suggested_fix: string[];
   location: null;
 }
 
@@ -29,7 +29,7 @@ export function checkUniqueColorCount(styles: ComputedStylesSnapshot): CssCheckR
     evidence: `${count} distinct colors found across page elements`,
     evidence_source: 'css.unique-color-count',
     severity: 4 - score,
-    suggested_fix: score < 4 ? `Reduce color palette to ≤10 distinct colors; ${count} found` : '',
+    suggested_fix: score < 4 ? [`Reduce color palette to ≤10 distinct colors; ${count} found`] : [],
     location: null,
   };
 }
@@ -54,8 +54,8 @@ export function checkFontFamilyCount(styles: ComputedStylesSnapshot): CssCheckRe
     severity: 4 - score,
     suggested_fix:
       score < 4
-        ? `Reduce font families for consistency; ${count} distinct families found (target: ≤3)`
-        : '',
+        ? [`Reduce font families for consistency; ${count} distinct families found (target: ≤3)`]
+        : [],
     location: null,
   };
 }
@@ -89,7 +89,7 @@ export function checkSpacingConsistency(styles: ComputedStylesSnapshot): CssChec
       evidence: 'Insufficient spacing data',
       evidence_source: 'css.spacing-consistency',
       severity: 0,
-      suggested_fix: '',
+      suggested_fix: [],
       location: null,
     };
   }
@@ -107,8 +107,10 @@ export function checkSpacingConsistency(styles: ComputedStylesSnapshot): CssChec
     severity: 4 - score,
     suggested_fix:
       score < 4
-        ? `Standardize spacing values; high variance (${stddev.toFixed(1)}) indicates inconsistent spacing system`
-        : '',
+        ? [
+            `Standardize spacing values; high variance (${stddev.toFixed(1)}) indicates inconsistent spacing system`,
+          ]
+        : [],
     location: null,
   };
 }

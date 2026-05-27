@@ -13,7 +13,7 @@ export function markVisualParityNotApplicable(
     evidence: 'No reference image supplied for visual parity comparison',
     evidence_source: checkFullId,
     severity: 0,
-    suggested_fix: '',
+    suggested_fix: [],
     location: null,
     confidence: 'deterministic',
   };

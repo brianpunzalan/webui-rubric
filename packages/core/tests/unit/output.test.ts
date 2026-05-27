@@ -77,7 +77,7 @@ function makeFinding(overrides: Partial<SubCriterionFinding> = {}): SubCriterion
     evidence: 'some evidence',
     evidence_source: 'test',
     severity: 1,
-    suggested_fix: 'Fix this issue',
+    suggested_fix: ['Fix this issue'],
     location: null,
     confidence: 'deterministic',
     ...overrides,
@@ -204,8 +204,8 @@ describe('output modules', () => {
           id: 'dim-a',
           weight: 10,
           sub_criteria: [
-            makeFinding({ id: 's1', score: 1, severity: 3, suggested_fix: 'Fix A' }),
-            makeFinding({ id: 's2', score: 2, severity: 2, suggested_fix: 'Fix B' }),
+            makeFinding({ id: 's1', score: 1, severity: 3, suggested_fix: ['Fix A'] }),
+            makeFinding({ id: 's2', score: 2, severity: 2, suggested_fix: ['Fix B'] }),
           ],
         }),
       ];
@@ -221,7 +221,7 @@ describe('output modules', () => {
       const findings: SubCriterionFinding[] = [];
       for (let i = 0; i < 15; i++) {
         findings.push(
-          makeFinding({ id: `s-${i}`, score: 1, severity: 3, suggested_fix: `Fix ${i}` }),
+          makeFinding({ id: `s-${i}`, score: 1, severity: 3, suggested_fix: [`Fix ${i}`] }),
         );
       }
       const dimResults: DimensionResult[] = [
@@ -232,15 +232,15 @@ describe('output modules', () => {
     });
 
     it('filters out attempted fixes', () => {
-      const fix = 'Already tried this fix';
-      const hash = createHash('sha256').update(fix).digest('hex');
+      const fix = ['Already tried this fix'];
+      const hash = createHash('sha256').update(JSON.stringify(fix)).digest('hex');
       const dimResults: DimensionResult[] = [
         makeDimensionResult({
           id: 'dim-a',
           weight: 10,
           sub_criteria: [
             makeFinding({ id: 's1', score: 1, severity: 3, suggested_fix: fix }),
-            makeFinding({ id: 's2', score: 2, severity: 2, suggested_fix: 'New fix' }),
+            makeFinding({ id: 's2', score: 2, severity: 2, suggested_fix: ['New fix'] }),
           ],
         }),
       ];
@@ -256,8 +256,8 @@ describe('output modules', () => {
           id: 'dim-a',
           weight: 10,
           sub_criteria: [
-            makeFinding({ id: 's1', score: 1, severity: 3, suggested_fix: 'Fix A' }),
-            makeFinding({ id: 's2', score: 2, severity: 1, suggested_fix: 'Fix B' }),
+            makeFinding({ id: 's1', score: 1, severity: 3, suggested_fix: ['Fix A'] }),
+            makeFinding({ id: 's2', score: 2, severity: 1, suggested_fix: ['Fix B'] }),
           ],
         }),
       ];
@@ -272,7 +272,7 @@ describe('output modules', () => {
           id: 'dim-a',
           weight: 10,
           sub_criteria: [
-            makeFinding({ id: 's1', score: 4, severity: 0, suggested_fix: 'No fix needed' }),
+            makeFinding({ id: 's1', score: 4, severity: 0, suggested_fix: ['No fix needed'] }),
           ],
         }),
       ];

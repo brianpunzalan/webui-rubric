@@ -1,6 +1,7 @@
 import pixelmatch from 'pixelmatch';
 import { PNG } from 'pngjs';
 import { writeFileSync } from 'node:fs';
+import { analyzeDiffRegions, type DiffRegion } from './diff-regions.js';
 
 export interface PixelComparisonInput {
   screenshotBuffer: Buffer;
@@ -17,6 +18,7 @@ export interface PixelComparisonOutput {
   diff_png_path: string | null;
   screenshot_dimensions: { width: number; height: number };
   reference_dimensions: { width: number; height: number };
+  diff_regions: DiffRegion[];
 }
 
 export function runPixelmatch(input: PixelComparisonInput): PixelComparisonOutput {
@@ -29,8 +31,10 @@ export function runPixelmatch(input: PixelComparisonInput): PixelComparisonOutpu
 
   const diff = new PNG({ width, height });
 
+  const diffColor: [number, number, number] = [255, 0, 0];
   const mismatchCount = pixelmatch(screenshot.data, reference.data, diff.data, width, height, {
     threshold,
+    diffColor,
   });
 
   const totalPixels = width * height;
@@ -43,6 +47,13 @@ export function runPixelmatch(input: PixelComparisonInput): PixelComparisonOutpu
     diffPngPath = input.diffOutputPath;
   }
 
+  const diff_regions = analyzeDiffRegions(
+    new Uint8Array(diff.data.buffer, diff.data.byteOffset, diff.data.byteLength),
+    width,
+    height,
+    diffColor,
+  );
+
   return {
     diff_pixel_count: mismatchCount,
     total_pixel_count: totalPixels,
@@ -51,5 +62,6 @@ export function runPixelmatch(input: PixelComparisonInput): PixelComparisonOutpu
     diff_png_path: diffPngPath,
     screenshot_dimensions: { width: screenshot.width, height: screenshot.height },
     reference_dimensions: { width: reference.width, height: reference.height },
+    diff_regions,
   };
 }

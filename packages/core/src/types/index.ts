@@ -140,7 +140,7 @@ export interface SubCriterionFinding {
   evidence: string;
   evidence_source: string;
   severity: number;
-  suggested_fix: string;
+  suggested_fix: string[];
   location: LocationReference | null;
   confidence: Confidence;
 }
@@ -171,9 +171,29 @@ export interface TopIssue {
   priority_score: number;
   score: number;
   severity: number;
-  fix: string;
+  fix: string[];
   fix_hash: string;
   expected_impact: string | null;
+}
+
+export interface StyleDiff {
+  property: string;
+  actual: string;
+  expected: string;
+}
+
+export interface MappedDiffElement {
+  selector: string;
+  tagName: string;
+  styleDiffs: StyleDiff[];
+}
+
+export interface MappedDiffRegion {
+  y_start: number;
+  y_end: number;
+  diff_pixel_count: number;
+  pct_of_total_diff: number;
+  elements: MappedDiffElement[];
 }
 
 export interface PixelComparisonViewport {
@@ -186,6 +206,7 @@ export interface PixelComparisonViewport {
   reference_image_path: string;
   screenshot_dimensions: ViewportDimensions;
   reference_dimensions: ViewportDimensions;
+  diff_regions?: MappedDiffRegion[];
 }
 
 export interface PixelComparisonResult {
@@ -256,6 +277,12 @@ export interface TargetCapture {
   screenshots: Map<string, Buffer>;
   dom_snapshot: string;
   computed_styles: ComputedStylesSnapshot;
+  element_locations: Array<{
+    selector: string;
+    bbox: { x: number; y: number; width: number; height: number };
+    tagName: string;
+    computedStyles: Record<string, string>;
+  }>;
   console_errors: ConsoleEntry[];
   har: unknown;
 }
@@ -266,7 +293,7 @@ export interface CheckResult {
   evidence: string;
   evidence_source: string;
   severity: number;
-  suggested_fix: string;
+  suggested_fix: string[];
   location: LocationReference | null;
   confidence: Confidence;
 }
