@@ -10,6 +10,7 @@ import { captureScreenshots, DEFAULT_VIEWPORTS, type ViewportSpec } from './scre
 import { captureDomSnapshot } from './dom.js';
 import { readHarFile } from './har.js';
 import { captureComputedStyles, type ComputedStylesSnapshot } from './styles.js';
+import { captureElementLocations, type ElementLocation } from './element-locator.js';
 import { setupConsoleCapture, type CapturedConsoleEntry } from './console.js';
 
 // FR-007a: Default consent banner dismiss selectors
@@ -42,6 +43,7 @@ export interface CaptureResult {
   screenshots: Map<string, Buffer>;
   dom_snapshot: string;
   computed_styles: ComputedStylesSnapshot;
+  element_locations: ElementLocation[];
   console_errors: CapturedConsoleEntry[];
   har: unknown;
 }
@@ -116,7 +118,10 @@ export async function capturePage(
     const dom_snapshot = await captureDomSnapshot(session.page);
     const computed_styles = await captureComputedStyles(session.page);
 
-    // 8. Close context to finalize HAR
+    // 8. Capture element locations (while browser is still alive)
+    const element_locations = await captureElementLocations(session.page);
+
+    // 9. Close context to finalize HAR
     await session.context.close();
 
     // Read HAR
@@ -147,6 +152,7 @@ export async function capturePage(
       screenshots,
       dom_snapshot,
       computed_styles,
+      element_locations,
       console_errors: consoleErrors,
       har,
     };
@@ -172,6 +178,7 @@ export { captureScreenshots, injectStabilizationCSS } from './screenshot.js';
 export { captureDomSnapshot } from './dom.js';
 export { readHarFile } from './har.js';
 export { captureComputedStyles } from './styles.js';
+export { captureElementLocations, type ElementLocation } from './element-locator.js';
 export { setupConsoleCapture } from './console.js';
 export {
   loadReferenceImage,

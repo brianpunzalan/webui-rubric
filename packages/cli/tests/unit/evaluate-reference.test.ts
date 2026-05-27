@@ -31,6 +31,7 @@ const fakeCaptureResult = {
   dom_snapshot:
     '<html><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body><main><h1>Test</h1></main></body></html>',
   computed_styles: {},
+  element_locations: [],
   console_errors: [],
   har: { log: { entries: [] } },
 };
@@ -75,7 +76,6 @@ describe('evaluate --reference integration', () => {
     const { evaluateCommand } = await import('../../src/commands/evaluate.js');
 
     // Intercept JSON output
-    const { routeJsonOutput } = await import('../../src/output/index.js');
     vi.spyOn(await import('../../src/output/index.js'), 'routeJsonOutput').mockImplementation(
       async (json: string) => {
         capturedOutput = json;

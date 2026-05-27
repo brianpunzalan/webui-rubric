@@ -256,6 +256,12 @@ export interface TargetCapture {
   screenshots: Map<string, Buffer>;
   dom_snapshot: string;
   computed_styles: ComputedStylesSnapshot;
+  element_locations: Array<{
+    selector: string;
+    bbox: { x: number; y: number; width: number; height: number };
+    tagName: string;
+    computedStyles: Record<string, string>;
+  }>;
   console_errors: ConsoleEntry[];
   har: unknown;
 }
