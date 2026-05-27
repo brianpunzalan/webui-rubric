@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.5] - 2026-05-27
+
+### Other Changes
+
+- Add tests for visual parity suggested_fix builder (`a908b87`)
+- Add DPR inference, dimension mismatch handling, and actionable suggested_fix (`c462d24`)
+- Add spatial diff region analysis and DOM element mapping (`f92cd7f`)
+- Add element location capture with bounding boxes and computed styles (`823c60f`)
+- Migrate suggested_fix from string to string[] across all packages (`fd5a9b5`)
+- Relax score-4 threshold from exact 0% to ≤0.5% pixel diff (`7594d93`)
+
 ## [0.1.4] - 2026-05-25
 
 ### Bug Fixes
