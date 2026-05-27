@@ -63,7 +63,7 @@ export async function checkFocusVisible(page: unknown): Promise<FocusVisibleResu
       evidence: 'Focus-visible check could not be executed',
       evidence_source: 'playwright.focus-visible',
       severity: 0,
-      suggested_fix: '',
+      suggested_fix: [],
       location: null,
     };
   }
