@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.6] - 2026-05-27
+
+### Documentation
+
+- docs: sync documentation with source code (`d02b51a`)
+
 ## [0.1.5] - 2026-05-27
 
 ### Other Changes

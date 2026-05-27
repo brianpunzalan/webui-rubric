@@ -1,5 +1,16 @@
 # @webui-rubric/checks
 
+## 0.1.6
+
+### Patch Changes
+
+- ### Documentation
+  - docs: sync documentation with source code (`d02b51a`)
+
+- Updated dependencies
+  - @webui-rubric/capture@0.1.6
+  - @webui-rubric/core@0.1.6
+
 ## 0.1.5
 
 ### Patch Changes

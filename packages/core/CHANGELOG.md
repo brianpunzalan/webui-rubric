@@ -1,5 +1,12 @@
 # @webui-rubric/core
 
+## 0.1.6
+
+### Patch Changes
+
+- ### Documentation
+  - docs: sync documentation with source code (`d02b51a`)
+
 ## 0.1.5
 
 ### Patch Changes
