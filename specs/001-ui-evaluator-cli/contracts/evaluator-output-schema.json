@@ -178,7 +178,8 @@
                   "diff_png_path": { "type": ["string", "null"] },
                   "reference_image_path": { "type": "string" },
                   "screenshot_dimensions": { "$ref": "#/$defs/dimensions" },
-                  "reference_dimensions": { "$ref": "#/$defs/dimensions" }
+                  "reference_dimensions": { "$ref": "#/$defs/dimensions" },
+                  "diff_regions": { "$ref": "#/$defs/diff_regions" }
                 }
               }
             }
@@ -269,6 +270,45 @@
     }
   },
   "$defs": {
+    "diff_regions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["y_start", "y_end", "diff_pixel_count", "pct_of_total_diff", "elements"],
+        "additionalProperties": false,
+        "properties": {
+          "y_start": { "type": "integer", "minimum": 0 },
+          "y_end": { "type": "integer", "minimum": 0 },
+          "diff_pixel_count": { "type": "integer", "minimum": 0 },
+          "pct_of_total_diff": { "type": "number", "minimum": 0, "maximum": 1 },
+          "elements": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["selector", "tagName", "styleDiffs"],
+              "additionalProperties": false,
+              "properties": {
+                "selector": { "type": "string" },
+                "tagName": { "type": "string" },
+                "styleDiffs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["property", "actual", "expected"],
+                    "additionalProperties": false,
+                    "properties": {
+                      "property": { "type": "string" },
+                      "actual": { "type": "string" },
+                      "expected": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "sub_criterion_finding": {
       "type": "object",
       "required": [

@@ -182,6 +182,6 @@ tool_fallback_policy: 'fail-fast' # or "mark-unavailable"
 iteration_cap: 5
 ship_threshold: 75
 top_issues_cap: 10
-settle_timeout_ms: 5000
+settle_timeout_ms: 30000
 redaction: true
 ```

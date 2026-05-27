@@ -152,8 +152,10 @@ Per-project overlay on the rubric definition.
 | `iteration_cap`                   | `number \| undefined`                  | Default: `5`                                   |                                            |
 | `ship_threshold`                  | `number \| undefined`                  | Default: `75`                                  | Composite score for "ship-ready"           |
 | `top_issues_cap`                  | `number \| undefined`                  | Default: `10`                                  | Max entries in top_issues                  |
-| `settle_timeout_ms`               | `number \| undefined`                  | Default: `5000`                                | Additional wait after networkidle          |
+| `settle_timeout_ms`               | `number \| undefined`                  | Default: `30000`                               | Milliseconds to wait for networkidle before timing out |
 | `redaction`                       | `boolean \| undefined`                 | Default: `true`                                | `false` equivalent to --no-redact          |
+| `capture`                         | `CaptureConfig \| undefined`           |                                                | `dismiss_selectors`, `auto_dismiss`        |
+| `pixel_comparison`                | `PixelComparisonConfig \| undefined`   |                                                | `mask_selectors`, `mask_color`, `device_pixel_ratio` |
 
 ### ViewportConfig
 
@@ -173,11 +175,23 @@ The set of artifacts captured from a single URL before scoring.
 | `captured_at`        | `string`                 | ISO 8601 timestamp            |                                |
 | `content_hash`       | `string`                 | SHA-256 hex                   | Hash of all artifacts combined |
 | `viewports_captured` | `string[]`               | e.g., `["desktop", "mobile"]` |                                |
-| `screenshots`        | `Record<string, Buffer>` | Viewport name → PNG buffer    | Desktop, above-fold, mobile    |
+| `screenshots`        | `Map<string, Buffer>`    | Viewport name → PNG buffer    | Desktop, above-fold, mobile    |
 | `dom_snapshot`       | `string`                 | Full rendered HTML            | From `page.content()`          |
 | `computed_styles`    | `ComputedStylesSnapshot` | Extracted style data          | Structured by element          |
+| `element_locations`  | `ElementLocation[]`      | Bounding boxes + styles per element | Used for diff region mapping |
 | `console_errors`     | `ConsoleEntry[]`         | Filtered to error + warning   |                                |
-| `har`                | `HarLog`                 | HAR 1.2 format                | Redacted per FR-039            |
+| `har`                | `unknown`                | HAR recording (HAR 1.2 format, nullable) | Redacted per FR-039  |
+
+### ElementLocation
+
+Captured by the `@webui-rubric/capture` package; used to map pixel-diff regions back to DOM elements.
+
+| Field            | Type                                              | Notes                                  |
+| ---------------- | ------------------------------------------------- | -------------------------------------- |
+| `selector`       | `string`                                          | CSS selector for the element           |
+| `bbox`           | `{ x: number, y: number, width: number, height: number }` | Bounding box in CSS pixels |
+| `tagName`        | `string`                                          | HTML tag name                          |
+| `computedStyles` | `Record<string, string>`                          | Relevant computed CSS properties       |
 
 ### ConsoleEntry
 
@@ -240,7 +254,7 @@ The top-level JSON artifact emitted by the CLI.
 | `evidence`        | `string`                                             | ≤ 300 chars, sanitized per FR-039 | Tool output, rule ID, or measurement      |
 | `evidence_source` | `string`                                             | BoundCheck full_id                | e.g., `"axe.color-contrast"`              |
 | `severity`        | `number`                                             | Nielsen 0–4                       |                                           |
-| `suggested_fix`   | `string`                                             | ≤ 280 chars                       | From fix_template; empty if score = 4     |
+| `suggested_fix`   | `string[]`                                           |                                   | From fix_template; empty array if score = 4 |
 | `location`        | `LocationReference \| null`                          |                                   | Selector, bounding box, or coordinates    |
 | `confidence`      | `"deterministic" \| "predicted"`                     |                                   | `"predicted"` for lab/performance metrics |
 
@@ -274,7 +288,7 @@ The top-level JSON artifact emitted by the CLI.
 | `priority_score`  | `number`         | `dimension_weight × severity` | Sorting key                         |
 | `score`           | `number`         | 0–4                           | The sub-criterion's score           |
 | `severity`        | `number`         | Nielsen 0–4                   |                                     |
-| `fix`             | `string`         | ≤ 280 chars                   | Actionable fix from fix_template    |
+| `fix`             | `string[]`       |                               | Actionable fix steps from fix_template |
 | `fix_hash`        | `string`         | SHA-256 of fix text           | For oscillation prevention (FR-033) |
 | `expected_impact` | `string \| null` | Optional improvement hint     |                                     |
 
@@ -297,6 +311,33 @@ The top-level JSON artifact emitted by the CLI.
 | `reference_image_path`  | `string`                            | Path to the reference image used       |
 | `screenshot_dimensions` | `{ width: number, height: number }` |                                        |
 | `reference_dimensions`  | `{ width: number, height: number }` |                                        |
+| `diff_regions`          | `MappedDiffRegion[] \| undefined`   | DOM-mapped diff regions (optional)     |
+
+### MappedDiffRegion
+
+| Field               | Type                    | Notes                                      |
+| ------------------- | ----------------------- | ------------------------------------------ |
+| `y_start`           | `number`                | Top pixel row of the diff band             |
+| `y_end`             | `number`                | Bottom pixel row of the diff band          |
+| `diff_pixel_count`  | `number`                | Pixels that differ in this region          |
+| `pct_of_total_diff` | `number`                | Fraction of total diff in this region      |
+| `elements`          | `MappedDiffElement[]`   | DOM elements overlapping this region       |
+
+### MappedDiffElement
+
+| Field         | Type           | Notes                                                     |
+| ------------- | -------------- | --------------------------------------------------------- |
+| `selector`    | `string`       | CSS selector identifying the element                      |
+| `tagName`     | `string`       | HTML tag name                                             |
+| `styleDiffs`  | `StyleDiff[]`  | Computed style properties that differ from the reference  |
+
+### StyleDiff
+
+| Field      | Type     | Notes                         |
+| ---------- | -------- | ----------------------------- |
+| `property` | `string` | CSS property name             |
+| `actual`   | `string` | Value in the live screenshot  |
+| `expected` | `string` | Value in the reference image  |
 
 ### EvaluationMeta
 
