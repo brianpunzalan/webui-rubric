@@ -1,11 +1,13 @@
 import { readFile } from 'node:fs/promises';
 
+/** Input parameters parsed from CLI loop flags for a single evaluation iteration. */
 export interface LoopInput {
   iteration: number | null;
   previousComposite: number | null;
   attemptedFixHashes: Set<string>;
 }
 
+/** Parse loop-related CLI options into a LoopInput, reading attempted-fix hashes from disk if provided. */
 export async function parseLoopInput(options: {
   iteration?: number;
   previousComposite?: number;

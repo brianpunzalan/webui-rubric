@@ -1,5 +1,6 @@
 import type { EffectiveConfig, ViewportConfig } from '../types/index.js';
 
+/** Assemble the effective config snapshot embedded in the output artifact meta block. */
 export function buildEffectiveConfig(params: {
   weights: Record<string, number>;
   blockingToggles: Record<string, boolean>;
