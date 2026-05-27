@@ -5,6 +5,18 @@ export interface AuthDetectionResult {
   reason?: string;
 }
 
+/**
+ * Error thrown when an authentication wall is detected.
+ * The CLI catches this and exits with code 5.
+ */
+export class AuthWallError extends Error {
+  readonly exitCode = 5;
+  constructor(reason: string) {
+    super(`Authentication wall detected: ${reason}`);
+    this.name = 'AuthWallError';
+  }
+}
+
 const LOGIN_INDICATORS = [
   /\/login/i,
   /\/signin/i,

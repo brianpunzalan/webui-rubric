@@ -31,7 +31,7 @@ export const evaluateCommand = new Command('evaluate')
       const { V1_RUBRIC } = await import('@webui-rubric/core');
       const { validateOutput } = await import('@webui-rubric/core');
       const { computeCompositeScore, buildDimensionResult } = await import('@webui-rubric/core');
-      const { redactHarHeaders, redactDomSnapshot, isRedactionEnabled } =
+      const { redactHarHeaders, redactDomSnapshot, redactEvidenceString, isRedactionEnabled } =
         await import('@webui-rubric/core');
       const { validateProjectConfig, validateWeights } = await import('@webui-rubric/core');
 
@@ -68,6 +68,38 @@ export const evaluateCommand = new Command('evaluate')
         if (weightErrors.length > 0) {
           logger.error(`Weight validation: ${weightErrors.join('; ')}`);
           process.exit(2);
+        }
+      }
+
+      // Check tool version drift (exit code 3) — unless --allow-tool-version-drift is set
+      if (!options.allowToolVersionDrift) {
+        const { createRequire } = await import('node:module');
+        const req = createRequire(import.meta.url);
+        const toolPackageMap: Record<string, string> = {
+          'axe-core': '@axe-core/playwright',
+          lighthouse: 'lighthouse',
+          pixelmatch: 'pixelmatch',
+          playwright: 'playwright',
+        };
+        const driftEntries: string[] = [];
+        for (const [tool, pinned] of Object.entries(V1_RUBRIC.tool_versions)) {
+          const packageName = toolPackageMap[tool] ?? tool;
+          let resolved = 'not found';
+          try {
+            const pkg = req(`${packageName}/package.json`) as { version: string };
+            resolved = pkg.version;
+          } catch {
+            // package not found
+          }
+          if (resolved !== pinned) {
+            driftEntries.push(`${tool}: pinned=${pinned} resolved=${resolved}`);
+          }
+        }
+        if (driftEntries.length > 0) {
+          logger.error(
+            `Tool version mismatch (use --allow-tool-version-drift to skip):\n  ${driftEntries.join('\n  ')}`,
+          );
+          process.exit(3);
         }
       }
 
@@ -311,6 +343,11 @@ export const evaluateCommand = new Command('evaluate')
           const mismatchMsg =
             `Reference image (${referenceImage.width}x${referenceImage.height}) does not match screenshot (${screenshotPng.width}x${screenshotPng.height}). ` +
             `Pixel comparison requires identical dimensions. Provide a reference at matching resolution or set an explicit device_pixel_ratio in config.`;
+          const mismatchPolicy = config.reference_image_mismatch_policy ?? 'fail-fast';
+          if (mismatchPolicy === 'fail-fast') {
+            logger.error(mismatchMsg);
+            process.exit(2);
+          }
           logger.warn(mismatchMsg);
 
           for (const dim of V1_RUBRIC.dimensions) {
@@ -395,6 +432,16 @@ export const evaluateCommand = new Command('evaluate')
       // Build sub-criterion findings for each dimension
       const allCheckResults = { ...domChecks, ...cssChecks, ...runtimeChecks };
 
+      // Helper: redact (if enabled) and truncate an evidence string
+      const cleanEvidence = (raw: string): string => {
+        const s = redactionEnabled ? redactEvidenceString(raw) : raw;
+        return s.slice(0, 300);
+      };
+
+      // Helper: redact suggested_fix strings (axe failureSummary may contain element text)
+      const cleanFixes = (fixes: string[]): string[] =>
+        redactionEnabled ? fixes.map((f) => redactEvidenceString(f)) : fixes;
+
       // Map check results to dimension sub-criteria findings
       const dimensionResults = V1_RUBRIC.dimensions.map((dim) => {
         const findings = dim.sub_criteria.map((sub) => {
@@ -412,10 +459,10 @@ export const evaluateCommand = new Command('evaluate')
               name: sub.name,
               score: checkResult.score as number | null,
               status: 'scored' as const,
-              evidence: checkResult.evidence.slice(0, 300),
+              evidence: cleanEvidence(checkResult.evidence),
               evidence_source: checkResult.evidence_source,
               severity: checkResult.severity,
-              suggested_fix: checkResult.suggested_fix ?? [],
+              suggested_fix: cleanFixes(checkResult.suggested_fix ?? []),
               location: checkResult.location ?? null,
               confidence: 'deterministic' as const,
             };
@@ -425,10 +472,10 @@ export const evaluateCommand = new Command('evaluate')
               name: sub.name,
               score: lhResult.score as number | null,
               status: lhResult.status as 'scored' | 'not_applicable' | 'tool_unavailable',
-              evidence: lhResult.evidence.slice(0, 300),
+              evidence: cleanEvidence(lhResult.evidence),
               evidence_source: lhResult.evidence_source,
               severity: lhResult.severity,
-              suggested_fix: lhResult.suggested_fix ?? [],
+              suggested_fix: cleanFixes(lhResult.suggested_fix ?? []),
               location: null,
               confidence: 'predicted' as const,
             };
@@ -440,7 +487,7 @@ export const evaluateCommand = new Command('evaluate')
                 name: sub.name,
                 score: null,
                 status: 'tool_unavailable' as const,
-                evidence: pmResult.evidence,
+                evidence: cleanEvidence(pmResult.evidence),
                 evidence_source: checkId,
                 severity: 0,
                 suggested_fix: [],
@@ -454,7 +501,7 @@ export const evaluateCommand = new Command('evaluate')
                 name: sub.name,
                 score: pmResult.score,
                 status: 'scored' as const,
-                evidence: pmResult.evidence,
+                evidence: cleanEvidence(pmResult.evidence),
                 evidence_source: checkId,
                 severity: pmResult.score !== null && pmResult.score < 4 ? 4 - pmResult.score : 0,
                 suggested_fix:
@@ -709,6 +756,14 @@ export const evaluateCommand = new Command('evaluate')
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
       process.stderr.write(`Error: ${msg}\n`);
+      // Preserve specific exit codes carried on known error types
+      if (
+        error instanceof Error &&
+        'exitCode' in error &&
+        typeof (error as Error & { exitCode: unknown }).exitCode === 'number'
+      ) {
+        process.exit((error as Error & { exitCode: number }).exitCode);
+      }
       process.exit(1);
     }
   });

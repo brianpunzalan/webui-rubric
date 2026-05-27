@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import type { Page } from 'playwright';
 import { launchBrowser, closeBrowser } from './browser.js';
 import { waitForSettle } from './settle.js';
-import { detectAuthWall } from './auth-detect.js';
+import { detectAuthWall, AuthWallError } from './auth-detect.js';
 import { captureScreenshots, DEFAULT_VIEWPORTS, type ViewportSpec } from './screenshot.js';
 import { captureDomSnapshot } from './dom.js';
 import { readHarFile } from './har.js';
@@ -103,7 +103,7 @@ export async function capturePage(
     // 4. Check for auth wall using the response from the initial navigation
     const authResult = await detectAuthWall(session.page, url, response);
     if (authResult.detected) {
-      throw new Error(`Authentication wall detected: ${authResult.reason}`);
+      throw new AuthWallError(authResult.reason ?? 'unknown reason');
     }
 
     // 5. Auto-dismiss consent banners
@@ -169,6 +169,7 @@ export type { ViewportSpec } from './screenshot.js';
 export type { CapturedConsoleEntry } from './console.js';
 export type { ComputedStylesSnapshot } from './styles.js';
 export type { AuthDetectionResult } from './auth-detect.js';
+export { AuthWallError } from './auth-detect.js';
 export type { SettleOptions } from './settle.js';
 export { DEFAULT_VIEWPORTS } from './screenshot.js';
 export { launchBrowser, closeBrowser } from './browser.js';
