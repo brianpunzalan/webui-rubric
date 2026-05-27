@@ -14,7 +14,9 @@ export function buildTopIssues(
       if (finding.status !== 'scored' || finding.score === null || finding.score >= 4) continue;
 
       const priorityScore = dim.weight * finding.severity;
-      const fixHash = createHash('sha256').update(finding.suggested_fix).digest('hex');
+      const fixHash = createHash('sha256')
+        .update(JSON.stringify(finding.suggested_fix))
+        .digest('hex');
 
       candidates.push({
         rank: 0,
@@ -23,7 +25,7 @@ export function buildTopIssues(
         priority_score: priorityScore,
         score: finding.score,
         severity: finding.severity,
-        fix: finding.suggested_fix.slice(0, 280),
+        fix: finding.suggested_fix,
         fix_hash: fixHash,
         expected_impact: null,
       });

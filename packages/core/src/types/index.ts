@@ -140,7 +140,7 @@ export interface SubCriterionFinding {
   evidence: string;
   evidence_source: string;
   severity: number;
-  suggested_fix: string;
+  suggested_fix: string[];
   location: LocationReference | null;
   confidence: Confidence;
 }
@@ -171,7 +171,7 @@ export interface TopIssue {
   priority_score: number;
   score: number;
   severity: number;
-  fix: string;
+  fix: string[];
   fix_hash: string;
   expected_impact: string | null;
 }
@@ -266,7 +266,7 @@ export interface CheckResult {
   evidence: string;
   evidence_source: string;
   severity: number;
-  suggested_fix: string;
+  suggested_fix: string[];
   location: LocationReference | null;
   confidence: Confidence;
 }

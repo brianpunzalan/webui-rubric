@@ -15,7 +15,7 @@ describe('checkUniqueColorCount', () => {
     const result = checkUniqueColorCount(styles);
     expect(result.score).toBe(4);
     expect(result.evidence_source).toBe('css.unique-color-count');
-    expect(result.suggested_fix).toBe('');
+    expect(result.suggested_fix).toEqual([]);
   });
 
   it('returns score 3 for 6-10 colors', () => {
@@ -113,7 +113,7 @@ describe('checkFontFamilyCount', () => {
     const result = checkFontFamilyCount(styles);
     expect(result.score).toBe(4);
     expect(result.evidence_source).toBe('css.font-family-count');
-    expect(result.suggested_fix).toBe('');
+    expect(result.suggested_fix).toEqual([]);
   });
 
   it('returns score 3 for 3 font families', () => {
@@ -211,7 +211,7 @@ describe('checkSpacingConsistency', () => {
     const result = checkSpacingConsistency(styles);
     expect(result.score).toBe(4);
     expect(result.evidence_source).toBe('css.spacing-consistency');
-    expect(result.suggested_fix).toBe('');
+    expect(result.suggested_fix).toEqual([]);
   });
 
   it('returns low score for high variance spacing', () => {

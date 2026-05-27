@@ -6,7 +6,7 @@ export interface PerformanceCheckResult {
   evidence: string;
   evidence_source: string;
   severity: number;
-  suggested_fix: string;
+  suggested_fix: string[];
   location: null;
   confidence: 'predicted';
 }
@@ -45,7 +45,7 @@ export async function runLighthouseChecks(url: string): Promise<PerformanceCheck
           evidence: `${metric.metric_id}: metric not available`,
           evidence_source: `lighthouse.${metric.metric_id}`,
           severity: 0,
-          suggested_fix: '',
+          suggested_fix: [],
           location: null,
           confidence: 'predicted',
         });
@@ -65,8 +65,7 @@ export async function runLighthouseChecks(url: string): Promise<PerformanceCheck
         ),
         evidence_source: `lighthouse.${metric.metric_id}`,
         severity,
-        suggested_fix:
-          s < 4 ? metric.fix_template.replace('{value}', value.toFixed(1)).slice(0, 280) : '',
+        suggested_fix: s < 4 ? [metric.fix_template.replace('{value}', value.toFixed(1))] : [],
         location: null,
         confidence: 'predicted',
       });

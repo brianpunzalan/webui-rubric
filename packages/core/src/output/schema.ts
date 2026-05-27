@@ -25,7 +25,7 @@ const SubCriterionFindingSchema = z.object({
   evidence: z.string().max(300),
   evidence_source: z.string(),
   severity: z.number().int().min(0).max(4),
-  suggested_fix: z.string().max(280),
+  suggested_fix: z.array(z.string()),
   location: LocationReferenceSchema.optional(),
   confidence: z.enum(['deterministic', 'predicted']),
 });
@@ -56,7 +56,7 @@ const TopIssueSchema = z.object({
   priority_score: z.number().min(0),
   score: z.number().int().min(0).max(4),
   severity: z.number().int().min(0).max(4),
-  fix: z.string().max(280),
+  fix: z.array(z.string()),
   fix_hash: z.string(),
   expected_impact: z.string().nullable(),
 });

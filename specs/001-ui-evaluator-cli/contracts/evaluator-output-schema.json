@@ -139,7 +139,7 @@
           "priority_score": { "type": "number", "minimum": 0 },
           "score": { "type": "integer", "minimum": 0, "maximum": 4 },
           "severity": { "type": "integer", "minimum": 0, "maximum": 4 },
-          "fix": { "type": "string", "maxLength": 280 },
+          "fix": { "type": "array", "items": { "type": "string" } },
           "fix_hash": { "type": "string" },
           "expected_impact": { "type": ["string", "null"] }
         }
@@ -291,7 +291,7 @@
         "evidence": { "type": "string", "maxLength": 300 },
         "evidence_source": { "type": "string" },
         "severity": { "type": "integer", "minimum": 0, "maximum": 4 },
-        "suggested_fix": { "type": "string", "maxLength": 280 },
+        "suggested_fix": { "type": "array", "items": { "type": "string" } },
         "location": { "$ref": "#/$defs/location_reference" },
         "confidence": { "type": "string", "enum": ["deterministic", "predicted"] }
       }

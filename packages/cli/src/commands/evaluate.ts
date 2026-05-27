@@ -171,7 +171,7 @@ export const evaluateCommand = new Command('evaluate')
         status: string;
         evidence: string;
         severity: number;
-        suggested_fix: string;
+        suggested_fix: string[];
       }> = [];
       try {
         const { runLighthouseChecks } = await import('@webui-rubric/checks');
@@ -291,7 +291,7 @@ export const evaluateCommand = new Command('evaluate')
               evidence: checkResult.evidence.slice(0, 300),
               evidence_source: checkResult.evidence_source,
               severity: checkResult.severity,
-              suggested_fix: (checkResult.suggested_fix ?? '').slice(0, 280),
+              suggested_fix: checkResult.suggested_fix ?? [],
               location: checkResult.location ?? null,
               confidence: 'deterministic' as const,
             };
@@ -304,7 +304,7 @@ export const evaluateCommand = new Command('evaluate')
               evidence: lhResult.evidence.slice(0, 300),
               evidence_source: lhResult.evidence_source,
               severity: lhResult.severity,
-              suggested_fix: (lhResult.suggested_fix ?? '').slice(0, 280),
+              suggested_fix: lhResult.suggested_fix ?? [],
               location: null,
               confidence: 'predicted' as const,
             };
@@ -321,8 +321,8 @@ export const evaluateCommand = new Command('evaluate')
                 severity: pmResult.score < 4 ? 4 - pmResult.score : 0,
                 suggested_fix:
                   pmResult.score < 4
-                    ? 'Reduce pixel differences to match reference design more closely'
-                    : '',
+                    ? ['Reduce pixel differences to match reference design more closely']
+                    : [],
                 location: null,
                 confidence: 'deterministic' as const,
               };
@@ -335,7 +335,7 @@ export const evaluateCommand = new Command('evaluate')
               evidence: 'No reference image supplied for visual parity comparison',
               evidence_source: checkId,
               severity: 0,
-              suggested_fix: '',
+              suggested_fix: [],
               location: null,
               confidence: 'deterministic' as const,
             };
@@ -348,7 +348,7 @@ export const evaluateCommand = new Command('evaluate')
               evidence: `Check ${checkId} not available`,
               evidence_source: checkId,
               severity: 0,
-              suggested_fix: '',
+              suggested_fix: [],
               location: null,
               confidence: 'deterministic' as const,
             };
@@ -395,7 +395,7 @@ export const evaluateCommand = new Command('evaluate')
         finding: {
           id: string;
           severity: number;
-          suggested_fix: string;
+          suggested_fix: string[];
           score: number | null;
           status: string;
         };
@@ -435,7 +435,9 @@ export const evaluateCommand = new Command('evaluate')
       const topIssues = allFindings
         .map(({ finding, dimensionId, weight }) => {
           const priorityScore = weight * finding.severity;
-          const fixHash = createHash('sha256').update(finding.suggested_fix).digest('hex');
+          const fixHash = createHash('sha256')
+            .update(JSON.stringify(finding.suggested_fix))
+            .digest('hex');
           return {
             rank: 0,
             criterion_id: finding.id,
@@ -443,7 +445,7 @@ export const evaluateCommand = new Command('evaluate')
             priority_score: priorityScore,
             score: finding.score as number,
             severity: finding.severity,
-            fix: finding.suggested_fix.slice(0, 280),
+            fix: finding.suggested_fix,
             fix_hash: fixHash,
             expected_impact: null,
           };
