@@ -11,6 +11,8 @@
 
 import type { CheckAdapter } from '../types/index.js';
 
+export { ToolUnavailableError, applyFallback } from './fallback.js';
+
 /**
  * Registry for deterministic check adapters.
  *
