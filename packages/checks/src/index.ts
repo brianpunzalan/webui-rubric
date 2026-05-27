@@ -23,6 +23,7 @@ export {
   type PixelComparisonOutput,
 } from './pixelmatch/index.js';
 export { scoreFromDiffRatio } from './pixelmatch/scoring.js';
+export { buildVisualParitySuggestedFix } from './pixelmatch/suggested-fix.js';
 export { analyzeDiffRegions, type DiffRegion } from './pixelmatch/diff-regions.js';
 export {
   mapDiffRegionsToElements,

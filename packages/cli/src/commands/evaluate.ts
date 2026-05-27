@@ -109,10 +109,40 @@ export const evaluateCommand = new Command('evaluate')
         }
       }
 
+      // Resolve device pixel ratio
+      let deviceScaleFactor = 1;
+      const dprConfig = config.pixel_comparison?.device_pixel_ratio;
+      if (typeof dprConfig === 'number') {
+        deviceScaleFactor = dprConfig;
+        logger.info(`Using configured device_pixel_ratio: ${deviceScaleFactor}`);
+      } else if (options.reference) {
+        const { loadReferenceImage, inferDpr } = await import('@webui-rubric/capture');
+        const refInfo = loadReferenceImage(resolve(options.reference));
+        const referenceViewport = options.referenceViewport ?? 'desktop';
+        const vpDims =
+          (configViewports as Record<string, { width: number; height: number }>)[
+            referenceViewport
+          ] ?? configViewports.custom?.[referenceViewport];
+        if (vpDims) {
+          deviceScaleFactor = inferDpr(refInfo.width, refInfo.height, vpDims.width, vpDims.height);
+          if (deviceScaleFactor > 1) {
+            logger.info(
+              `Inferred device_pixel_ratio: ${deviceScaleFactor} (from reference image ${refInfo.width}x${refInfo.height} vs viewport ${vpDims.width}x${vpDims.height})`,
+            );
+          } else {
+            logger.info(`Using default device_pixel_ratio: ${deviceScaleFactor}`);
+          }
+        } else {
+          logger.info(`Using default device_pixel_ratio: ${deviceScaleFactor}`);
+        }
+      } else {
+        logger.info(`Using default device_pixel_ratio: ${deviceScaleFactor}`);
+      }
+
       const captureResult = await capturePage(url, {
         settleTimeoutMs: config.settle_timeout_ms ?? 30000,
         additionalSettleDelay: 5000,
-        deviceScaleFactor: 1,
+        deviceScaleFactor,
         autoDismiss: config.capture?.auto_dismiss ?? true,
         dismissSelectors: config.capture?.dismiss_selectors,
         viewports: viewportSpecs.length > 0 ? viewportSpecs : undefined,
@@ -182,9 +212,41 @@ export const evaluateCommand = new Command('evaluate')
       }
 
       // Reference image pixel comparison
+      let suggestedFixBuilder:
+        | ((input: {
+            mappedRegions: Array<{
+              y_start: number;
+              y_end: number;
+              diff_pixel_count: number;
+              pct_of_total_diff: number;
+              elements: Array<{
+                selector: string;
+                tagName: string;
+                styleDiffs: Array<{ property: string; actual: string; expected: string }>;
+              }>;
+            }>;
+            diffRatio: number;
+          }) => string[])
+        | null = null;
       const pixelComparisonResults: Map<
         string,
-        { score: number; diffRatio: number; evidence: string }
+        {
+          score: number | null;
+          diffRatio: number;
+          evidence: string;
+          status?: 'tool_unavailable';
+          mappedRegions?: Array<{
+            y_start: number;
+            y_end: number;
+            diff_pixel_count: number;
+            pct_of_total_diff: number;
+            elements: Array<{
+              selector: string;
+              tagName: string;
+              styleDiffs: Array<{ property: string; actual: string; expected: string }>;
+            }>;
+          }>;
+        }
       > = new Map();
       const pixelComparisonOutput: Array<{
         viewport: string;
@@ -196,6 +258,17 @@ export const evaluateCommand = new Command('evaluate')
         reference_image_path: string;
         screenshot_dimensions: { width: number; height: number };
         reference_dimensions: { width: number; height: number };
+        diff_regions?: Array<{
+          y_start: number;
+          y_end: number;
+          diff_pixel_count: number;
+          pct_of_total_diff: number;
+          elements: Array<{
+            selector: string;
+            tagName: string;
+            styleDiffs: Array<{ property: string; actual: string; expected: string }>;
+          }>;
+        }>;
       }> = [];
 
       if (options.reference) {
@@ -206,7 +279,14 @@ export const evaluateCommand = new Command('evaluate')
         }
 
         const { loadReferenceImage } = await import('@webui-rubric/capture');
-        const { runPixelmatch, scoreFromDiffRatio } = await import('@webui-rubric/checks');
+        const {
+          runPixelmatch,
+          scoreFromDiffRatio,
+          mapDiffRegionsToElements,
+          buildVisualParitySuggestedFix: buildFix,
+        } = await import('@webui-rubric/checks');
+        suggestedFixBuilder = buildFix;
+        const { PNG } = await import('pngjs');
 
         const referenceImage = loadReferenceImage(refPath);
         const referenceViewport = options.referenceViewport ?? 'desktop';
@@ -222,50 +302,94 @@ export const evaluateCommand = new Command('evaluate')
           process.exit(2);
         }
 
-        const diffOutputPath = options.debugDir
-          ? resolve(options.debugDir, `diff-${referenceViewport}.png`)
-          : null;
+        // Dimension mismatch check
+        const screenshotPng = PNG.sync.read(screenshotBuffer);
+        if (
+          referenceImage.width !== screenshotPng.width ||
+          referenceImage.height !== screenshotPng.height
+        ) {
+          const mismatchMsg =
+            `Reference image (${referenceImage.width}x${referenceImage.height}) does not match screenshot (${screenshotPng.width}x${screenshotPng.height}). ` +
+            `Pixel comparison requires identical dimensions. Provide a reference at matching resolution or set an explicit device_pixel_ratio in config.`;
+          logger.warn(mismatchMsg);
 
-        const pmResult = runPixelmatch({
-          screenshotBuffer,
-          referenceBuffer: referenceImage.buffer,
-          threshold: config.pixelmatch_threshold ?? 0.1,
-          diffOutputPath,
-        });
-
-        const vpScore = scoreFromDiffRatio(pmResult.diff_ratio);
-        const pctDiff = (pmResult.diff_ratio * 100).toFixed(2);
-
-        pixelComparisonOutput.push({
-          viewport: referenceViewport,
-          diff_pixel_count: pmResult.diff_pixel_count,
-          total_pixel_count: pmResult.total_pixel_count,
-          diff_ratio: pmResult.diff_ratio,
-          threshold: pmResult.threshold,
-          diff_png_path: pmResult.diff_png_path,
-          reference_image_path: refPath,
-          screenshot_dimensions: pmResult.screenshot_dimensions,
-          reference_dimensions: pmResult.reference_dimensions,
-        });
-
-        // Map results to each visual parity sub-criterion by its bound viewport
-        for (const dim of V1_RUBRIC.dimensions) {
-          for (const sub of dim.sub_criteria) {
-            if (!sub.visual_parity) continue;
-            const checkId = sub.bound_check.full_id;
-            const vpMatch = checkId.match(/viewport=(\w+)/);
-            const boundViewport = vpMatch ? vpMatch[1] : 'desktop';
-            if (boundViewport === referenceViewport) {
-              pixelComparisonResults.set(sub.id, {
-                score: vpScore,
-                diffRatio: pmResult.diff_ratio,
-                evidence: `Pixel diff: ${pctDiff}% (${pmResult.diff_pixel_count}/${pmResult.total_pixel_count} pixels differ)`,
-              });
+          for (const dim of V1_RUBRIC.dimensions) {
+            for (const sub of dim.sub_criteria) {
+              if (!sub.visual_parity) continue;
+              const checkId = sub.bound_check.full_id;
+              const vpMatch = checkId.match(/viewport=(\w+)/);
+              const boundViewport = vpMatch ? vpMatch[1] : 'desktop';
+              if (boundViewport === referenceViewport) {
+                pixelComparisonResults.set(sub.id, {
+                  score: null,
+                  diffRatio: -1,
+                  evidence: mismatchMsg.slice(0, 300),
+                  status: 'tool_unavailable' as const,
+                });
+              }
             }
           }
-        }
+        } else {
+          const diffOutputPath = options.debugDir
+            ? resolve(options.debugDir, `diff-${referenceViewport}.png`)
+            : null;
 
-        logger.info(`Pixelmatch complete: ${pctDiff}% diff, score ${vpScore}/4`);
+          const pmResult = runPixelmatch({
+            screenshotBuffer,
+            referenceBuffer: referenceImage.buffer,
+            threshold: config.pixelmatch_threshold ?? 0.1,
+            diffOutputPath,
+          });
+
+          const vpScore = scoreFromDiffRatio(pmResult.diff_ratio);
+          const pctDiff = (pmResult.diff_ratio * 100).toFixed(2);
+
+          // Map diff regions to DOM elements
+          const refRgba = new Uint8Array(
+            referenceImage.png.data.buffer,
+            referenceImage.png.data.byteOffset,
+            referenceImage.png.data.byteLength,
+          );
+          const mappedRegions = mapDiffRegionsToElements(
+            pmResult.diff_regions,
+            captureResult.element_locations,
+            refRgba,
+            referenceImage.width,
+          );
+
+          pixelComparisonOutput.push({
+            viewport: referenceViewport,
+            diff_pixel_count: pmResult.diff_pixel_count,
+            total_pixel_count: pmResult.total_pixel_count,
+            diff_ratio: pmResult.diff_ratio,
+            threshold: pmResult.threshold,
+            diff_png_path: pmResult.diff_png_path,
+            reference_image_path: refPath,
+            screenshot_dimensions: pmResult.screenshot_dimensions,
+            reference_dimensions: pmResult.reference_dimensions,
+            diff_regions: mappedRegions,
+          });
+
+          // Map results to each visual parity sub-criterion by its bound viewport
+          for (const dim of V1_RUBRIC.dimensions) {
+            for (const sub of dim.sub_criteria) {
+              if (!sub.visual_parity) continue;
+              const checkId = sub.bound_check.full_id;
+              const vpMatch = checkId.match(/viewport=(\w+)/);
+              const boundViewport = vpMatch ? vpMatch[1] : 'desktop';
+              if (boundViewport === referenceViewport) {
+                pixelComparisonResults.set(sub.id, {
+                  score: vpScore,
+                  diffRatio: pmResult.diff_ratio,
+                  evidence: `Pixel diff: ${pctDiff}% (${pmResult.diff_pixel_count}/${pmResult.total_pixel_count} pixels differ)`,
+                  mappedRegions,
+                });
+              }
+            }
+          }
+
+          logger.info(`Pixelmatch complete: ${pctDiff}% diff, score ${vpScore}/4`);
+        }
       }
 
       // Build sub-criterion findings for each dimension
@@ -310,6 +434,20 @@ export const evaluateCommand = new Command('evaluate')
             };
           } else if (sub.visual_parity) {
             const pmResult = pixelComparisonResults.get(sub.id);
+            if (pmResult && pmResult.status === 'tool_unavailable') {
+              return {
+                id: sub.id,
+                name: sub.name,
+                score: null,
+                status: 'tool_unavailable' as const,
+                evidence: pmResult.evidence,
+                evidence_source: checkId,
+                severity: 0,
+                suggested_fix: [],
+                location: null,
+                confidence: 'deterministic' as const,
+              };
+            }
             if (pmResult) {
               return {
                 id: sub.id,
@@ -318,10 +456,13 @@ export const evaluateCommand = new Command('evaluate')
                 status: 'scored' as const,
                 evidence: pmResult.evidence,
                 evidence_source: checkId,
-                severity: pmResult.score < 4 ? 4 - pmResult.score : 0,
+                severity: pmResult.score !== null && pmResult.score < 4 ? 4 - pmResult.score : 0,
                 suggested_fix:
-                  pmResult.score < 4
-                    ? ['Reduce pixel differences to match reference design more closely']
+                  pmResult.score !== null && pmResult.score < 4 && suggestedFixBuilder
+                    ? suggestedFixBuilder({
+                        mappedRegions: pmResult.mappedRegions ?? [],
+                        diffRatio: pmResult.diffRatio,
+                      })
                     : [],
                 location: null,
                 confidence: 'deterministic' as const,
