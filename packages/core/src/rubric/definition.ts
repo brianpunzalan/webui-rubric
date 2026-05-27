@@ -149,7 +149,7 @@ const PIXEL_DIFF_ANCHORS: AnchorTuple = anchors([
   [1, 'Poor', 'Diff ratio ≤ 10%', lte(0.1)],
   [2, 'Needs Improvement', 'Diff ratio ≤ 5%', lte(0.05)],
   [3, 'Good', 'Diff ratio ≤ 1%', lte(0.01)],
-  [4, 'Excellent', 'No pixel difference', eq(0)],
+  [4, 'Excellent', 'Near-perfect match (≤ 0.5%)', lte(0.005)],
 ]);
 
 const PIXEL_DIFF_THRESHOLD_MAP: Record<number, ThresholdRange> = {
@@ -157,7 +157,7 @@ const PIXEL_DIFF_THRESHOLD_MAP: Record<number, ThresholdRange> = {
   1: lte(0.1),
   2: lte(0.05),
   3: lte(0.01),
-  4: eq(0),
+  4: lte(0.005),
 };
 
 /* ------------------------------------------------------------------ */
