@@ -12,7 +12,7 @@ The artifact is designed for consumption by an Evaluator/Generator agent loop: i
 
 ```bash
 # Install globally
-yarn global add @webui-rubric/cli
+npm install -g @webui-rubric/cli
 
 # Or run directly
 npx @webui-rubric/cli evaluate https://example.com
@@ -98,7 +98,7 @@ webui-rubric evaluate https://my-app.dev \
 
 The CLI captures a desktop screenshot, runs `pixelmatch` against `homepage-desktop.png`, and:
 
-- Scores visual-parity sub-criteria based on `diff_ratio` thresholds
+- Scores visual-parity sub-criteria based on `diff_ratio` thresholds (≤ 0.5% → 4, ≤ 1% → 3, ≤ 5% → 2, ≤ 10% → 1, > 10% → 0)
 - Persists a side-by-side diff PNG to `./debug-output/`
 - Includes `pixel_comparison` in the JSON with `diff_ratio`, `diff_pixel_count`, and paths
 

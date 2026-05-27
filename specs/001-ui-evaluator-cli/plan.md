@@ -29,7 +29,7 @@ A deterministic CLI tool that evaluates a live web UI against a 10-dimension wei
 - Test: `vitest`
 - Lint: `eslint` (flat config)
 - Format: `prettier`
-- Monorepo: Yarn workspaces
+- Monorepo: pnpm workspaces
 - Versioning: `@changesets/cli` for semantic versioning + release workflow
 
 **Storage**: Filesystem only (debug artifacts, config files, reference images, HAR)
@@ -178,7 +178,7 @@ webui-rubric/
 │       ├── capture.md
 │       └── checks.md
 ├── specs/                         # Feature specs (existing)
-├── package.json                   # Root: Yarn workspaces config
+├── package.json                   # Root: pnpm workspaces config
 ├── tsconfig.base.json             # Shared TypeScript config (extended by each package)
 ├── eslint.config.mjs              # ESLint flat config
 ├── .prettierrc                    # Prettier config

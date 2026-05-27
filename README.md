@@ -6,7 +6,7 @@ Deterministic CLI tool that evaluates a live web UI against a 10-dimension weigh
 
 ```bash
 # Install globally
-yarn global add @webui-rubric/cli
+npm install -g @webui-rubric/cli
 
 # Or run directly
 npx @webui-rubric/cli evaluate https://example.com
@@ -38,7 +38,7 @@ webui-rubric evaluate https://example.com --reference ./design/homepage.png
 
 ## Architecture
 
-Yarn workspaces monorepo with 4 packages:
+pnpm workspaces monorepo with 4 packages:
 
 | Package                 | Description                                                                        |
 | ----------------------- | ---------------------------------------------------------------------------------- |
@@ -89,7 +89,7 @@ weights:
   microinteractions: 10
 
 ship_threshold: 75
-settle_timeout_ms: 5000
+settle_timeout_ms: 30000
 ```
 
 Weights must sum to 100. Accessibility has a weight floor of 10 (overridable via `weight_overrides_ack`). See the [Quickstart Guide](specs/001-ui-evaluator-cli/quickstart.md) for more configuration examples.
@@ -107,22 +107,22 @@ Weights must sum to 100. Accessibility has a weight floor of 10 (overridable via
 
 ```bash
 # Install dependencies
-npm install
+pnpm install
 
 # Build all packages
-npm run build
+pnpm build
 
 # Run tests
-npm run test
+pnpm test
 
 # Lint
-npm run lint
+pnpm lint
 
 # Format (check)
-npm run format
+pnpm format:check
 
 # Format (fix)
-npm run format:fix
+pnpm format
 ```
 
 ## License
