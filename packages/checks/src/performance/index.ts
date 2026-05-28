@@ -83,7 +83,7 @@ export async function runLighthouseChecks(url: string): Promise<PerformanceCheck
         ),
       evidence_source: `lighthouse.${m.metric_id}`,
       severity: 0,
-      suggested_fix: '',
+      suggested_fix: [],
       location: null,
       confidence: 'predicted' as const,
     }));

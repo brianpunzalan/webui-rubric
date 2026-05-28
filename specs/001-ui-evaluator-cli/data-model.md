@@ -137,25 +137,25 @@ Defines the numeric boundary for a score level.
 
 Per-project overlay on the rubric definition.
 
-| Field                             | Type                                   | Constraints                                    | Notes                                      |
-| --------------------------------- | -------------------------------------- | ---------------------------------------------- | ------------------------------------------ |
-| `rubric_version`                  | `string \| undefined`                  | If set, must match loaded rubric               | Version compatibility check                |
-| `weights`                         | `Record<string, number> \| undefined`  | Must sum to 100 if provided                    | Dimension ID → weight                      |
-| `weight_overrides_ack`            | `string[] \| undefined`                | List of dimension IDs                          | Required for overriding below weight_floor |
-| `blocking_overrides`              | `Record<string, boolean> \| undefined` | Sub-criterion ID → toggle                      |                                            |
-| `custom_sub_criteria`             | `CustomSubCriterion[] \| undefined`    | Each must have complete anchors + bound check  |                                            |
-| `viewports`                       | `ViewportConfig \| undefined`          | Default: desktop (1280×800) + mobile (375×812) |                                            |
-| `reference_images`                | `Record<string, string> \| undefined`  | Viewport name → image path                     |                                            |
-| `reference_image_mismatch_policy` | `"fail-fast" \| "resize"`              | Default: `"fail-fast"`                         |                                            |
-| `pixelmatch_threshold`            | `number \| undefined`                  | Default: `0.1`                                 | Anti-alias tolerance                       |
-| `tool_fallback_policy`            | `"fail-fast" \| "mark-unavailable"`    | Default: `"fail-fast"`                         | Per FR-025                                 |
-| `iteration_cap`                   | `number \| undefined`                  | Default: `5`                                   |                                            |
-| `ship_threshold`                  | `number \| undefined`                  | Default: `75`                                  | Composite score for "ship-ready"           |
-| `top_issues_cap`                  | `number \| undefined`                  | Default: `10`                                  | Max entries in top_issues                  |
+| Field                             | Type                                   | Constraints                                    | Notes                                                  |
+| --------------------------------- | -------------------------------------- | ---------------------------------------------- | ------------------------------------------------------ |
+| `rubric_version`                  | `string \| undefined`                  | If set, must match loaded rubric               | Version compatibility check                            |
+| `weights`                         | `Record<string, number> \| undefined`  | Must sum to 100 if provided                    | Dimension ID → weight                                  |
+| `weight_overrides_ack`            | `string[] \| undefined`                | List of dimension IDs                          | Required for overriding below weight_floor             |
+| `blocking_overrides`              | `Record<string, boolean> \| undefined` | Sub-criterion ID → toggle                      |                                                        |
+| `custom_sub_criteria`             | `CustomSubCriterion[] \| undefined`    | Each must have complete anchors + bound check  |                                                        |
+| `viewports`                       | `ViewportConfig \| undefined`          | Default: desktop (1280×800) + mobile (375×812) |                                                        |
+| `reference_images`                | `Record<string, string> \| undefined`  | Viewport name → image path                     |                                                        |
+| `reference_image_mismatch_policy` | `"fail-fast" \| "resize"`              | Default: `"fail-fast"`                         |                                                        |
+| `pixelmatch_threshold`            | `number \| undefined`                  | Default: `0.1`                                 | Anti-alias tolerance                                   |
+| `tool_fallback_policy`            | `"fail-fast" \| "mark-unavailable"`    | Default: `"fail-fast"`                         | Per FR-025                                             |
+| `iteration_cap`                   | `number \| undefined`                  | Default: `5`                                   |                                                        |
+| `ship_threshold`                  | `number \| undefined`                  | Default: `75`                                  | Composite score for "ship-ready"                       |
+| `top_issues_cap`                  | `number \| undefined`                  | Default: `10`                                  | Max entries in top_issues                              |
 | `settle_timeout_ms`               | `number \| undefined`                  | Default: `30000`                               | Milliseconds to wait for networkidle before timing out |
-| `redaction`                       | `boolean \| undefined`                 | Default: `true`                                | `false` equivalent to --no-redact          |
-| `capture`                         | `CaptureConfig \| undefined`           |                                                | `dismiss_selectors`, `auto_dismiss`        |
-| `pixel_comparison`                | `PixelComparisonConfig \| undefined`   |                                                | `mask_selectors`, `mask_color`, `device_pixel_ratio` |
+| `redaction`                       | `boolean \| undefined`                 | Default: `true`                                | `false` equivalent to --no-redact                      |
+| `capture`                         | `CaptureConfig \| undefined`           |                                                | `dismiss_selectors`, `auto_dismiss`                    |
+| `pixel_comparison`                | `PixelComparisonConfig \| undefined`   |                                                | `mask_selectors`, `mask_color`, `device_pixel_ratio`   |
 
 ### ViewportConfig
 
@@ -169,29 +169,29 @@ Per-project overlay on the rubric definition.
 
 The set of artifacts captured from a single URL before scoring.
 
-| Field                | Type                     | Constraints                   | Notes                          |
-| -------------------- | ------------------------ | ----------------------------- | ------------------------------ |
-| `url`                | `string`                 | Fully qualified URL           | The target that was evaluated  |
-| `captured_at`        | `string`                 | ISO 8601 timestamp            |                                |
-| `content_hash`       | `string`                 | SHA-256 hex                   | Hash of all artifacts combined |
-| `viewports_captured` | `string[]`               | e.g., `["desktop", "mobile"]` |                                |
-| `screenshots`        | `Map<string, Buffer>`    | Viewport name → PNG buffer    | Desktop, above-fold, mobile    |
-| `dom_snapshot`       | `string`                 | Full rendered HTML            | From `page.content()`          |
-| `computed_styles`    | `ComputedStylesSnapshot` | Extracted style data          | Structured by element          |
-| `element_locations`  | `ElementLocation[]`      | Bounding boxes + styles per element | Used for diff region mapping |
-| `console_errors`     | `ConsoleEntry[]`         | Filtered to error + warning   |                                |
-| `har`                | `unknown`                | HAR recording (HAR 1.2 format, nullable) | Redacted per FR-039  |
+| Field                | Type                     | Constraints                              | Notes                          |
+| -------------------- | ------------------------ | ---------------------------------------- | ------------------------------ |
+| `url`                | `string`                 | Fully qualified URL                      | The target that was evaluated  |
+| `captured_at`        | `string`                 | ISO 8601 timestamp                       |                                |
+| `content_hash`       | `string`                 | SHA-256 hex                              | Hash of all artifacts combined |
+| `viewports_captured` | `string[]`               | e.g., `["desktop", "mobile"]`            |                                |
+| `screenshots`        | `Map<string, Buffer>`    | Viewport name → PNG buffer               | Desktop, above-fold, mobile    |
+| `dom_snapshot`       | `string`                 | Full rendered HTML                       | From `page.content()`          |
+| `computed_styles`    | `ComputedStylesSnapshot` | Extracted style data                     | Structured by element          |
+| `element_locations`  | `ElementLocation[]`      | Bounding boxes + styles per element      | Used for diff region mapping   |
+| `console_errors`     | `ConsoleEntry[]`         | Filtered to error + warning              |                                |
+| `har`                | `unknown`                | HAR recording (HAR 1.2 format, nullable) | Redacted per FR-039            |
 
 ### ElementLocation
 
 Captured by the `@webui-rubric/capture` package; used to map pixel-diff regions back to DOM elements.
 
-| Field            | Type                                              | Notes                                  |
-| ---------------- | ------------------------------------------------- | -------------------------------------- |
-| `selector`       | `string`                                          | CSS selector for the element           |
-| `bbox`           | `{ x: number, y: number, width: number, height: number }` | Bounding box in CSS pixels |
-| `tagName`        | `string`                                          | HTML tag name                          |
-| `computedStyles` | `Record<string, string>`                          | Relevant computed CSS properties       |
+| Field            | Type                                                      | Notes                            |
+| ---------------- | --------------------------------------------------------- | -------------------------------- |
+| `selector`       | `string`                                                  | CSS selector for the element     |
+| `bbox`           | `{ x: number, y: number, width: number, height: number }` | Bounding box in CSS pixels       |
+| `tagName`        | `string`                                                  | HTML tag name                    |
+| `computedStyles` | `Record<string, string>`                                  | Relevant computed CSS properties |
 
 ### ConsoleEntry
 
@@ -245,18 +245,18 @@ The top-level JSON artifact emitted by the CLI.
 
 ### SubCriterionFinding
 
-| Field             | Type                                                 | Constraints                       | Notes                                     |
-| ----------------- | ---------------------------------------------------- | --------------------------------- | ----------------------------------------- |
-| `id`              | `string`                                             | Sub-criterion ID                  |                                           |
-| `name`            | `string`                                             | Human-readable                    |                                           |
-| `score`           | `number \| null`                                     | 0–4 integer, or null with status  |                                           |
-| `status`          | `"scored" \| "not_applicable" \| "tool_unavailable"` |                                   | Determines if score is null               |
-| `evidence`        | `string`                                             | ≤ 300 chars, sanitized per FR-039 | Tool output, rule ID, or measurement      |
-| `evidence_source` | `string`                                             | BoundCheck full_id                | e.g., `"axe.color-contrast"`              |
-| `severity`        | `number`                                             | Nielsen 0–4                       |                                           |
+| Field             | Type                                                 | Constraints                       | Notes                                       |
+| ----------------- | ---------------------------------------------------- | --------------------------------- | ------------------------------------------- |
+| `id`              | `string`                                             | Sub-criterion ID                  |                                             |
+| `name`            | `string`                                             | Human-readable                    |                                             |
+| `score`           | `number \| null`                                     | 0–4 integer, or null with status  |                                             |
+| `status`          | `"scored" \| "not_applicable" \| "tool_unavailable"` |                                   | Determines if score is null                 |
+| `evidence`        | `string`                                             | ≤ 300 chars, sanitized per FR-039 | Tool output, rule ID, or measurement        |
+| `evidence_source` | `string`                                             | BoundCheck full_id                | e.g., `"axe.color-contrast"`                |
+| `severity`        | `number`                                             | Nielsen 0–4                       |                                             |
 | `suggested_fix`   | `string[]`                                           |                                   | From fix_template; empty array if score = 4 |
-| `location`        | `LocationReference \| null`                          |                                   | Selector, bounding box, or coordinates    |
-| `confidence`      | `"deterministic" \| "predicted"`                     |                                   | `"predicted"` for lab/performance metrics |
+| `location`        | `LocationReference \| null`                          |                                   | Selector, bounding box, or coordinates      |
+| `confidence`      | `"deterministic" \| "predicted"`                     |                                   | `"predicted"` for lab/performance metrics   |
 
 ### LocationReference
 
@@ -280,17 +280,17 @@ The top-level JSON artifact emitted by the CLI.
 
 ### TopIssue
 
-| Field             | Type             | Constraints                   | Notes                               |
-| ----------------- | ---------------- | ----------------------------- | ----------------------------------- |
-| `rank`            | `number`         | 1-based                       | Position in priority list           |
-| `criterion_id`    | `string`         | Sub-criterion ID              |                                     |
-| `dimension_id`    | `string`         | Parent dimension ID           |                                     |
-| `priority_score`  | `number`         | `dimension_weight × severity` | Sorting key                         |
-| `score`           | `number`         | 0–4                           | The sub-criterion's score           |
-| `severity`        | `number`         | Nielsen 0–4                   |                                     |
+| Field             | Type             | Constraints                   | Notes                                  |
+| ----------------- | ---------------- | ----------------------------- | -------------------------------------- |
+| `rank`            | `number`         | 1-based                       | Position in priority list              |
+| `criterion_id`    | `string`         | Sub-criterion ID              |                                        |
+| `dimension_id`    | `string`         | Parent dimension ID           |                                        |
+| `priority_score`  | `number`         | `dimension_weight × severity` | Sorting key                            |
+| `score`           | `number`         | 0–4                           | The sub-criterion's score              |
+| `severity`        | `number`         | Nielsen 0–4                   |                                        |
 | `fix`             | `string[]`       |                               | Actionable fix steps from fix_template |
-| `fix_hash`        | `string`         | SHA-256 of fix text           | For oscillation prevention (FR-033) |
-| `expected_impact` | `string \| null` | Optional improvement hint     |                                     |
+| `fix_hash`        | `string`         | SHA-256 of fix text           | For oscillation prevention (FR-033)    |
+| `expected_impact` | `string \| null` | Optional improvement hint     |                                        |
 
 ### PixelComparisonResult
 
@@ -315,29 +315,29 @@ The top-level JSON artifact emitted by the CLI.
 
 ### MappedDiffRegion
 
-| Field               | Type                    | Notes                                      |
-| ------------------- | ----------------------- | ------------------------------------------ |
-| `y_start`           | `number`                | Top pixel row of the diff band             |
-| `y_end`             | `number`                | Bottom pixel row of the diff band          |
-| `diff_pixel_count`  | `number`                | Pixels that differ in this region          |
-| `pct_of_total_diff` | `number`                | Fraction of total diff in this region      |
-| `elements`          | `MappedDiffElement[]`   | DOM elements overlapping this region       |
+| Field               | Type                  | Notes                                 |
+| ------------------- | --------------------- | ------------------------------------- |
+| `y_start`           | `number`              | Top pixel row of the diff band        |
+| `y_end`             | `number`              | Bottom pixel row of the diff band     |
+| `diff_pixel_count`  | `number`              | Pixels that differ in this region     |
+| `pct_of_total_diff` | `number`              | Fraction of total diff in this region |
+| `elements`          | `MappedDiffElement[]` | DOM elements overlapping this region  |
 
 ### MappedDiffElement
 
-| Field         | Type           | Notes                                                     |
-| ------------- | -------------- | --------------------------------------------------------- |
-| `selector`    | `string`       | CSS selector identifying the element                      |
-| `tagName`     | `string`       | HTML tag name                                             |
-| `styleDiffs`  | `StyleDiff[]`  | Computed style properties that differ from the reference  |
+| Field        | Type          | Notes                                                    |
+| ------------ | ------------- | -------------------------------------------------------- |
+| `selector`   | `string`      | CSS selector identifying the element                     |
+| `tagName`    | `string`      | HTML tag name                                            |
+| `styleDiffs` | `StyleDiff[]` | Computed style properties that differ from the reference |
 
 ### StyleDiff
 
-| Field      | Type     | Notes                         |
-| ---------- | -------- | ----------------------------- |
-| `property` | `string` | CSS property name             |
-| `actual`   | `string` | Value in the live screenshot  |
-| `expected` | `string` | Value in the reference image  |
+| Field      | Type     | Notes                        |
+| ---------- | -------- | ---------------------------- |
+| `property` | `string` | CSS property name            |
+| `actual`   | `string` | Value in the live screenshot |
+| `expected` | `string` | Value in the reference image |
 
 ### EvaluationMeta
 
