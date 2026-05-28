@@ -1,5 +1,15 @@
 # @webui-rubric/core
 
+## 0.1.7
+
+### Patch Changes
+
+- ### Bug Fixes
+  - fix: correct suggested_fix type from string to string[] in error paths (`3b8ab83`)
+
+  ### Other Changes
+  - style: fix prettier formatting in data-model.md (`fad91ff`)
+
 ## 0.1.6
 
 ### Patch Changes

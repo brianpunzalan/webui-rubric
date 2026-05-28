@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.7] - 2026-05-28
+
+### Bug Fixes
+
+- fix: correct suggested_fix type from string to string[] in error paths (`3b8ab83`)
+
+### Other Changes
+
+- style: fix prettier formatting in data-model.md (`fad91ff`)
+
 ## [0.1.6] - 2026-05-27
 
 ### Documentation
