@@ -1,5 +1,15 @@
 # @webui-rubric/capture
 
+## 0.1.8
+
+### Patch Changes
+
+- ### Documentation
+  - docs: add detailed README for each package (`f2de5c7`)
+
+- Updated dependencies
+  - @webui-rubric/core@0.1.8
+
 ## 0.1.7
 
 ### Patch Changes
