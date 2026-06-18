@@ -16,6 +16,8 @@ export interface PixelComparisonOutput {
   diff_ratio: number;
   threshold: number;
   diff_png_path: string | null;
+  /** In-memory PNG buffer of the rendered diff image (always populated). */
+  diff_buffer: Buffer;
   screenshot_dimensions: { width: number; height: number };
   reference_dimensions: { width: number; height: number };
   diff_regions: DiffRegion[];
@@ -40,9 +42,9 @@ export function runPixelmatch(input: PixelComparisonInput): PixelComparisonOutpu
   const totalPixels = width * height;
   const diffRatio = totalPixels > 0 ? mismatchCount / totalPixels : 0;
 
+  const diffBuffer = PNG.sync.write(diff);
   let diffPngPath: string | null = null;
   if (input.diffOutputPath) {
-    const diffBuffer = PNG.sync.write(diff);
     writeFileSync(input.diffOutputPath, diffBuffer);
     diffPngPath = input.diffOutputPath;
   }
@@ -60,6 +62,7 @@ export function runPixelmatch(input: PixelComparisonInput): PixelComparisonOutpu
     diff_ratio: diffRatio,
     threshold,
     diff_png_path: diffPngPath,
+    diff_buffer: diffBuffer,
     screenshot_dimensions: { width: screenshot.width, height: screenshot.height },
     reference_dimensions: { width: reference.width, height: reference.height },
     diff_regions,

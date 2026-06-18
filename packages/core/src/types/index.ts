@@ -213,6 +213,27 @@ export interface PixelComparisonResult {
   viewports: PixelComparisonViewport[];
 }
 
+export interface ArtifactViewportImages {
+  viewport: string;
+  reference: string;
+  screenshot: string;
+  diff: string;
+  composite: string;
+  regions: string[];
+}
+
+/**
+ * Reference to a generated evaluation-results artifact bundle. All paths are
+ * relative to `dir` so the bundle is portable. Present only when --artifact-dir
+ * was supplied.
+ */
+export interface ArtifactReference {
+  dir: string;
+  manifest_path: string;
+  report_path: string;
+  viewports: ArtifactViewportImages[];
+}
+
 export interface EffectiveConfig {
   weights: Record<string, number>;
   blocking_toggles: Record<string, boolean>;
@@ -264,6 +285,7 @@ export interface EvaluationResult {
   dimensions: DimensionResult[];
   top_issues: TopIssue[];
   pixel_comparison: PixelComparisonResult | null;
+  artifact?: ArtifactReference;
   meta: EvaluationMeta;
 }
 

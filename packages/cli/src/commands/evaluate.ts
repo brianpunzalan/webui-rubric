@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import type { ArtifactViewportInput } from '../artifact/index.js';
 
 export const evaluateCommand = new Command('evaluate')
   .description('Evaluate a live web UI against the rubric')
@@ -13,6 +14,7 @@ export const evaluateCommand = new Command('evaluate')
   .option('--reference-viewport <name>', 'Which viewport the reference image represents', 'desktop')
   .option('--viewports <list>', 'Comma-separated viewport names to capture', 'desktop,mobile')
   .option('--debug-dir <path>', 'Directory for debug artifacts')
+  .option('--artifact-dir <path>', 'Directory for the evaluation-results artifact bundle')
   .option('--iteration <n>', 'Loop iteration index', parseInt)
   .option('--previous-composite <n>', 'Previous composite score', parseFloat)
   .option('--attempted-fixes <path>', 'Path to JSON file of attempted fix hashes')
@@ -270,6 +272,8 @@ export const evaluateCommand = new Command('evaluate')
           }>;
         }>;
       }> = [];
+      // Image buffers + metrics retained per compared viewport for artifact assembly.
+      const artifactViewportInputs: ArtifactViewportInput[] = [];
 
       if (options.reference) {
         const refPath = resolve(options.reference);
@@ -330,6 +334,10 @@ export const evaluateCommand = new Command('evaluate')
             }
           }
         } else {
+          // Ensure the debug dir exists before pixelmatch writes the diff PNG into it.
+          if (options.debugDir) {
+            await mkdir(resolve(options.debugDir), { recursive: true, mode: 0o700 });
+          }
           const diffOutputPath = options.debugDir
             ? resolve(options.debugDir, `diff-${referenceViewport}.png`)
             : null;
@@ -367,6 +375,19 @@ export const evaluateCommand = new Command('evaluate')
             reference_image_path: refPath,
             screenshot_dimensions: pmResult.screenshot_dimensions,
             reference_dimensions: pmResult.reference_dimensions,
+            diff_regions: mappedRegions,
+          });
+
+          artifactViewportInputs.push({
+            viewport: referenceViewport,
+            referenceBuffer: referenceImage.buffer,
+            screenshotBuffer,
+            diffBuffer: pmResult.diff_buffer,
+            diff_ratio: pmResult.diff_ratio,
+            diff_pixel_count: pmResult.diff_pixel_count,
+            total_pixel_count: pmResult.total_pixel_count,
+            threshold: pmResult.threshold,
+            score: vpScore,
             diff_regions: mappedRegions,
           });
 
@@ -610,7 +631,7 @@ export const evaluateCommand = new Command('evaluate')
 
       // Build evaluation result
       const result = {
-        schema_version: '1.0.0',
+        schema_version: '1.1.0',
         rubric_version: V1_RUBRIC.rubric_version,
         run_id: randomUUID(),
         timestamp: new Date().toISOString(),
@@ -665,6 +686,24 @@ export const evaluateCommand = new Command('evaluate')
         },
       };
 
+      // Generate the evaluation-results artifact bundle (US: artifact output)
+      if (options.artifactDir) {
+        if (artifactViewportInputs.length > 0) {
+          const { writeArtifact } = await import('../artifact/index.js');
+          const artifact = await writeArtifact({
+            dir: options.artifactDir,
+            result,
+            viewports: artifactViewportInputs,
+          });
+          (result as Record<string, unknown>).artifact = artifact;
+          logger.info(`Artifact bundle written to ${artifact.dir}`);
+        } else {
+          logger.warn(
+            'Artifact bundle requires a reference-image comparison (--reference); skipping artifact generation',
+          );
+        }
+      }
+
       // Validate output against schema
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const validation = validateOutput(result as any);
@@ -680,6 +719,9 @@ export const evaluateCommand = new Command('evaluate')
 
         for (const [name, buffer] of captureResult.screenshots) {
           await writeFile(resolve(debugDir, `screenshot-${name}.png`), buffer);
+        }
+        for (const vp of artifactViewportInputs) {
+          await writeFile(resolve(debugDir, `reference-${vp.viewport}.png`), vp.referenceBuffer);
         }
         await writeFile(resolve(debugDir, 'dom-snapshot.html'), domSnapshot);
         if (captureResult.har) {

@@ -25,6 +25,7 @@ export {
 export { scoreFromDiffRatio } from './pixelmatch/scoring.js';
 export { buildVisualParitySuggestedFix } from './pixelmatch/suggested-fix.js';
 export { analyzeDiffRegions, type DiffRegion } from './pixelmatch/diff-regions.js';
+export { buildSideBySide, cropStrip } from './pixelmatch/composite.js';
 export {
   mapDiffRegionsToElements,
   type MappedDiffRegion,

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://webui-rubric.dev/schemas/evaluator-output/v1.0.0",
+  "$id": "https://webui-rubric.dev/schemas/evaluator-output/v1.1.0",
   "title": "WebUI Rubric Evaluator Output",
   "description": "The evaluation artifact emitted by the webui-rubric CLI per run. Conforms to FR-030.",
   "type": "object",
@@ -186,6 +186,33 @@
           }
         }
       ]
+    },
+    "artifact": {
+      "type": "object",
+      "description": "Reference to a generated artifact bundle; present only when --artifact-dir was supplied. Paths are relative to dir.",
+      "required": ["dir", "manifest_path", "report_path", "viewports"],
+      "additionalProperties": false,
+      "properties": {
+        "dir": { "type": "string" },
+        "manifest_path": { "type": "string" },
+        "report_path": { "type": "string" },
+        "viewports": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["viewport", "reference", "screenshot", "diff", "composite", "regions"],
+            "additionalProperties": false,
+            "properties": {
+              "viewport": { "type": "string" },
+              "reference": { "type": "string" },
+              "screenshot": { "type": "string" },
+              "diff": { "type": "string" },
+              "composite": { "type": "string" },
+              "regions": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
     },
     "meta": {
       "type": "object",
