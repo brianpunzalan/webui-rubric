@@ -16,14 +16,14 @@ Chrome/Chromium must be available on `PATH` for Lighthouse performance checks.
 
 ## Dependencies
 
-| Dependency | Version | Purpose |
-|---|---|---|
-| `lighthouse` | `^12.0.0` | Core Web Vitals and lab performance metrics |
-| `chrome-launcher` | `^1.1.0` | Spawns a Chrome process for Lighthouse |
-| `pixelmatch` | `^6.0.0` | Pixel-level image diff algorithm |
-| `pngjs` | `^7.0.0` | PNG parsing and writing |
-| `@webui-rubric/core` | `workspace:*` | Shared types (`CheckResult`, `AnchorScore`, `TargetCapture`) |
-| `@webui-rubric/capture` | `workspace:*` | `ElementLocation` type (used in `mapDiffRegionsToElements`) |
+| Dependency              | Version       | Purpose                                                      |
+| ----------------------- | ------------- | ------------------------------------------------------------ |
+| `lighthouse`            | `^12.0.0`     | Core Web Vitals and lab performance metrics                  |
+| `chrome-launcher`       | `^1.1.0`      | Spawns a Chrome process for Lighthouse                       |
+| `pixelmatch`            | `^6.0.0`      | Pixel-level image diff algorithm                             |
+| `pngjs`                 | `^7.0.0`      | PNG parsing and writing                                      |
+| `@webui-rubric/core`    | `workspace:*` | Shared types (`CheckResult`, `AnchorScore`, `TargetCapture`) |
+| `@webui-rubric/capture` | `workspace:*` | `ElementLocation` type (used in `mapDiffRegionsToElements`)  |
 
 ## Package Interactions
 
@@ -54,12 +54,12 @@ Runs axe-core against a live Playwright page. Returns one finding per accessibil
 
 ```typescript
 interface AxeCheckResult {
-  score: number | null;       // 0 (violation) or 4 (pass)
+  score: number | null; // 0 (violation) or 4 (pass)
   status: 'scored' | 'not_applicable' | 'tool_unavailable';
-  evidence: string;           // "{violation.id}: {violation.help}" ≤300 chars
-  evidence_source: string;    // "axe.{violation.id}"
-  severity: number;           // mapped from axe impact via AXE_IMPACT_TO_SEVERITY
-  suggested_fix: string[];    // from axe failureSummary or help text
+  evidence: string; // "{violation.id}: {violation.help}" ≤300 chars
+  evidence_source: string; // "axe.{violation.id}"
+  severity: number; // mapped from axe impact via AXE_IMPACT_TO_SEVERITY
+  suggested_fix: string[]; // from axe failureSummary or help text
   location: {
     type: 'selector';
     selector: string | null;
@@ -97,11 +97,11 @@ Maps an axe-core impact string to a Nielsen severity integer. Unknown or undefin
 ```typescript
 import { axeSeverity } from '@webui-rubric/checks';
 
-axeSeverity('critical');  // 4
-axeSeverity('serious');   // 3
-axeSeverity('moderate');  // 2
-axeSeverity('minor');     // 1
-axeSeverity(undefined);   // 2 (default)
+axeSeverity('critical'); // 4
+axeSeverity('serious'); // 3
+axeSeverity('moderate'); // 2
+axeSeverity('minor'); // 1
+axeSeverity(undefined); // 2 (default)
 ```
 
 #### `AXE_IMPACT_TO_SEVERITY`
@@ -129,9 +129,9 @@ Confidence is always `'predicted'` — Lighthouse measures lab (simulated) condi
 interface PerformanceCheckResult {
   score: number | null;
   status: 'scored' | 'not_applicable' | 'tool_unavailable';
-  evidence: string;          // "{metric_id}: {value}{unit} (score: N/4)"
-  evidence_source: string;   // "lighthouse.{metric_id}"
-  severity: number;          // 4 - score
+  evidence: string; // "{metric_id}: {value}{unit} (score: N/4)"
+  evidence_source: string; // "lighthouse.{metric_id}"
+  severity: number; // 4 - score
   suggested_fix: string[];
   location: null;
   confidence: 'predicted';
@@ -153,12 +153,12 @@ const metrics = await runLighthouseChecks('https://example.com');
 
 Array of metric definitions tracked by Lighthouse. Each entry describes one Core Web Vital or performance metric:
 
-| `metric_id` | `lighthouse_audit_id` | Unit | Score 4 threshold |
-|---|---|---|---|
-| `lcp` | `largest-contentful-paint` | ms | ≤1200ms |
-| `fcp` | `first-contentful-paint` | ms | ≤1000ms |
-| `cls` | `cumulative-layout-shift` | — | ≤0.05 |
-| `tbt` | `total-blocking-time` | ms | ≤150ms |
+| `metric_id` | `lighthouse_audit_id`      | Unit | Score 4 threshold |
+| ----------- | -------------------------- | ---- | ----------------- |
+| `lcp`       | `largest-contentful-paint` | ms   | ≤1200ms           |
+| `fcp`       | `first-contentful-paint`   | ms   | ≤1000ms           |
+| `cls`       | `cumulative-layout-shift`  | —    | ≤0.05             |
+| `tbt`       | `total-blocking-time`      | ms   | ≤150ms            |
 
 Each entry also includes `fix_template` (a string with `{value}` placeholder) and `thresholds` (the anchor threshold map).
 
@@ -169,9 +169,9 @@ Maps a raw numeric metric value to a 0–4 anchor score by evaluating the thresh
 ```typescript
 import { scoreFromMetric, PERFORMANCE_METRICS } from '@webui-rubric/checks';
 
-const lcpMetric = PERFORMANCE_METRICS.find(m => m.metric_id === 'lcp')!;
-scoreFromMetric(2100, lcpMetric.thresholds);  // 3 (≤2500ms)
-scoreFromMetric(800,  lcpMetric.thresholds);  // 4 (≤1200ms)
+const lcpMetric = PERFORMANCE_METRICS.find((m) => m.metric_id === 'lcp')!;
+scoreFromMetric(2100, lcpMetric.thresholds); // 3 (≤2500ms)
+scoreFromMetric(800, lcpMetric.thresholds); // 4 (≤1200ms)
 ```
 
 ---
@@ -184,17 +184,17 @@ Synchronously compares a screenshot PNG against a reference PNG using `pixelmatc
 
 ```typescript
 interface PixelComparisonInput {
-  screenshotBuffer: Buffer;    // PNG buffer from capturePage
-  referenceBuffer: Buffer;     // PNG buffer from loadReferenceImage
-  threshold?: number;          // Anti-alias tolerance 0–1. Default: 0.1
+  screenshotBuffer: Buffer; // PNG buffer from capturePage
+  referenceBuffer: Buffer; // PNG buffer from loadReferenceImage
+  threshold?: number; // Anti-alias tolerance 0–1. Default: 0.1
   diffOutputPath?: string | null; // Write diff PNG here if set
 }
 
 interface PixelComparisonOutput {
   diff_pixel_count: number;
   total_pixel_count: number;
-  diff_ratio: number;          // diff_pixel_count / total_pixel_count
-  threshold: number;           // threshold used
+  diff_ratio: number; // diff_pixel_count / total_pixel_count
+  threshold: number; // threshold used
   diff_png_path: string | null;
   screenshot_dimensions: { width: number; height: number };
   reference_dimensions: { width: number; height: number };
@@ -225,20 +225,20 @@ console.log(`Diff: ${(result.diff_ratio * 100).toFixed(2)}%`);
 
 Maps a `diff_ratio` (0–1) to a 0–4 anchor score:
 
-| diff_ratio | Score |
-|---|---|
-| ≤ 0.5% | 4 (Excellent) |
-| ≤ 1% | 3 (Good) |
-| ≤ 5% | 2 (Needs Improvement) |
-| ≤ 10% | 1 (Poor) |
-| > 10% | 0 (Critical) |
+| diff_ratio | Score                 |
+| ---------- | --------------------- |
+| ≤ 0.5%     | 4 (Excellent)         |
+| ≤ 1%       | 3 (Good)              |
+| ≤ 5%       | 2 (Needs Improvement) |
+| ≤ 10%      | 1 (Poor)              |
+| > 10%      | 0 (Critical)          |
 
 ```typescript
 import { scoreFromDiffRatio } from '@webui-rubric/checks';
 
-scoreFromDiffRatio(0.003);  // 4
-scoreFromDiffRatio(0.08);   // 1
-scoreFromDiffRatio(0.15);   // 0
+scoreFromDiffRatio(0.003); // 4
+scoreFromDiffRatio(0.08); // 1
+scoreFromDiffRatio(0.15); // 0
 ```
 
 #### `analyzeDiffRegions(diffData, width, height, diffColor): DiffRegion[]`
@@ -264,7 +264,7 @@ import { mapDiffRegionsToElements } from '@webui-rubric/checks';
 const mappedRegions = mapDiffRegionsToElements(
   result.diff_regions,
   captureResult.element_locations,
-  refRgba,           // Uint8Array of reference image RGBA data
+  refRgba, // Uint8Array of reference image RGBA data
   refWidth,
 );
 // Each region has .elements: [{ selector, tagName, styleDiffs: [...] }]
@@ -305,12 +305,17 @@ All DOM check functions take a raw HTML string (the output of `captureDomSnapsho
 
 ```typescript
 interface StructuralCheckResult {
-  score: number;            // 0–4 anchor scale
-  evidence: string;         // ≤300 chars
-  evidence_source: string;  // "dom.{check-id}"
-  severity: number;         // 4 - score
+  score: number; // 0–4 anchor scale
+  evidence: string; // ≤300 chars
+  evidence_source: string; // "dom.{check-id}"
+  severity: number; // 4 - score
   suggested_fix: string[];
-  location: { type: 'selector'; selector: string | null; bounding_box: null; viewport: null; } | null;
+  location: {
+    type: 'selector';
+    selector: string | null;
+    bounding_box: null;
+    viewport: null;
+  } | null;
 }
 ```
 
@@ -319,36 +324,36 @@ interface StructuralCheckResult {
 Counts heading level skips (e.g., `h1` followed by `h3`). Maps to `evidence_source: 'dom.heading-order'`.
 
 | Skips | Score |
-|---|---|
-| 0 | 4 |
-| 1 | 3 |
-| 2 | 2 |
-| 3–5 | 1 |
-| >5 | 0 |
+| ----- | ----- |
+| 0     | 4     |
+| 1     | 3     |
+| 2     | 2     |
+| 3–5   | 1     |
+| >5    | 0     |
 
 #### `checkLandmarkUsage(html): StructuralCheckResult`
 
 Counts the presence of the four core HTML5 semantic landmark elements: `<main>`, `<nav>`, `<header>`, `<footer>`. Maps to `evidence_source: 'dom.landmark-usage'`.
 
 | Landmarks found | Score |
-|---|---|
-| ≥4 | 4 |
-| 3 | 3 |
-| 2 | 2 |
-| 1 | 1 |
-| 0 | 0 |
+| --------------- | ----- |
+| ≥4              | 4     |
+| 3               | 3     |
+| 2               | 2     |
+| 1               | 1     |
+| 0               | 0     |
 
 #### `checkLinkDescriptiveness(html): StructuralCheckResult`
 
 Measures the percentage of links containing generic text such as "click here", "read more", "learn more", "here". Maps to `evidence_source: 'dom.link-descriptiveness'`.
 
 | Generic link % | Score |
-|---|---|
-| ≤1% | 4 |
-| ≤5% | 3 |
-| ≤15% | 2 |
-| ≤50% | 1 |
-| >50% | 0 |
+| -------------- | ----- |
+| ≤1%            | 4     |
+| ≤5%            | 3     |
+| ≤15%           | 2     |
+| ≤50%           | 1     |
+| >50%           | 0     |
 
 #### `checkImageAlt(html): StructuralCheckResult`
 
@@ -372,7 +377,7 @@ All CSS check functions take a `ComputedStylesSnapshot` (from `captureComputedSt
 interface CssCheckResult {
   score: number;
   evidence: string;
-  evidence_source: string;  // "css.{check-id}"
+  evidence_source: string; // "css.{check-id}"
   severity: number;
   suggested_fix: string[];
   location: null;
@@ -384,36 +389,36 @@ interface CssCheckResult {
 Counts distinct colors across `color`, `background-color`, and `border-color` properties of all elements. Fewer colors = better design system consistency. Maps to `evidence_source: 'css.unique-color-count'`.
 
 | Distinct colors | Score |
-|---|---|
-| ≤5 | 4 |
-| ≤10 | 3 |
-| ≤20 | 2 |
-| ≤30 | 1 |
-| >30 | 0 |
+| --------------- | ----- |
+| ≤5              | 4     |
+| ≤10             | 3     |
+| ≤20             | 2     |
+| ≤30             | 1     |
+| >30             | 0     |
 
 #### `checkFontFamilyCount(styles): CssCheckResult`
 
 Counts distinct primary font families across all elements. Fewer families = better typographic consistency. Maps to `evidence_source: 'css.font-family-count'`.
 
 | Distinct font families | Score |
-|---|---|
-| ≤2 | 4 |
-| ≤3 | 3 |
-| ≤4 | 2 |
-| ≤6 | 1 |
-| >6 | 0 |
+| ---------------------- | ----- |
+| ≤2                     | 4     |
+| ≤3                     | 3     |
+| ≤4                     | 2     |
+| ≤6                     | 1     |
+| >6                     | 0     |
 
 #### `checkSpacingConsistency(styles): CssCheckResult`
 
 Counts distinct spacing values (`padding`, `margin` properties) across all elements. Fewer variants = more consistent spacing. Maps to `evidence_source: 'css.spacing-consistency'`.
 
 | Spacing variants | Score |
-|---|---|
-| ≤5 | 4 |
-| ≤15 | 3 |
-| ≤30 | 2 |
-| ≤50 | 1 |
-| >50 | 0 |
+| ---------------- | ----- |
+| ≤5               | 4     |
+| ≤15              | 3     |
+| ≤30              | 2     |
+| ≤50              | 1     |
+| >50              | 0     |
 
 ---
 
@@ -424,24 +429,24 @@ Counts distinct spacing values (`padding`, `margin` properties) across all eleme
 Counts `console.error` and `console.warn` entries captured during page load. Takes `CapturedConsoleEntry[]` from `setupConsoleCapture`. Maps to `evidence_source: 'console.error-count'`.
 
 | Errors | Score |
-|---|---|
-| 0 | 4 |
-| ≤2 | 3 |
-| ≤5 | 2 |
-| ≤10 | 1 |
-| >10 | 0 |
+| ------ | ----- |
+| 0      | 4     |
+| ≤2     | 3     |
+| ≤5     | 2     |
+| ≤10    | 1     |
+| >10    | 0     |
 
 #### `checkResourceCount(har): RuntimeCheckResult`
 
 Counts total network requests in the HAR. Fewer requests = better resource efficiency. Takes the raw HAR object from `readHarFile`. Maps to `evidence_source: 'har.resource-count'`.
 
 | Resources | Score |
-|---|---|
-| ≤25 | 4 |
-| ≤40 | 3 |
-| ≤60 | 2 |
-| ≤100 | 1 |
-| >100 | 0 |
+| --------- | ----- |
+| ≤25       | 4     |
+| ≤40       | 3     |
+| ≤60       | 2     |
+| ≤100      | 1     |
+| >100      | 0     |
 
 ---
 
@@ -452,12 +457,12 @@ Counts total network requests in the HAR. Fewer requests = better resource effic
 Scans the DOM HTML for `:focus-visible` CSS rule references to estimate the percentage of interactive elements with keyboard focus indicators. Maps to `evidence_source: 'playwright.focus-visible'`.
 
 | % with focus indicators | Score |
-|---|---|
-| >90% | 4 |
-| ≤90% | 3 |
-| ≤50% | 2 |
-| ≤25% | 1 |
-| 0 | 0 |
+| ----------------------- | ----- |
+| >90%                    | 4     |
+| ≤90%                    | 3     |
+| ≤50%                    | 2     |
+| ≤25%                    | 1     |
+| 0                       | 0     |
 
 ---
 
@@ -465,33 +470,33 @@ Scans the DOM HTML for `:focus-visible` CSS rule references to estimate the perc
 
 Each rubric sub-criterion is bound to exactly one `check_family.check_id`. This table maps the check IDs exported from this package to their corresponding sub-criteria:
 
-| `evidence_source` | Sub-criterion ID | Dimension |
-|---|---|---|
-| `axe.color-contrast` | `accessibility.color-contrast` | accessibility |
-| `dom.image-alt` | `accessibility.image-alt` | accessibility |
-| `dom.form-labels` | `accessibility.form-labels` | accessibility |
-| `axe.aria-valid-attr` | `accessibility.aria-valid` | accessibility |
-| `dom.heading-order` | `accessibility.heading-order` | accessibility |
-| `dom.heading-order` | `content_ia.heading-structure` | content_ia |
-| `dom.landmark-usage` | `content_ia.landmark-usage` | content_ia |
-| `playwright.focus-visible` | `usability.focus-visible` | usability |
-| `dom.link-descriptiveness` | `usability.link-descriptiveness` | usability |
-| `lighthouse.lcp` | `performance.lcp` | performance |
-| `lighthouse.fcp` | `performance.fcp` | performance |
-| `lighthouse.cls` | `performance.cls` | performance |
-| `lighthouse.tbt` | `performance.tbt` | performance |
-| `har.resource-count` | `performance.resource-efficiency` | performance |
-| `console.error-count` | `code_quality.console-errors` | code_quality |
-| `css.unique-color-count` | `visual_design.color-harmony` | visual_design |
-| `css.unique-color-count` | `consistency.color-count` | consistency |
-| `css.font-family-count` | `consistency.font-family-count` | consistency |
-| `css.spacing-consistency` | `layout.spacing-consistency` | layout |
-| `dom.meta-viewport` | `layout.viewport-meta` | layout |
-| `pixelmatch.viewport=desktop` | `visual_design.visual-parity-desktop` | visual_design |
-| `pixelmatch.viewport=mobile` | `layout.visual-parity-mobile` | layout |
-| `pixelmatch.viewport=desktop` | `brand.visual-parity-brand` | brand |
-| `pixelmatch.viewport=desktop` | `consistency.visual-parity-consistency` | consistency |
-| `playwright.focus-visible` | `microinteractions.focus-states` | microinteractions |
+| `evidence_source`             | Sub-criterion ID                        | Dimension         |
+| ----------------------------- | --------------------------------------- | ----------------- |
+| `axe.color-contrast`          | `accessibility.color-contrast`          | accessibility     |
+| `dom.image-alt`               | `accessibility.image-alt`               | accessibility     |
+| `dom.form-labels`             | `accessibility.form-labels`             | accessibility     |
+| `axe.aria-valid-attr`         | `accessibility.aria-valid`              | accessibility     |
+| `dom.heading-order`           | `accessibility.heading-order`           | accessibility     |
+| `dom.heading-order`           | `content_ia.heading-structure`          | content_ia        |
+| `dom.landmark-usage`          | `content_ia.landmark-usage`             | content_ia        |
+| `playwright.focus-visible`    | `usability.focus-visible`               | usability         |
+| `dom.link-descriptiveness`    | `usability.link-descriptiveness`        | usability         |
+| `lighthouse.lcp`              | `performance.lcp`                       | performance       |
+| `lighthouse.fcp`              | `performance.fcp`                       | performance       |
+| `lighthouse.cls`              | `performance.cls`                       | performance       |
+| `lighthouse.tbt`              | `performance.tbt`                       | performance       |
+| `har.resource-count`          | `performance.resource-efficiency`       | performance       |
+| `console.error-count`         | `code_quality.console-errors`           | code_quality      |
+| `css.unique-color-count`      | `visual_design.color-harmony`           | visual_design     |
+| `css.unique-color-count`      | `consistency.color-count`               | consistency       |
+| `css.font-family-count`       | `consistency.font-family-count`         | consistency       |
+| `css.spacing-consistency`     | `layout.spacing-consistency`            | layout            |
+| `dom.meta-viewport`           | `layout.viewport-meta`                  | layout            |
+| `pixelmatch.viewport=desktop` | `visual_design.visual-parity-desktop`   | visual_design     |
+| `pixelmatch.viewport=mobile`  | `layout.visual-parity-mobile`           | layout            |
+| `pixelmatch.viewport=desktop` | `brand.visual-parity-brand`             | brand             |
+| `pixelmatch.viewport=desktop` | `consistency.visual-parity-consistency` | consistency       |
+| `playwright.focus-visible`    | `microinteractions.focus-states`        | microinteractions |
 
 ---
 
@@ -510,18 +515,18 @@ import {
 
 // After capturePage:
 const domChecks = {
-  'dom.heading-order':  checkHeadingOrder(captureResult.dom_snapshot),
+  'dom.heading-order': checkHeadingOrder(captureResult.dom_snapshot),
   'dom.landmark-usage': checkLandmarkUsage(captureResult.dom_snapshot),
 };
 
 const cssChecks = {
   'css.unique-color-count': checkUniqueColorCount(captureResult.computed_styles),
-  'css.font-family-count':  checkFontFamilyCount(captureResult.computed_styles),
+  'css.font-family-count': checkFontFamilyCount(captureResult.computed_styles),
 };
 
 const runtimeChecks = {
   'console.error-count': checkConsoleErrors(captureResult.console_errors),
-  'har.resource-count':  checkResourceCount(captureResult.har),
+  'har.resource-count': checkResourceCount(captureResult.har),
 };
 
 // Lighthouse (async, launches Chrome)
