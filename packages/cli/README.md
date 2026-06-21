@@ -20,13 +20,13 @@ npx @webui-rubric/cli evaluate https://example.com
 
 ## Dependencies
 
-| Dependency | Version | Purpose |
-|---|---|---|
-| `commander` | `^13.0.0` | CLI argument parsing and command definitions |
-| `yaml` | `^2.6.0` | Parses `.webui-rubric.yml` configuration files |
-| `@webui-rubric/core` | `workspace:*` | Rubric definition, scoring math, config validation, redaction, output validation, logger |
-| `@webui-rubric/capture` | `workspace:*` | Headless browser pipeline (screenshots, DOM, HAR, styles) |
-| `@webui-rubric/checks` | `workspace:*` | All deterministic check adapters |
+| Dependency              | Version       | Purpose                                                                                  |
+| ----------------------- | ------------- | ---------------------------------------------------------------------------------------- |
+| `commander`             | `^13.0.0`     | CLI argument parsing and command definitions                                             |
+| `yaml`                  | `^2.6.0`      | Parses `.webui-rubric.yml` configuration files                                           |
+| `@webui-rubric/core`    | `workspace:*` | Rubric definition, scoring math, config validation, redaction, output validation, logger |
+| `@webui-rubric/capture` | `workspace:*` | Headless browser pipeline (screenshots, DOM, HAR, styles)                                |
+| `@webui-rubric/checks`  | `workspace:*` | All deterministic check adapters                                                         |
 
 ## Package Interactions
 
@@ -57,33 +57,33 @@ webui-rubric evaluate https://example.com [options]
 
 #### Options
 
-| Flag | Type | Default | Description |
-|---|---|---|---|
-| `--config <path>` | string | `.webui-rubric.yml` | Project configuration file path |
-| `--out <path>` | string | — | Write JSON artifact to file (default: stdout) |
-| `--reference <path>` | string | — | Reference design PNG for pixel comparison |
-| `--reference-viewport <name>` | string | `desktop` | Viewport the reference image represents |
-| `--viewports <list>` | string | `desktop,mobile` | Comma-separated viewport names to capture |
-| `--debug-dir <path>` | string | — | Persist debug artifacts (screenshots, DOM, HAR, diff PNGs) |
-| `--iteration <n>` | integer | — | Loop iteration index (for Evaluator/Generator loops) |
-| `--previous-composite <n>` | float | — | Previous run's composite score (for delta computation) |
-| `--attempted-fixes <path>` | string | — | Path to JSON array of attempted fix hashes (oscillation prevention) |
-| `--allow-overrun` | boolean | `false` | Permit iterations beyond `iteration_cap` |
-| `--allow-tool-version-drift` | boolean | `false` | Proceed when installed tool versions differ from rubric pins |
-| `--no-redact` | boolean | `false` | Disable HAR/DOM/evidence redaction |
-| `--log-level <level>` | string | `info` | Log verbosity: `debug`, `info`, `warn`, `error` |
-| `-q, --quiet` | boolean | `false` | Suppress all logs below `error` |
+| Flag                          | Type    | Default             | Description                                                         |
+| ----------------------------- | ------- | ------------------- | ------------------------------------------------------------------- |
+| `--config <path>`             | string  | `.webui-rubric.yml` | Project configuration file path                                     |
+| `--out <path>`                | string  | —                   | Write JSON artifact to file (default: stdout)                       |
+| `--reference <path>`          | string  | —                   | Reference design PNG for pixel comparison                           |
+| `--reference-viewport <name>` | string  | `desktop`           | Viewport the reference image represents                             |
+| `--viewports <list>`          | string  | `desktop,mobile`    | Comma-separated viewport names to capture                           |
+| `--debug-dir <path>`          | string  | —                   | Persist debug artifacts (screenshots, DOM, HAR, diff PNGs)          |
+| `--iteration <n>`             | integer | —                   | Loop iteration index (for Evaluator/Generator loops)                |
+| `--previous-composite <n>`    | float   | —                   | Previous run's composite score (for delta computation)              |
+| `--attempted-fixes <path>`    | string  | —                   | Path to JSON array of attempted fix hashes (oscillation prevention) |
+| `--allow-overrun`             | boolean | `false`             | Permit iterations beyond `iteration_cap`                            |
+| `--allow-tool-version-drift`  | boolean | `false`             | Proceed when installed tool versions differ from rubric pins        |
+| `--no-redact`                 | boolean | `false`             | Disable HAR/DOM/evidence redaction                                  |
+| `--log-level <level>`         | string  | `info`              | Log verbosity: `debug`, `info`, `warn`, `error`                     |
+| `-q, --quiet`                 | boolean | `false`             | Suppress all logs below `error`                                     |
 
 #### Exit codes
 
-| Code | Meaning |
-|---|---|
-| `0` | Success — JSON artifact emitted |
-| `1` | Runtime error (target unreachable, tool crash, schema validation failure) |
-| `2` | Configuration error (invalid config, weights don't sum to 100, missing anchors) |
-| `3` | Tool version mismatch (installed version ≠ rubric pin; use `--allow-tool-version-drift` to bypass) |
-| `4` | Iteration cap exceeded (use `--allow-overrun` to bypass) |
-| `5` | Precondition failure (auth wall detected, server returned 4xx/5xx, page settlement timeout) |
+| Code | Meaning                                                                                            |
+| ---- | -------------------------------------------------------------------------------------------------- |
+| `0`  | Success — JSON artifact emitted                                                                    |
+| `1`  | Runtime error (target unreachable, tool crash, schema validation failure)                          |
+| `2`  | Configuration error (invalid config, weights don't sum to 100, missing anchors)                    |
+| `3`  | Tool version mismatch (installed version ≠ rubric pin; use `--allow-tool-version-drift` to bypass) |
+| `4`  | Iteration cap exceeded (use `--allow-overrun` to bypass)                                           |
+| `5`  | Precondition failure (auth wall detected, server returned 4xx/5xx, page settlement timeout)        |
 
 ---
 
@@ -140,12 +140,13 @@ Exit codes: `0` (all match), `3` (one or more mismatches).
 
 The routing contract depends on whether `--out` is specified:
 
-| Mode | stdout | stderr |
-|---|---|---|
-| No `--out` | **JSON artifact** | Logs + one-line summary |
-| With `--out <file>` | One-line summary | Logs only |
+| Mode                | stdout            | stderr                  |
+| ------------------- | ----------------- | ----------------------- |
+| No `--out`          | **JSON artifact** | Logs + one-line summary |
+| With `--out <file>` | One-line summary  | Logs only               |
 
 **One-line summary format:**
+
 ```
 score=82 blocking=0 issues=5 ship_ready=true
 ```
@@ -163,7 +164,7 @@ weights:
   visual_design: 10
   layout: 10
   usability: 12
-  accessibility: 15    # floor: 10
+  accessibility: 15 # floor: 10
   content_ia: 8
   performance: 12
   code_quality: 8
@@ -176,7 +177,7 @@ weight_overrides_ack: []
 
 # Toggle blocking status of individual sub-criteria
 blocking_overrides:
-  accessibility.color-contrast: true   # default is already true for WCAG sub-criteria
+  accessibility.color-contrast: true # default is already true for WCAG sub-criteria
 
 # Viewport dimensions (pixels)
 viewports:
@@ -197,13 +198,13 @@ reference_images:
   mobile: ./designs/homepage-mobile.png
 
 # What to do when reference dimensions don't match the screenshot
-reference_image_mismatch_policy: fail-fast   # or "resize"
+reference_image_mismatch_policy: fail-fast # or "resize"
 
 # pixelmatch anti-alias tolerance (0–1)
 pixelmatch_threshold: 0.1
 
 # What to do when a check tool is not available
-tool_fallback_policy: fail-fast   # or "mark-unavailable"
+tool_fallback_policy: fail-fast # or "mark-unavailable"
 
 # Maximum evaluation loop iterations before CLI refuses to proceed
 iteration_cap: 5
@@ -233,7 +234,7 @@ pixel_comparison:
     - '.dynamic-carousel'
     - '[data-ad]'
   mask_color: '#FF00FF'
-  device_pixel_ratio: auto   # or a number: 1, 2, etc.
+  device_pixel_ratio: auto # or a number: 1, 2, etc.
 
 # Add custom sub-criteria to existing dimensions
 custom_sub_criteria:

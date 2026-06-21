@@ -12,9 +12,9 @@ pnpm add @webui-rubric/core
 
 ## Dependencies
 
-| Dependency | Version | Purpose |
-|---|---|---|
-| `zod` | `^3.23.0` | Config and output schema validation |
+| Dependency | Version   | Purpose                             |
+| ---------- | --------- | ----------------------------------- |
+| `zod`      | `^3.23.0` | Config and output schema validation |
 
 No workspace dependencies — this package is the root of the dependency graph.
 
@@ -42,14 +42,14 @@ All shared TypeScript interfaces and type aliases.
 interface RubricDefinition {
   rubric_version: string;
   dimensions: Dimension[];
-  tool_versions: Record<string, string>;   // pinned semver per tool family
+  tool_versions: Record<string, string>; // pinned semver per tool family
 }
 
 interface Dimension {
   id: string;
   name: string;
   default_weight: number;
-  weight_floor: number | null;             // minimum allowed weight (accessibility = 10)
+  weight_floor: number | null; // minimum allowed weight (accessibility = 10)
   sub_criteria: SubCriterion[];
 }
 
@@ -58,30 +58,36 @@ interface SubCriterion {
   name: string;
   description: string;
   bound_check: BoundCheck;
-  anchors: AnchorTuple;                    // exactly 5 descriptors (scores 0–4)
-  blocking_if_zero: boolean;               // true → WCAG blocking
-  visual_parity: boolean;                  // true → requires reference image
-  references: string[];                    // e.g. ["WCAG 2.2 §1.4.3"]
+  anchors: AnchorTuple; // exactly 5 descriptors (scores 0–4)
+  blocking_if_zero: boolean; // true → WCAG blocking
+  visual_parity: boolean; // true → requires reference image
+  references: string[]; // e.g. ["WCAG 2.2 §1.4.3"]
 }
 
 interface BoundCheck {
-  check_family: string;     // "axe" | "lighthouse" | "pixelmatch" | "dom" | "css" | "console" | "har" | "playwright"
-  check_id: string;         // family-specific identifier
-  full_id: string;          // "{family}.{id}", e.g. "axe.color-contrast"
-  threshold_map: Record<number, ThresholdRange>;  // score (0–4) → threshold
+  check_family: string; // "axe" | "lighthouse" | "pixelmatch" | "dom" | "css" | "console" | "har" | "playwright"
+  check_id: string; // family-specific identifier
+  full_id: string; // "{family}.{id}", e.g. "axe.color-contrast"
+  threshold_map: Record<number, ThresholdRange>; // score (0–4) → threshold
   pinned_tool_version: string;
-  fix_template: string;     // ≤280 chars
+  fix_template: string; // ≤280 chars
   severity_map: SeverityMapping;
 }
 
 interface AnchorDescriptor {
-  score: AnchorScore;       // 0 | 1 | 2 | 3 | 4
+  score: AnchorScore; // 0 | 1 | 2 | 3 | 4
   label: string;
   description: string;
   threshold: ThresholdRange;
 }
 
-type AnchorTuple = [AnchorDescriptor, AnchorDescriptor, AnchorDescriptor, AnchorDescriptor, AnchorDescriptor];
+type AnchorTuple = [
+  AnchorDescriptor,
+  AnchorDescriptor,
+  AnchorDescriptor,
+  AnchorDescriptor,
+  AnchorDescriptor,
+];
 type AnchorScore = 0 | 1 | 2 | 3 | 4;
 
 interface ThresholdRange {
@@ -100,15 +106,15 @@ type SeverityMapping = Record<string, AnchorScore>;
 interface EvaluationResult {
   schema_version: string;
   rubric_version: string;
-  run_id: string;               // UUID v4
-  timestamp: string;            // ISO 8601
+  run_id: string; // UUID v4
+  timestamp: string; // ISO 8601
   target: TargetReference;
-  composite_score: number;      // 0–100 weighted average
+  composite_score: number; // 0–100 weighted average
   ship_ready: boolean;
-  no_progress: boolean;         // true when delta < 3
+  no_progress: boolean; // true when delta < 3
   blocking: BlockingEntry[];
   dimensions: DimensionResult[];
-  top_issues: TopIssue[];       // priority-sorted, capped at N
+  top_issues: TopIssue[]; // priority-sorted, capped at N
   pixel_comparison: PixelComparisonResult | null;
   meta: EvaluationMeta;
 }
@@ -117,7 +123,7 @@ interface DimensionResult {
   id: string;
   name: string;
   weight: number;
-  score: number;                // 0–100
+  score: number; // 0–100
   sub_criteria: SubCriterionFinding[];
   applicable_count: number;
   excluded_count: number;
@@ -127,13 +133,13 @@ interface SubCriterionFinding {
   id: string;
   name: string;
   score: number | null;
-  status: FindingStatus;        // "scored" | "not_applicable" | "tool_unavailable"
-  evidence: string;             // ≤300 chars
-  evidence_source: string;      // e.g. "axe.color-contrast"
-  severity: number;             // 0–4 Nielsen scale
+  status: FindingStatus; // "scored" | "not_applicable" | "tool_unavailable"
+  evidence: string; // ≤300 chars
+  evidence_source: string; // e.g. "axe.color-contrast"
+  severity: number; // 0–4 Nielsen scale
   suggested_fix: string[];
   location: LocationReference | null;
-  confidence: Confidence;       // "deterministic" | "predicted"
+  confidence: Confidence; // "deterministic" | "predicted"
 }
 
 interface BlockingEntry {
@@ -142,18 +148,18 @@ interface BlockingEntry {
   wcag_ref: string;
   evidence: string;
   location: LocationReference | null;
-  severity: number;             // always 4 for blocking entries
+  severity: number; // always 4 for blocking entries
 }
 
 interface TopIssue {
   rank: number;
   criterion_id: string;
   dimension_id: string;
-  priority_score: number;       // dimension_weight × severity
+  priority_score: number; // dimension_weight × severity
   score: number;
   severity: number;
   fix: string[];
-  fix_hash: string;             // SHA-256 of fix text (oscillation prevention)
+  fix_hash: string; // SHA-256 of fix text (oscillation prevention)
   expected_impact: string | null;
 }
 ```
@@ -163,40 +169,43 @@ interface TopIssue {
 ```typescript
 interface ProjectConfig {
   rubric_version?: string;
-  weights?: Record<string, number>;           // must sum to 100
-  weight_overrides_ack?: string[];            // dimension IDs acknowledging floor override
+  weights?: Record<string, number>; // must sum to 100
+  weight_overrides_ack?: string[]; // dimension IDs acknowledging floor override
   blocking_overrides?: Record<string, boolean>;
   custom_sub_criteria?: CustomSubCriterion[];
   viewports?: ViewportConfig;
-  reference_images?: Record<string, string>;  // viewport name → PNG path
+  reference_images?: Record<string, string>; // viewport name → PNG path
   reference_image_mismatch_policy?: 'fail-fast' | 'resize';
-  pixelmatch_threshold?: number;              // 0–1, default 0.1
+  pixelmatch_threshold?: number; // 0–1, default 0.1
   tool_fallback_policy?: 'fail-fast' | 'mark-unavailable';
-  iteration_cap?: number;                     // default 5
-  ship_threshold?: number;                    // default 75
-  top_issues_cap?: number;                    // default 10
-  settle_timeout_ms?: number;                 // default 30000
-  redaction?: boolean;                        // default true
+  iteration_cap?: number; // default 5
+  ship_threshold?: number; // default 75
+  top_issues_cap?: number; // default 10
+  settle_timeout_ms?: number; // default 30000
+  redaction?: boolean; // default true
   capture?: CaptureConfig;
   pixel_comparison?: PixelComparisonConfig;
 }
 
 interface ViewportConfig {
-  desktop: ViewportDimensions;   // default 1280×800
-  mobile: ViewportDimensions;    // default 375×812
+  desktop: ViewportDimensions; // default 1280×800
+  mobile: ViewportDimensions; // default 375×812
   custom?: Record<string, ViewportDimensions>;
 }
 
-interface ViewportDimensions { width: number; height: number; }
+interface ViewportDimensions {
+  width: number;
+  height: number;
+}
 
 interface CaptureConfig {
-  dismiss_selectors?: string[];  // CSS selectors for consent banner dismiss buttons
-  auto_dismiss?: boolean;        // default true
+  dismiss_selectors?: string[]; // CSS selectors for consent banner dismiss buttons
+  auto_dismiss?: boolean; // default true
 }
 
 interface PixelComparisonConfig {
   mask_selectors?: string[];
-  mask_color?: string;           // hex color, default "#FF00FF"
+  mask_color?: string; // hex color, default "#FF00FF"
   device_pixel_ratio?: 'auto' | number;
 }
 
@@ -328,7 +337,10 @@ interface EvaluationMeta {
   duration_ms: number;
 }
 
-interface ToolVersionEntry { pinned: string; resolved: string; }
+interface ToolVersionEntry {
+  pinned: string;
+  resolved: string;
+}
 
 interface EffectiveConfig {
   weights: Record<string, number>;
@@ -360,34 +372,34 @@ The singleton rubric definition for version 1.0.0. Includes all 10 dimensions wi
 ```typescript
 import { V1_RUBRIC } from '@webui-rubric/core';
 
-V1_RUBRIC.rubric_version;   // "1.0.0"
-V1_RUBRIC.dimensions;       // 10 Dimension objects
-V1_RUBRIC.tool_versions;    // { "axe-core": "4.10.2", "lighthouse": "12.2.1", ... }
+V1_RUBRIC.rubric_version; // "1.0.0"
+V1_RUBRIC.dimensions; // 10 Dimension objects
+V1_RUBRIC.tool_versions; // { "axe-core": "4.10.2", "lighthouse": "12.2.1", ... }
 ```
 
 **Dimensions and default weights:**
 
-| ID | Name | Weight | Weight Floor |
-|---|---|---|---|
-| `visual_design` | Visual Design & Aesthetics | 10 | — |
-| `layout` | Layout & Responsiveness | 10 | — |
-| `usability` | Usability & Interaction Design | 12 | — |
-| `accessibility` | Accessibility — WCAG 2.2 | 15 | 10 |
-| `content_ia` | Content & Information Architecture | 8 | — |
-| `performance` | Performance & Technical Quality | 12 | — |
-| `code_quality` | Code Quality — UI relevant | 8 | — |
-| `brand` | Brand & Emotional Design | 5 | — |
-| `consistency` | Consistency & Design System Adherence | 10 | — |
-| `microinteractions` | Microinteractions, Motion & States | 10 | — |
+| ID                  | Name                                  | Weight | Weight Floor |
+| ------------------- | ------------------------------------- | ------ | ------------ |
+| `visual_design`     | Visual Design & Aesthetics            | 10     | —            |
+| `layout`            | Layout & Responsiveness               | 10     | —            |
+| `usability`         | Usability & Interaction Design        | 12     | —            |
+| `accessibility`     | Accessibility — WCAG 2.2              | 15     | 10           |
+| `content_ia`        | Content & Information Architecture    | 8      | —            |
+| `performance`       | Performance & Technical Quality       | 12     | —            |
+| `code_quality`      | Code Quality — UI relevant            | 8      | —            |
+| `brand`             | Brand & Emotional Design              | 5      | —            |
+| `consistency`       | Consistency & Design System Adherence | 10     | —            |
+| `microinteractions` | Microinteractions, Motion & States    | 10     | —            |
 
 **Pinned tool versions:**
 
-| Tool | Pinned version |
-|---|---|
-| `axe-core` | 4.10.2 |
-| `lighthouse` | 12.2.1 |
-| `pixelmatch` | 7.1.0 |
-| `playwright` | 1.52.0 |
+| Tool         | Pinned version |
+| ------------ | -------------- |
+| `axe-core`   | 4.10.2         |
+| `lighthouse` | 12.2.1         |
+| `pixelmatch` | 7.1.0          |
+| `playwright` | 1.52.0         |
 
 ---
 
@@ -415,9 +427,9 @@ Computes Nielsen severity (0–4) from an anchor score. Default formula: `severi
 ```typescript
 import { assignSeverity } from '@webui-rubric/core';
 
-assignSeverity(4, {});           // 0 — no issue
-assignSeverity(0, {});           // 4 — catastrophic
-assignSeverity(2, { "2": 3 });   // 3 — explicit override
+assignSeverity(4, {}); // 0 — no issue
+assignSeverity(0, {}); // 4 — catastrophic
+assignSeverity(2, { '2': 3 }); // 3 — explicit override
 ```
 
 #### `computeDimensionScore(findings): { score, applicable_count, excluded_count }`
@@ -489,6 +501,7 @@ if (!valid) process.exit(2);
 ```
 
 `ValidationResult`:
+
 ```typescript
 interface ValidationResult {
   valid: boolean;
@@ -504,7 +517,7 @@ Validates that dimension weights sum to 100 and that no dimension falls below it
 ```typescript
 import { validateWeights, V1_RUBRIC } from '@webui-rubric/core';
 
-const errors = validateWeights({ accessibility: 8, /* ... */ }, V1_RUBRIC, ['accessibility']);
+const errors = validateWeights({ accessibility: 8 /* ... */ }, V1_RUBRIC, ['accessibility']);
 // [] if ack includes 'accessibility', otherwise error about weight floor
 ```
 
@@ -535,6 +548,7 @@ if (!valid) {
 ```
 
 `OutputValidationResult`:
+
 ```typescript
 interface OutputValidationResult {
   valid: boolean;
@@ -611,8 +625,8 @@ Returns `true` unless `config.redaction` is explicitly `false`. Redaction is on 
 ```typescript
 import { isRedactionEnabled } from '@webui-rubric/core';
 
-isRedactionEnabled({});                    // true
-isRedactionEnabled({ redaction: false });  // false
+isRedactionEnabled({}); // true
+isRedactionEnabled({ redaction: false }); // false
 ```
 
 ---
@@ -637,6 +651,7 @@ const loopInput = await parseLoopInput({
 ```
 
 `LoopInput`:
+
 ```typescript
 interface LoopInput {
   iteration: number | null;
@@ -666,6 +681,7 @@ Returns `true` when `Math.abs(delta) < 3`, signalling that the loop is not makin
 Checks whether the current iteration exceeds the configured cap. Returns `{ exceeded: boolean, message?: string }`. When exceeded and `allowOverrun` is false, the CLI exits with code 4.
 
 `CapCheckResult`:
+
 ```typescript
 interface CapCheckResult {
   exceeded: boolean;
@@ -697,8 +713,8 @@ Sets the minimum severity level. Messages below this level are suppressed. Defau
 ```typescript
 import { setLogLevel } from '@webui-rubric/core';
 
-setLogLevel('debug');   // show all messages
-setLogLevel('warn');    // only warn and error
+setLogLevel('debug'); // show all messages
+setLogLevel('warn'); // only warn and error
 ```
 
 #### `setQuiet(quiet: boolean): void`
@@ -708,7 +724,7 @@ When `true`, suppresses all messages except `error`, regardless of the configure
 ```typescript
 import { setQuiet } from '@webui-rubric/core';
 
-setQuiet(true);   // only errors emitted
+setQuiet(true); // only errors emitted
 ```
 
 **Log format:** `[ISO-8601] [LEVEL] message\n`
@@ -727,7 +743,7 @@ import {
   type SubCriterionFinding,
 } from '@webui-rubric/core';
 
-const accessibilityDimension = V1_RUBRIC.dimensions.find(d => d.id === 'accessibility')!;
+const accessibilityDimension = V1_RUBRIC.dimensions.find((d) => d.id === 'accessibility')!;
 
 const findings: SubCriterionFinding[] = [
   {
@@ -746,7 +762,7 @@ const findings: SubCriterionFinding[] = [
 ];
 
 const result = buildDimensionResult(accessibilityDimension, findings, 15);
-console.log(result.score);  // 0-100
+console.log(result.score); // 0-100
 ```
 
 ### Validate a config file

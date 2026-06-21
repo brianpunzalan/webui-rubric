@@ -105,6 +105,22 @@ const PixelComparisonResultSchema = z
   })
   .nullable();
 
+const ArtifactViewportImagesSchema = z.object({
+  viewport: z.string(),
+  reference: z.string(),
+  screenshot: z.string(),
+  diff: z.string(),
+  composite: z.string(),
+  regions: z.array(z.string()),
+});
+
+const ArtifactReferenceSchema = z.object({
+  dir: z.string(),
+  manifest_path: z.string(),
+  report_path: z.string(),
+  viewports: z.array(ArtifactViewportImagesSchema),
+});
+
 const EffectiveConfigSchema = z.object({
   weights: z.record(z.string(), z.number()),
   blocking_toggles: z.record(z.string(), z.boolean()),
@@ -156,6 +172,7 @@ export const EvaluationResultSchema = z.object({
   dimensions: z.array(DimensionResultSchema).length(10),
   top_issues: z.array(TopIssueSchema),
   pixel_comparison: PixelComparisonResultSchema,
+  artifact: ArtifactReferenceSchema.optional(),
   meta: EvaluationMetaSchema,
 });
 
