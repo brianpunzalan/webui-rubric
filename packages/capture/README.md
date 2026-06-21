@@ -46,7 +46,7 @@ The primary consumer is `@webui-rubric/cli`, which calls `capturePage` and then 
 
 #### `capturePage(url, options?): Promise<CaptureResult>`
 
-Runs the full capture pipeline in a single call. Launches a headless Chromium browser, navigates to `url`, stabilizes the page, optionally dismisses consent banners, and captures all artifacts before closing the browser.
+Runs the full capture pipeline in a single call. Launches a headless Playwright browser (Chromium by default), navigates to `url`, stabilizes the page, optionally dismisses consent banners, and captures all artifacts before closing the browser.
 
 **`CaptureOptions`:**
 
@@ -58,6 +58,7 @@ interface CaptureOptions {
   deviceScaleFactor?: number; // Device pixel ratio (e.g. 2 for Retina). Default: 1
   dismissSelectors?: string[]; // CSS selectors for consent banner dismiss buttons
   autoDismiss?: boolean; // Auto-click consent banners. Default: true
+  browser?: 'chromium' | 'firefox' | 'webkit'; // Playwright engine. Default: 'chromium'
 }
 ```
 
@@ -151,6 +152,10 @@ await closeBrowser(session);
 #### `closeBrowser(session): Promise<void>`
 
 Closes the browser context and browser. Safe to call even if the session is in an error state.
+
+#### `chromiumExecutablePath(): string | undefined`
+
+Returns the path to Playwright's bundled Chromium executable, or `undefined` if it cannot be resolved (e.g. the binary was never installed). This lets Chromium-only tools such as Lighthouse reuse Playwright's Chromium regardless of which engine capture runs on — see `@webui-rubric/checks`'s `runLighthouseChecks`.
 
 ---
 

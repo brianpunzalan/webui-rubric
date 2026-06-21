@@ -88,6 +88,18 @@ describe('config validation', () => {
       expect(result.valid).toBe(false);
       expect(result.errors.length).toBeGreaterThan(0);
     });
+
+    it('accepts a valid capture.browser engine', () => {
+      const result = validateProjectConfig({ capture: { browser: 'firefox' } });
+      expect(result.valid).toBe(true);
+      expect(result.config?.capture?.browser).toBe('firefox');
+    });
+
+    it('rejects an unknown capture.browser engine', () => {
+      const result = validateProjectConfig({ capture: { browser: 'safari' } });
+      expect(result.valid).toBe(false);
+      expect(result.errors.length).toBeGreaterThan(0);
+    });
   });
 
   // =========================================================================
