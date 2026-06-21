@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.10] - 2026-06-21
+
+### Documentation
+
+- docs: document --artifact-dir bundle across READMEs (`6fa84b8`)
+
+### Chores
+
+- chore: add changeset for artifact-dir documentation (`318cdf7`)
+
 ## [0.1.9] - 2026-06-21
 
 ### Other Changes

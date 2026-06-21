@@ -1,5 +1,19 @@
 # @webui-rubric/capture
 
+## 0.1.10
+
+### Patch Changes
+
+- ### Documentation
+  - docs: document --artifact-dir bundle across READMEs (`6fa84b8`)
+
+  ### Chores
+  - chore: add changeset for artifact-dir documentation (`318cdf7`)
+
+- Updated dependencies
+- Updated dependencies [318cdf7]
+  - @webui-rubric/core@0.1.10
+
 ## 0.1.9
 
 ### Patch Changes

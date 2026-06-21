@@ -1,5 +1,22 @@
 # @webui-rubric/cli
 
+## 0.1.10
+
+### Patch Changes
+
+- ### Documentation
+  - docs: document --artifact-dir bundle across READMEs (`6fa84b8`)
+
+  ### Chores
+  - chore: add changeset for artifact-dir documentation (`318cdf7`)
+
+- 318cdf7: Document the `--artifact-dir` evaluation-results bundle across the package and global READMEs. Adds the `--artifact-dir` option and bundle layout to the CLI docs, documents the new `buildSideBySide`/`cropStrip` exports and `PixelComparisonOutput.diff_buffer` field in `@webui-rubric/checks`, and documents the `ArtifactReference`/`ArtifactViewportImages` types, the optional `artifact` field on `EvaluationResult`, and the `schema_version` 1.1.0 bump in `@webui-rubric/core`.
+- Updated dependencies
+- Updated dependencies [318cdf7]
+  - @webui-rubric/capture@0.1.10
+  - @webui-rubric/checks@0.1.10
+  - @webui-rubric/core@0.1.10
+
 ## 0.1.9
 
 ### Patch Changes
