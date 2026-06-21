@@ -116,6 +116,7 @@ interface EvaluationResult {
   dimensions: DimensionResult[];
   top_issues: TopIssue[]; // priority-sorted, capped at N
   pixel_comparison: PixelComparisonResult | null;
+  artifact?: ArtifactReference; // present only when the CLI ran with --artifact-dir
   meta: EvaluationMeta;
 }
 
@@ -161,6 +162,30 @@ interface TopIssue {
   fix: string[];
   fix_hash: string; // SHA-256 of fix text (oscillation prevention)
   expected_impact: string | null;
+}
+```
+
+`schema_version` is `1.1.0`, which adds the optional `artifact` block (below). Results without an artifact bundle remain backward-compatible.
+
+#### Artifact reference
+
+Populated by `@webui-rubric/cli` when the `evaluate` command runs with `--artifact-dir` (and a reference comparison). All paths are relative to `dir`, so the bundle is portable.
+
+```typescript
+interface ArtifactReference {
+  dir: string; // absolute path to the bundle directory
+  manifest_path: string; // relative path to manifest.json
+  report_path: string; // relative path to report.html
+  viewports: ArtifactViewportImages[];
+}
+
+interface ArtifactViewportImages {
+  viewport: string;
+  reference: string; // relative path to reference-<viewport>.png
+  screenshot: string; // relative path to screenshot-<viewport>.png
+  diff: string; // relative path to diff-<viewport>.png
+  composite: string; // relative path to composite-<viewport>.png
+  regions: string[]; // relative paths to regions/region-<viewport>-<n>.png crops
 }
 ```
 
@@ -531,7 +556,7 @@ Validates custom sub-criterion definitions. Each must have exactly 5 anchor desc
 
 #### `EvaluationResultSchema`
 
-Zod schema for the complete `EvaluationResult` JSON artifact. Used internally by `validateOutput`.
+Zod schema (output `schema_version` `1.1.0`) for the complete `EvaluationResult` JSON artifact, including the optional `artifact` block. Used internally by `validateOutput`.
 
 #### `validateOutput(result): OutputValidationResult`
 

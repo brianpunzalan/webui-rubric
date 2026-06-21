@@ -180,7 +180,7 @@ scoreFromMetric(800, lcpMetric.thresholds); // 4 (≤1200ms)
 
 #### `runPixelmatch(input): PixelComparisonOutput`
 
-Synchronously compares a screenshot PNG against a reference PNG using `pixelmatch`. Optionally writes the diff PNG to disk. Returns diff statistics and detected diff regions.
+Synchronously compares a screenshot PNG against a reference PNG using `pixelmatch`. Optionally writes the diff PNG to disk. Returns diff statistics, detected diff regions, and the in-memory diff PNG (`diff_buffer`) so composites and region crops can be built without a disk round-trip.
 
 ```typescript
 interface PixelComparisonInput {
@@ -196,6 +196,7 @@ interface PixelComparisonOutput {
   diff_ratio: number; // diff_pixel_count / total_pixel_count
   threshold: number; // threshold used
   diff_png_path: string | null;
+  diff_buffer: Buffer; // in-memory diff PNG (always present)
   screenshot_dimensions: { width: number; height: number };
   reference_dimensions: { width: number; height: number };
   diff_regions: DiffRegion[];
@@ -296,6 +297,14 @@ interface ViewportComparisonInput {
   diffOutputPath?: string | null;
 }
 ```
+
+#### `buildSideBySide(referenceBuffer, screenshotBuffer, diffBuffer): Buffer`
+
+Stitches the reference, screenshot, and diff PNGs horizontally into a single composite image, always in the order **reference | screenshot | diff**, with a labeled band and gutter above each panel as a visual separator. The three inputs must share identical pixel dimensions (guaranteed by the dimension-match check upstream). Returns the composite as a PNG `Buffer`. Used by `@webui-rubric/cli` to build the `composite-<viewport>.png` in the evaluation-results artifact bundle.
+
+#### `cropStrip(sourceBuffer, yStart, yEnd): Buffer`
+
+Crops a full-width horizontal strip `[yStart, yEnd)` from a PNG buffer, clamping the bounds to the source height. Diff regions are horizontal bands, so this isolates the rows that changed most. Returns the cropped strip as a PNG `Buffer`; used to render the per-region `regions/region-<viewport>-<n>.png` crops in the artifact bundle.
 
 ---
 

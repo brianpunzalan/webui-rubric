@@ -19,6 +19,9 @@ webui-rubric evaluate https://example.com --debug-dir ./debug-output
 
 # Pixel comparison against a reference design
 webui-rubric evaluate https://example.com --reference ./design/homepage.png
+
+# Generate a self-contained evaluation-results bundle (images + manifest + HTML report)
+webui-rubric evaluate https://example.com --reference ./design/homepage.png --artifact-dir ./eval-results
 ```
 
 ### Prerequisites
@@ -34,6 +37,7 @@ webui-rubric evaluate https://example.com --reference ./design/homepage.png
 - Generator-consumable output with blocking list, top issues, and ship-ready indicator
 - Per-project configuration via YAML (custom weights, thresholds, viewports)
 - Pixel-level comparison against reference design images
+- Curated evaluation-results artifact bundle (`--artifact-dir`): reference/screenshot/diff/composite images, per-region crops, a `manifest.json`, and an offline HTML report for Evaluator/Generator agents
 - Iterative loop metadata for convergence tracking (delta, attempted-fix deduplication, iteration cap)
 
 ## Architecture
@@ -55,7 +59,7 @@ pnpm workspaces monorepo with 4 packages:
 webui-rubric evaluate <url> [options]
 ```
 
-Key options: `--config`, `--out`, `--reference`, `--viewports`, `--debug-dir`, `--iteration`, `--previous-composite`, `--attempted-fixes`.
+Key options: `--config`, `--out`, `--reference`, `--viewports`, `--debug-dir`, `--artifact-dir`, `--iteration`, `--previous-composite`, `--attempted-fixes`.
 
 ### `version`
 

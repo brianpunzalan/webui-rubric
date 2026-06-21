@@ -57,22 +57,23 @@ webui-rubric evaluate https://example.com [options]
 
 #### Options
 
-| Flag                          | Type    | Default             | Description                                                         |
-| ----------------------------- | ------- | ------------------- | ------------------------------------------------------------------- |
-| `--config <path>`             | string  | `.webui-rubric.yml` | Project configuration file path                                     |
-| `--out <path>`                | string  | —                   | Write JSON artifact to file (default: stdout)                       |
-| `--reference <path>`          | string  | —                   | Reference design PNG for pixel comparison                           |
-| `--reference-viewport <name>` | string  | `desktop`           | Viewport the reference image represents                             |
-| `--viewports <list>`          | string  | `desktop,mobile`    | Comma-separated viewport names to capture                           |
-| `--debug-dir <path>`          | string  | —                   | Persist debug artifacts (screenshots, DOM, HAR, diff PNGs)          |
-| `--iteration <n>`             | integer | —                   | Loop iteration index (for Evaluator/Generator loops)                |
-| `--previous-composite <n>`    | float   | —                   | Previous run's composite score (for delta computation)              |
-| `--attempted-fixes <path>`    | string  | —                   | Path to JSON array of attempted fix hashes (oscillation prevention) |
-| `--allow-overrun`             | boolean | `false`             | Permit iterations beyond `iteration_cap`                            |
-| `--allow-tool-version-drift`  | boolean | `false`             | Proceed when installed tool versions differ from rubric pins        |
-| `--no-redact`                 | boolean | `false`             | Disable HAR/DOM/evidence redaction                                  |
-| `--log-level <level>`         | string  | `info`              | Log verbosity: `debug`, `info`, `warn`, `error`                     |
-| `-q, --quiet`                 | boolean | `false`             | Suppress all logs below `error`                                     |
+| Flag                          | Type    | Default             | Description                                                                     |
+| ----------------------------- | ------- | ------------------- | ------------------------------------------------------------------------------- |
+| `--config <path>`             | string  | `.webui-rubric.yml` | Project configuration file path                                                 |
+| `--out <path>`                | string  | —                   | Write JSON artifact to file (default: stdout)                                   |
+| `--reference <path>`          | string  | —                   | Reference design PNG for pixel comparison                                       |
+| `--reference-viewport <name>` | string  | `desktop`           | Viewport the reference image represents                                         |
+| `--viewports <list>`          | string  | `desktop,mobile`    | Comma-separated viewport names to capture                                       |
+| `--debug-dir <path>`          | string  | —                   | Persist raw debug artifacts (screenshots, reference image, DOM, HAR, diff PNGs) |
+| `--artifact-dir <path>`       | string  | —                   | Write a curated evaluation-results bundle (requires `--reference`)              |
+| `--iteration <n>`             | integer | —                   | Loop iteration index (for Evaluator/Generator loops)                            |
+| `--previous-composite <n>`    | float   | —                   | Previous run's composite score (for delta computation)                          |
+| `--attempted-fixes <path>`    | string  | —                   | Path to JSON array of attempted fix hashes (oscillation prevention)             |
+| `--allow-overrun`             | boolean | `false`             | Permit iterations beyond `iteration_cap`                                        |
+| `--allow-tool-version-drift`  | boolean | `false`             | Proceed when installed tool versions differ from rubric pins                    |
+| `--no-redact`                 | boolean | `false`             | Disable HAR/DOM/evidence redaction                                              |
+| `--log-level <level>`         | string  | `info`              | Log verbosity: `debug`, `info`, `warn`, `error`                                 |
+| `-q, --quiet`                 | boolean | `false`             | Suppress all logs below `error`                                                 |
 
 #### Exit codes
 
@@ -150,6 +151,27 @@ The routing contract depends on whether `--out` is specified:
 ```
 score=82 blocking=0 issues=5 ship_ready=true
 ```
+
+---
+
+## Evaluation-results artifact (`--artifact-dir`)
+
+When `--artifact-dir <path>` is supplied **and** a reference-image comparison ran (`--reference`), the CLI writes a self-contained bundle the Evaluator/Generator agent can both read and view. The directory is created at mode `0700`, and the result JSON gains an optional `artifact` block whose paths are relative to the bundle directory.
+
+Per compared viewport the bundle contains:
+
+```
+<artifact-dir>/
+  reference-<viewport>.png           # the supplied reference image
+  screenshot-<viewport>.png          # the captured screenshot it was compared against
+  diff-<viewport>.png                # pixelmatch diff output
+  composite-<viewport>.png           # side-by-side: reference | screenshot | diff
+  regions/region-<viewport>-<n>.png  # crops of the largest diff regions
+  manifest.json                      # scores + verdict, top issues + fixes, pixel-diff metrics, iteration context
+  report.html                        # offline HTML report binding the visuals to the data
+```
+
+`--debug-dir` is a raw dump; `--artifact-dir` is the curated, manifest-described bundle. The two flags are independent and may be used together. If `--artifact-dir` is set without `--reference`, bundle generation is skipped silently. The bundle is assembled by the `@webui-rubric/cli` artifact module (`writeArtifact` / `buildManifest` / `buildReportHtml`), reusing `buildSideBySide` and `cropStrip` from `@webui-rubric/checks`.
 
 ---
 
@@ -310,9 +332,11 @@ When `evaluate` runs, it follows this sequence:
 
 13. **Validate output** — Calls `validateOutput` against the Zod schema. Exits code `1` if invalid — no partial JSON.
 
-14. **Persist debug artifacts** — If `--debug-dir` is set, writes screenshots, `dom-snapshot.html`, `recording.har`, `console-errors.json`, and diff PNGs to the directory at mode `0700`.
+14. **Persist debug artifacts** — If `--debug-dir` is set, writes screenshots, the reference image (`reference-<viewport>.png`), `dom-snapshot.html`, `recording.har`, `console-errors.json`, and diff PNGs to the directory at mode `0700`.
 
-15. **Route output** — `routeJsonOutput` (to stdout or `--out` file) and `routeSummary` (to stderr or stdout per routing contract).
+15. **Write evaluation-results bundle** — If `--artifact-dir` is set **and** `--reference` ran, calls `writeArtifact` to emit the curated bundle (see [Evaluation-results artifact](#evaluation-results-artifact---artifact-dir)) and embeds an `artifact` block in the result JSON.
+
+16. **Route output** — `routeJsonOutput` (to stdout or `--out` file) and `routeSummary` (to stderr or stdout per routing contract).
 
 ---
 
@@ -346,8 +370,19 @@ webui-rubric evaluate https://example.com \
 
 ```bash
 webui-rubric evaluate https://example.com --debug-dir ./debug
-# Saves: debug/screenshot-desktop.png, debug/screenshot-mobile.png,
+# Saves: debug/screenshot-desktop.png, debug/screenshot-mobile.png, debug/reference-desktop.png,
 #        debug/dom-snapshot.html, debug/recording.har, debug/console-errors.json
+```
+
+### Generate an evaluation-results artifact bundle
+
+```bash
+webui-rubric evaluate https://example.com \
+  --reference ./designs/homepage.png \
+  --artifact-dir ./eval-results
+# Writes ./eval-results/{reference,screenshot,diff,composite}-desktop.png,
+#        ./eval-results/regions/*.png, manifest.json, and report.html.
+# The emitted JSON gains an `artifact` block referencing these files.
 ```
 
 ### Iterative loop mode
