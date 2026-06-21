@@ -113,14 +113,17 @@ console.log([...result.screenshots.keys()]); // ['desktop', 'mobile']
 
 #### `launchBrowser(options?): Promise<BrowserSession>`
 
-Launches a headless Chromium instance and returns a session with `browser`, `context`, and `page`. Optionally enables HAR recording on the context.
+Launches a headless Playwright browser (Chromium by default) and returns a session with `browser`, `context`, and `page`. Optionally enables HAR recording on the context.
 
 ```typescript
+type BrowserEngine = 'chromium' | 'firefox' | 'webkit';
+
 interface BrowserOptions {
   harPath?: string; // If set, enables recordHar on the context
   viewportWidth?: number; // Default: 1280
   viewportHeight?: number; // Default: 800
   deviceScaleFactor?: number; // Default: 1
+  browser?: BrowserEngine; // Default: 'chromium'
 }
 
 interface BrowserSession {
@@ -129,6 +132,13 @@ interface BrowserSession {
   page: Page;
 }
 ```
+
+> **Non-Chromium engines:** the `postinstall` only downloads Chromium. To capture
+> with another engine, install it once with `npx playwright install firefox` (or
+> `webkit`). Lighthouse performance metrics always run on Chromium independently
+> of this option (see `@webui-rubric/checks`); the helper
+> `chromiumExecutablePath()` exposes Playwright's bundled Chromium path for that
+> purpose.
 
 ```typescript
 import { launchBrowser, closeBrowser } from '@webui-rubric/capture';

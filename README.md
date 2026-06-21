@@ -29,6 +29,7 @@ webui-rubric evaluate https://example.com --reference ./design/homepage.png --ar
 - Node.js >= 20 LTS
 - Playwright Chromium (`npx playwright install chromium`)
 - Chrome/Chromium for Lighthouse (via `chrome-launcher` or system install)
+- _Optional:_ a non-Chromium capture engine — install once with `npx playwright install firefox` (or `webkit`) and run with `--browser firefox`. Lighthouse still runs on Chromium independently of this choice.
 
 ## Features
 

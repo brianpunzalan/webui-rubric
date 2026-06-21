@@ -17,6 +17,12 @@ npx @webui-rubric/cli evaluate https://example.com
 - **Node.js** >= 20 LTS
 - **Playwright Chromium** (for browser capture): `npx playwright install chromium`
 - **Chrome/Chromium** on `PATH` (for Lighthouse performance checks)
+- _Optional:_ to capture with a non-Chromium engine, install it once with
+  `npx playwright install firefox` (or `webkit`) and pass `--browser firefox`.
+  Lighthouse performance metrics always run on Chromium regardless of the
+  capture engine; if Chromium is unavailable, those metrics are excluded and the
+  CLI logs a degradation warning (the performance dimension is then scored from
+  resource-efficiency only).
 
 ## Dependencies
 
@@ -64,6 +70,7 @@ webui-rubric evaluate https://example.com [options]
 | `--reference <path>`          | string  | —                   | Reference design PNG for pixel comparison                                       |
 | `--reference-viewport <name>` | string  | `desktop`           | Viewport the reference image represents                                         |
 | `--viewports <list>`          | string  | `desktop,mobile`    | Comma-separated viewport names to capture                                       |
+| `--browser <engine>`          | string  | `chromium`          | Playwright capture engine: `chromium`, `firefox`, or `webkit`                   |
 | `--debug-dir <path>`          | string  | —                   | Persist raw debug artifacts (screenshots, reference image, DOM, HAR, diff PNGs) |
 | `--artifact-dir <path>`       | string  | —                   | Write a curated evaluation-results bundle (requires `--reference`)              |
 | `--iteration <n>`             | integer | —                   | Loop iteration index (for Evaluator/Generator loops)                            |
@@ -243,8 +250,12 @@ settle_timeout_ms: 30000
 # Default true — redacts HAR headers, POST bodies, and input values
 redaction: true
 
-# Cookie consent banner configuration
+# Capture configuration
 capture:
+  # Playwright engine: chromium (default), firefox, or webkit.
+  # Non-default engines require a one-time `npx playwright install <engine>`.
+  browser: chromium
+  # Cookie consent banner handling
   auto_dismiss: true
   dismiss_selectors:
     - '[aria-label*="accept" i][aria-label*="cookie" i]'
@@ -305,7 +316,7 @@ When `evaluate` runs, it follows this sequence:
 3. **Resolve DPR** — If `--reference` is supplied, reads the reference image and calls `inferDpr` to determine the device scale factor. Falls back to the config value or `1`.
 
 4. **Capture phase** — Calls `capturePage(url, options)` which:
-   - Launches headless Chromium
+   - Launches the headless Playwright engine selected by `--browser` / `capture.browser` (default Chromium)
    - Navigates, settles, dismisses consent banners
    - Injects stabilization CSS
    - Captures screenshots at each viewport

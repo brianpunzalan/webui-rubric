@@ -3,7 +3,7 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import type { Page } from 'playwright';
-import { launchBrowser, closeBrowser } from './browser.js';
+import { launchBrowser, closeBrowser, type BrowserEngine } from './browser.js';
 import { waitForSettle } from './settle.js';
 import { detectAuthWall } from './auth-detect.js';
 import { captureScreenshots, DEFAULT_VIEWPORTS, type ViewportSpec } from './screenshot.js';
@@ -33,6 +33,8 @@ export interface CaptureOptions {
   deviceScaleFactor?: number;
   dismissSelectors?: string[];
   autoDismiss?: boolean;
+  /** Playwright engine to capture with. Defaults to 'chromium'. */
+  browser?: BrowserEngine;
 }
 
 export interface CaptureResult {
@@ -82,6 +84,7 @@ export async function capturePage(
     viewportWidth: viewports[0]?.width ?? 1280,
     viewportHeight: viewports[0]?.height ?? 800,
     deviceScaleFactor: options.deviceScaleFactor ?? 1,
+    browser: options.browser,
   });
 
   try {
@@ -164,14 +167,14 @@ export async function capturePage(
 }
 
 // Re-export types for consumers
-export type { BrowserSession } from './browser.js';
+export type { BrowserSession, BrowserEngine } from './browser.js';
 export type { ViewportSpec } from './screenshot.js';
 export type { CapturedConsoleEntry } from './console.js';
 export type { ComputedStylesSnapshot } from './styles.js';
 export type { AuthDetectionResult } from './auth-detect.js';
 export type { SettleOptions } from './settle.js';
 export { DEFAULT_VIEWPORTS } from './screenshot.js';
-export { launchBrowser, closeBrowser } from './browser.js';
+export { launchBrowser, closeBrowser, chromiumExecutablePath } from './browser.js';
 export { waitForSettle } from './settle.js';
 export { detectAuthWall } from './auth-detect.js';
 export { captureScreenshots, injectStabilizationCSS } from './screenshot.js';

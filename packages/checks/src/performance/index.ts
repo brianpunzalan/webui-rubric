@@ -15,8 +15,18 @@ export async function runLighthouseChecks(url: string): Promise<PerformanceCheck
   try {
     const chromeLauncher = await import('chrome-launcher');
     const lighthouse = await import('lighthouse');
+    const { chromiumExecutablePath } = await import('@webui-rubric/capture');
 
-    const chrome = await chromeLauncher.launch({ chromeFlags: ['--headless', '--no-sandbox'] });
+    // Lighthouse is Chromium-only and independent of the Playwright capture
+    // engine. Point chrome-launcher at Playwright's bundled Chromium so
+    // performance metrics keep working even when capture runs on Firefox/WebKit
+    // and even when no system Chrome is installed. Falls back to chrome-launcher's
+    // default discovery when the path can't be resolved.
+    const chromePath = chromiumExecutablePath();
+    const chrome = await chromeLauncher.launch({
+      chromeFlags: ['--headless', '--no-sandbox'],
+      ...(chromePath ? { chromePath } : {}),
+    });
 
     const result = await lighthouse.default(url, {
       port: chrome.port,

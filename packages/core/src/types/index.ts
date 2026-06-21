@@ -75,6 +75,7 @@ export interface ViewportConfig {
 export interface CaptureConfig {
   dismiss_selectors?: string[];
   auto_dismiss?: boolean;
+  browser?: 'chromium' | 'firefox' | 'webkit';
 }
 
 export interface PixelComparisonConfig {
