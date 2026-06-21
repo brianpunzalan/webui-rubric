@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0] - 2026-06-21
+
+### Features
+
+- feat: make Playwright capture engine configurable (`a93954c`)
+
+### Other Changes
+
+- test: cover configurable capture engine; docs + changeset (`1e12e59`)
+
 ## [0.1.10] - 2026-06-21
 
 ### Documentation
