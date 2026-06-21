@@ -1,5 +1,17 @@
 # @webui-rubric/checks
 
+## 0.1.9
+
+### Patch Changes
+
+- ### Other Changes
+  - Fix prettier formatting in package READMEs (`e23c580`)
+  - Add evaluation-results artifact bundle generation (`96bfce0`)
+
+- Updated dependencies
+  - @webui-rubric/capture@0.1.9
+  - @webui-rubric/core@0.1.9
+
 ## 0.1.8
 
 ### Patch Changes

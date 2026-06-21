@@ -1,5 +1,13 @@
 # @webui-rubric/core
 
+## 0.1.9
+
+### Patch Changes
+
+- ### Other Changes
+  - Fix prettier formatting in package READMEs (`e23c580`)
+  - Add evaluation-results artifact bundle generation (`96bfce0`)
+
 ## 0.1.8
 
 ### Patch Changes

@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.9] - 2026-06-21
+
+### Other Changes
+
+- Fix prettier formatting in package READMEs (`e23c580`)
+- Add evaluation-results artifact bundle generation (`96bfce0`)
+
 ## [0.1.8] - 2026-06-09
 
 ### Documentation
