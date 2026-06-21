@@ -14,6 +14,7 @@ export const ViewportConfigSchema = z.object({
 export const CaptureConfigSchema = z.object({
   dismiss_selectors: z.array(z.string()).optional(),
   auto_dismiss: z.boolean().optional(),
+  browser: z.enum(['chromium', 'firefox', 'webkit']).optional(),
 });
 
 export const PixelComparisonConfigSchema = z.object({

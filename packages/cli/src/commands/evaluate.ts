@@ -13,6 +13,7 @@ export const evaluateCommand = new Command('evaluate')
   .option('--reference <path>', 'Reference design image (PNG) for pixel comparison')
   .option('--reference-viewport <name>', 'Which viewport the reference image represents', 'desktop')
   .option('--viewports <list>', 'Comma-separated viewport names to capture', 'desktop,mobile')
+  .option('--browser <engine>', 'Playwright capture engine: chromium | firefox | webkit')
   .option('--debug-dir <path>', 'Directory for debug artifacts')
   .option('--artifact-dir <path>', 'Directory for the evaluation-results artifact bundle')
   .option('--iteration <n>', 'Loop iteration index', parseInt)
@@ -84,8 +85,20 @@ export const evaluateCommand = new Command('evaluate')
         }
       }
 
+      // Resolve capture engine: CLI flag > config > default. Lighthouse is
+      // unaffected (it runs its own Chromium), so non-Chromium engines only
+      // change Playwright capture.
+      const SUPPORTED_BROWSERS = ['chromium', 'firefox', 'webkit'] as const;
+      const browser = options.browser ?? config.capture?.browser ?? 'chromium';
+      if (!SUPPORTED_BROWSERS.includes(browser)) {
+        logger.error(
+          `Unknown browser engine "${browser}". Supported: ${SUPPORTED_BROWSERS.join(', ')}`,
+        );
+        process.exit(2);
+      }
+
       // Capture phase
-      logger.info('Starting capture phase...');
+      logger.info(`Starting capture phase (browser: ${browser})...`);
       const { capturePage } = await import('@webui-rubric/capture');
 
       // Build viewport specs from config, filtered by --viewports CLI option
@@ -148,6 +161,7 @@ export const evaluateCommand = new Command('evaluate')
         autoDismiss: config.capture?.auto_dismiss ?? true,
         dismissSelectors: config.capture?.dismiss_selectors,
         viewports: viewportSpecs.length > 0 ? viewportSpecs : undefined,
+        browser,
       });
 
       logger.info('Capture complete. Running checks...');
@@ -208,9 +222,27 @@ export const evaluateCommand = new Command('evaluate')
       try {
         const { runLighthouseChecks } = await import('@webui-rubric/checks');
         lighthouseResults = await runLighthouseChecks(url);
-        logger.info('Lighthouse checks complete.');
+        // runLighthouseChecks degrades gracefully (returns tool_unavailable
+        // findings) instead of throwing when Chromium can't run. Surface that
+        // so the user knows the performance dimension is degraded.
+        const unavailable = lighthouseResults.filter((r) => r.status === 'tool_unavailable');
+        if (unavailable.length > 0) {
+          logger.warn(
+            `Lighthouse unavailable (Chromium could not run): ${unavailable
+              .map((r) => r.evidence_source)
+              .join(', ')} excluded. The performance dimension will be scored from ` +
+              `resource-efficiency only. Run "npx playwright install chromium" to enable ` +
+              `performance metrics.`,
+          );
+        } else {
+          logger.info('Lighthouse checks complete.');
+        }
       } catch (error) {
-        logger.warn(`Lighthouse failed: ${error instanceof Error ? error.message : 'unknown'}`);
+        logger.warn(
+          `Lighthouse failed: ${error instanceof Error ? error.message : 'unknown'}. ` +
+            `Performance metrics (LCP/FCP/CLS/TBT) will be excluded; the performance ` +
+            `dimension will be scored from resource-efficiency only.`,
+        );
       }
 
       // Reference image pixel comparison

@@ -46,7 +46,7 @@ The primary consumer is `@webui-rubric/cli`, which calls `capturePage` and then 
 
 #### `capturePage(url, options?): Promise<CaptureResult>`
 
-Runs the full capture pipeline in a single call. Launches a headless Chromium browser, navigates to `url`, stabilizes the page, optionally dismisses consent banners, and captures all artifacts before closing the browser.
+Runs the full capture pipeline in a single call. Launches a headless Playwright browser (Chromium by default), navigates to `url`, stabilizes the page, optionally dismisses consent banners, and captures all artifacts before closing the browser.
 
 **`CaptureOptions`:**
 
@@ -58,6 +58,7 @@ interface CaptureOptions {
   deviceScaleFactor?: number; // Device pixel ratio (e.g. 2 for Retina). Default: 1
   dismissSelectors?: string[]; // CSS selectors for consent banner dismiss buttons
   autoDismiss?: boolean; // Auto-click consent banners. Default: true
+  browser?: 'chromium' | 'firefox' | 'webkit'; // Playwright engine. Default: 'chromium'
 }
 ```
 
@@ -113,14 +114,17 @@ console.log([...result.screenshots.keys()]); // ['desktop', 'mobile']
 
 #### `launchBrowser(options?): Promise<BrowserSession>`
 
-Launches a headless Chromium instance and returns a session with `browser`, `context`, and `page`. Optionally enables HAR recording on the context.
+Launches a headless Playwright browser (Chromium by default) and returns a session with `browser`, `context`, and `page`. Optionally enables HAR recording on the context.
 
 ```typescript
+type BrowserEngine = 'chromium' | 'firefox' | 'webkit';
+
 interface BrowserOptions {
   harPath?: string; // If set, enables recordHar on the context
   viewportWidth?: number; // Default: 1280
   viewportHeight?: number; // Default: 800
   deviceScaleFactor?: number; // Default: 1
+  browser?: BrowserEngine; // Default: 'chromium'
 }
 
 interface BrowserSession {
@@ -129,6 +133,13 @@ interface BrowserSession {
   page: Page;
 }
 ```
+
+> **Non-Chromium engines:** the `postinstall` only downloads Chromium. To capture
+> with another engine, install it once with `npx playwright install firefox` (or
+> `webkit`). Lighthouse performance metrics always run on Chromium independently
+> of this option (see `@webui-rubric/checks`); the helper
+> `chromiumExecutablePath()` exposes Playwright's bundled Chromium path for that
+> purpose.
 
 ```typescript
 import { launchBrowser, closeBrowser } from '@webui-rubric/capture';
@@ -141,6 +152,10 @@ await closeBrowser(session);
 #### `closeBrowser(session): Promise<void>`
 
 Closes the browser context and browser. Safe to call even if the session is in an error state.
+
+#### `chromiumExecutablePath(): string | undefined`
+
+Returns the path to Playwright's bundled Chromium executable, or `undefined` if it cannot be resolved (e.g. the binary was never installed). This lets Chromium-only tools such as Lighthouse reuse Playwright's Chromium regardless of which engine capture runs on — see `@webui-rubric/checks`'s `runLighthouseChecks`.
 
 ---
 

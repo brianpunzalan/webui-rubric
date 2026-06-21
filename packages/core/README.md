@@ -226,6 +226,7 @@ interface ViewportDimensions {
 interface CaptureConfig {
   dismiss_selectors?: string[]; // CSS selectors for consent banner dismiss buttons
   auto_dismiss?: boolean; // default true
+  browser?: 'chromium' | 'firefox' | 'webkit'; // Playwright capture engine. default 'chromium'
 }
 
 interface PixelComparisonConfig {

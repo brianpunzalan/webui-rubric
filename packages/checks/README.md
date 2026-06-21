@@ -123,6 +123,8 @@ const AXE_IMPACT_TO_SEVERITY: Record<string, number> = {
 
 Launches Chrome via `chrome-launcher`, runs Lighthouse in performance-only mode (desktop, no CPU/network throttling), and returns findings for each tracked metric. Returns one `PerformanceCheckResult` per metric in `PERFORMANCE_METRICS`. If Lighthouse fails entirely, all metrics are returned with `status: 'tool_unavailable'`.
 
+Lighthouse is **independent of the Playwright capture engine** — it always runs on Chromium. To keep performance metrics working even when capture uses Firefox/WebKit (and when no system Chrome is installed), `chrome-launcher` is pointed at Playwright's bundled Chromium via `chromiumExecutablePath()` from `@webui-rubric/capture`, falling back to `chrome-launcher`'s default discovery when that path can't be resolved.
+
 Confidence is always `'predicted'` — Lighthouse measures lab (simulated) conditions, not real-user performance.
 
 ```typescript
