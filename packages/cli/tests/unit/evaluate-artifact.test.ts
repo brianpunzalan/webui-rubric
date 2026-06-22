@@ -54,11 +54,16 @@ vi.mock('@webui-rubric/checks', async (importOriginal) => {
 
 describe('evaluate --artifact-dir', () => {
   let tmpDir: string;
+  let originalCwd: string;
   let capturedOutput: string | null;
   let exitSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     tmpDir = mkdtempSync(join(tmpdir(), 'webui-rubric-artifact-'));
+    // Run from the tmp dir so the default --artifact-dir (a relative path) and
+    // any other relative writes land inside it and are cleaned up afterwards.
+    originalCwd = process.cwd();
+    process.chdir(tmpDir);
     capturedOutput = null;
     exitSpy = vi.spyOn(process, 'exit').mockImplementation((code) => {
       throw new Error(`process.exit(${code})`);
@@ -66,6 +71,7 @@ describe('evaluate --artifact-dir', () => {
   });
 
   afterEach(() => {
+    process.chdir(originalCwd);
     rmSync(tmpDir, { recursive: true, force: true });
     exitSpy.mockRestore();
     vi.restoreAllMocks();

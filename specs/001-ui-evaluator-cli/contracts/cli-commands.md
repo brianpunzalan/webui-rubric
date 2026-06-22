@@ -28,24 +28,24 @@ webui-rubric evaluate <url> [options]
 
 #### Options
 
-| Flag                          | Type      | Default             | Description                                                                                           |
-| ----------------------------- | --------- | ------------------- | ----------------------------------------------------------------------------------------------------- |
-| `--config <path>`             | `string`  | `.webui-rubric.yml` | Path to the project configuration file                                                                |
-| `--out <path>`                | `string`  | (stdout)            | Write JSON artifact to file instead of stdout; summary moves to stdout                                |
-| `--reference <path>`          | `string`  | (none)              | Reference design image (PNG) for pixel comparison                                                     |
-| `--reference-viewport <name>` | `string`  | `"desktop"`         | Which viewport the reference image represents                                                         |
-| `--viewports <list>`          | `string`  | `"desktop,mobile"`  | Comma-separated viewport names to capture                                                             |
-| `--debug-dir <path>`          | `string`  | (none)              | Directory for raw debug artifacts (screenshots, reference image, HAR, diffs). Created with mode 0700. |
-| `--artifact-dir <path>`       | `string`  | (none)              | Directory for the curated evaluation-results artifact bundle (see below). Created with mode 0700.     |
-| `--iteration <n>`             | `number`  | (none)              | Loop iteration index for Evaluator/Generator convergence tracking                                     |
-| `--previous-composite <n>`    | `number`  | (none)              | Previous run's composite score (used to compute delta)                                                |
-| `--attempted-fixes <path>`    | `string`  | (none)              | Path to JSON file listing previously attempted fix hashes                                             |
-| `--allow-overrun`             | `boolean` | `false`             | Allow iterations beyond the configured cap                                                            |
-| `--allow-tool-version-drift`  | `boolean` | `false`             | Proceed when installed tool versions differ from rubric pins                                          |
-| `--no-redact`                 | `boolean` | `false`             | Disable default redaction of sensitive data in HAR/DOM/evidence                                       |
-| `--log-level <level>`         | `string`  | `"info"`            | Log verbosity: `debug`, `info`, `warn`, `error`                                                       |
-| `--quiet`, `-q`               | `boolean` | `false`             | Suppress all log output below `error`                                                                 |
-| `--help`, `-h`                | `boolean` |                     | Show help                                                                                             |
+| Flag                          | Type      | Default                   | Description                                                                                           |
+| ----------------------------- | --------- | ------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `--config <path>`             | `string`  | `.webui-rubric.yml`       | Path to the project configuration file                                                                |
+| `--out <path>`                | `string`  | (stdout)                  | Write JSON artifact to file instead of stdout; summary moves to stdout                                |
+| `--reference <path>`          | `string`  | (none)                    | Reference design image (PNG) for pixel comparison                                                     |
+| `--reference-viewport <name>` | `string`  | `"desktop"`               | Which viewport the reference image represents                                                         |
+| `--viewports <list>`          | `string`  | `"desktop,mobile"`        | Comma-separated viewport names to capture                                                             |
+| `--debug-dir <path>`          | `string`  | (none)                    | Directory for raw debug artifacts (screenshots, reference image, HAR, diffs). Created with mode 0700. |
+| `--artifact-dir <path>`       | `string`  | `.webui-rubric/artifacts` | Directory for the curated evaluation-results artifact bundle (see below). Created with mode 0700.     |
+| `--iteration <n>`             | `number`  | (none)                    | Loop iteration index for Evaluator/Generator convergence tracking                                     |
+| `--previous-composite <n>`    | `number`  | (none)                    | Previous run's composite score (used to compute delta)                                                |
+| `--attempted-fixes <path>`    | `string`  | (none)                    | Path to JSON file listing previously attempted fix hashes                                             |
+| `--allow-overrun`             | `boolean` | `false`                   | Allow iterations beyond the configured cap                                                            |
+| `--allow-tool-version-drift`  | `boolean` | `false`                   | Proceed when installed tool versions differ from rubric pins                                          |
+| `--no-redact`                 | `boolean` | `false`                   | Disable default redaction of sensitive data in HAR/DOM/evidence                                       |
+| `--log-level <level>`         | `string`  | `"info"`                  | Log verbosity: `debug`, `info`, `warn`, `error`                                                       |
+| `--quiet`, `-q`               | `boolean` | `false`                   | Suppress all log output below `error`                                                                 |
+| `--help`, `-h`                | `boolean` |                           | Show help                                                                                             |
 
 #### Output Contract (FR-002)
 

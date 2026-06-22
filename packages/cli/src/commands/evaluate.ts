@@ -15,7 +15,11 @@ export const evaluateCommand = new Command('evaluate')
   .option('--viewports <list>', 'Comma-separated viewport names to capture', 'desktop,mobile')
   .option('--browser <engine>', 'Playwright capture engine: chromium | firefox | webkit')
   .option('--debug-dir <path>', 'Directory for debug artifacts')
-  .option('--artifact-dir <path>', 'Directory for the evaluation-results artifact bundle')
+  .option(
+    '--artifact-dir <path>',
+    'Directory for the evaluation-results artifact bundle',
+    '.webui-rubric/artifacts',
+  )
   .option('--iteration <n>', 'Loop iteration index', parseInt)
   .option('--previous-composite <n>', 'Previous composite score', parseFloat)
   .option('--attempted-fixes <path>', 'Path to JSON file of attempted fix hashes')
