@@ -78,6 +78,11 @@ bundle directory. Per compared viewport the bundle contains:
   report.html                   # offline HTML report binding the visuals to the data
 ```
 
+If the reference and screenshot dimensions differ, pixelmatch cannot run for that
+viewport. The bundle is still written with the reference and screenshot images and a
+manifest entry marked `"compared": false` (with a `note` explaining the mismatch); the
+`diff`/`composite` paths are `null` and no `regions/` crops are produced.
+
 `--debug-dir` remains a raw dump (now also including `reference-<viewport>.png`); `--artifact-dir`
 is the curated, manifest-described bundle. The two flags are independent and may be used together.
 

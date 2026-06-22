@@ -218,8 +218,10 @@ export interface ArtifactViewportImages {
   viewport: string;
   reference: string;
   screenshot: string;
-  diff: string;
-  composite: string;
+  /** Null when the pixel diff could not be computed (e.g. dimension mismatch). */
+  diff: string | null;
+  /** Null when no diff was produced, so no side-by-side composite exists. */
+  composite: string | null;
   regions: string[];
 }
 

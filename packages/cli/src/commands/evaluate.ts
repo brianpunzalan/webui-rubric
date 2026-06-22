@@ -349,6 +349,23 @@ export const evaluateCommand = new Command('evaluate')
             `Pixel comparison requires identical dimensions. Provide a reference at matching resolution or set an explicit device_pixel_ratio in config.`;
           logger.warn(mismatchMsg);
 
+          // The pixel diff can't run, but the artifact bundle is still useful:
+          // record the reference and screenshot images (no diff/composite) so
+          // --artifact-dir produces something the agent can inspect.
+          artifactViewportInputs.push({
+            viewport: referenceViewport,
+            referenceBuffer: referenceImage.buffer,
+            screenshotBuffer,
+            diffBuffer: null,
+            diff_ratio: -1,
+            diff_pixel_count: 0,
+            total_pixel_count: 0,
+            threshold: config.pixelmatch_threshold ?? 0.1,
+            score: null,
+            diff_regions: [],
+            note: mismatchMsg,
+          });
+
           for (const dim of V1_RUBRIC.dimensions) {
             for (const sub of dim.sub_criteria) {
               if (!sub.visual_parity) continue;
@@ -729,9 +746,13 @@ export const evaluateCommand = new Command('evaluate')
           });
           (result as Record<string, unknown>).artifact = artifact;
           logger.info(`Artifact bundle written to ${artifact.dir}`);
+        } else if (!options.reference) {
+          logger.warn(
+            'Artifact bundle requires a reference image (--reference); skipping artifact generation',
+          );
         } else {
           logger.warn(
-            'Artifact bundle requires a reference-image comparison (--reference); skipping artifact generation',
+            'No viewport could be compared against the reference image; skipping artifact generation',
           );
         }
       }

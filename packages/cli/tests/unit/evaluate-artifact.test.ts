@@ -155,6 +155,54 @@ describe('evaluate --artifact-dir', () => {
     expect(manifest.viewports[0].images.composite).toBe('composite-desktop.png');
   });
 
+  it('still writes a bundle when the reference dimensions do not match the screenshot', async () => {
+    // The captured screenshot is 64x64 but the reference is 80x80, so pixelmatch
+    // cannot run. The bundle should still carry the two source images plus a
+    // manifest that records the mismatch instead of producing nothing.
+    const screenshot = createSolidPng(64, 64, [255, 0, 0, 255]);
+    const reference = createSolidPng(80, 80, [0, 0, 255, 255]);
+    fakeCaptureResult.screenshots = new Map([['desktop', screenshot]]);
+
+    const refPath = join(tmpDir, 'reference.png');
+    writeFileSync(refPath, reference);
+    const artifactDir = join(tmpDir, 'mismatch-artifact');
+
+    const result = await runEvaluate([
+      'http://example.com',
+      '--reference',
+      refPath,
+      '--artifact-dir',
+      artifactDir,
+      '--viewports',
+      'desktop',
+    ]);
+
+    const artifact = result.artifact as {
+      viewports: Array<{ viewport: string; diff: string | null; composite: string | null }>;
+    };
+    expect(artifact).toBeTruthy();
+    expect(artifact.viewports[0].diff).toBeNull();
+    expect(artifact.viewports[0].composite).toBeNull();
+
+    // Source images and the manifest/report exist; diff/composite do not.
+    for (const rel of [
+      'reference-desktop.png',
+      'screenshot-desktop.png',
+      'manifest.json',
+      'report.html',
+    ]) {
+      expect(existsSync(join(artifactDir, rel)), `${rel} should exist`).toBe(true);
+    }
+    for (const rel of ['diff-desktop.png', 'composite-desktop.png']) {
+      expect(existsSync(join(artifactDir, rel)), `${rel} should not exist`).toBe(false);
+    }
+
+    const manifest = JSON.parse(readFileSync(join(artifactDir, 'manifest.json'), 'utf-8'));
+    expect(manifest.viewports[0].compared).toBe(false);
+    expect(manifest.viewports[0].note).toContain('does not match');
+    expect(manifest.viewports[0].images.composite).toBeNull();
+  });
+
   it('skips artifact generation when no reference image is supplied', async () => {
     fakeCaptureResult.screenshots = new Map([['desktop', createSolidPng(64, 64, [1, 2, 3, 255])]]);
     const artifactDir = join(tmpDir, 'no-ref-artifact');

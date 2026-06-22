@@ -10,13 +10,20 @@ export interface ArtifactViewportInput {
   viewport: string;
   referenceBuffer: Buffer;
   screenshotBuffer: Buffer;
-  diffBuffer: Buffer;
+  /**
+   * Pixelmatch diff output. Null when the comparison could not run (e.g. the
+   * reference and screenshot dimensions differ); the bundle then carries the
+   * reference and screenshot images only and `note` explains the gap.
+   */
+  diffBuffer: Buffer | null;
   diff_ratio: number;
   diff_pixel_count: number;
   total_pixel_count: number;
   threshold: number;
   score: number | null;
   diff_regions: MappedDiffRegion[];
+  /** Set when `diffBuffer` is null to explain why the diff is missing. */
+  note?: string;
 }
 
 export interface WriteArtifactOptions {
@@ -50,14 +57,26 @@ export async function writeArtifact(options: WriteArtifactOptions): Promise<Arti
     const diffRel = `diff-${vp.viewport}.png`;
     const compositeRel = `composite-${vp.viewport}.png`;
 
-    const composite = buildSideBySide(vp.referenceBuffer, vp.screenshotBuffer, vp.diffBuffer);
-
-    await Promise.all([
+    const writes: Array<Promise<void>> = [
       writeFile(resolve(dir, referenceRel), vp.referenceBuffer),
       writeFile(resolve(dir, screenshotRel), vp.screenshotBuffer),
-      writeFile(resolve(dir, diffRel), vp.diffBuffer),
-      writeFile(resolve(dir, compositeRel), composite),
-    ]);
+    ];
+
+    // The diff and the side-by-side composite require the reference and
+    // screenshot to share dimensions. When the comparison could not run
+    // (diffBuffer is null) we still bundle the two source images so the agent
+    // can eyeball them; the diff/composite paths are reported as null.
+    let diffOut: string | null = null;
+    let compositeOut: string | null = null;
+    if (vp.diffBuffer) {
+      diffOut = diffRel;
+      compositeOut = compositeRel;
+      const composite = buildSideBySide(vp.referenceBuffer, vp.screenshotBuffer, vp.diffBuffer);
+      writes.push(writeFile(resolve(dir, diffRel), vp.diffBuffer));
+      writes.push(writeFile(resolve(dir, compositeRel), composite));
+    }
+
+    await Promise.all(writes);
 
     const regionRels: string[] = [];
     for (let i = 0; i < vp.diff_regions.length; i++) {
@@ -71,13 +90,15 @@ export async function writeArtifact(options: WriteArtifactOptions): Promise<Arti
     const images = {
       reference: referenceRel,
       screenshot: screenshotRel,
-      diff: diffRel,
-      composite: compositeRel,
+      diff: diffOut,
+      composite: compositeOut,
       regions: regionRels,
     };
 
     manifestViewports.push({
       viewport: vp.viewport,
+      compared: vp.diffBuffer !== null,
+      note: vp.note,
       diff_ratio: vp.diff_ratio,
       diff_pixel_count: vp.diff_pixel_count,
       total_pixel_count: vp.total_pixel_count,

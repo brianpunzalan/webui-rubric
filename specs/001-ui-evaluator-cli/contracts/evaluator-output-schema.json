@@ -206,8 +206,8 @@
               "viewport": { "type": "string" },
               "reference": { "type": "string" },
               "screenshot": { "type": "string" },
-              "diff": { "type": "string" },
-              "composite": { "type": "string" },
+              "diff": { "type": ["string", "null"] },
+              "composite": { "type": ["string", "null"] },
               "regions": { "type": "array", "items": { "type": "string" } }
             }
           }
