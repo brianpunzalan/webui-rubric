@@ -62,10 +62,11 @@ score=82 blocking=0 issues=5 ship_ready=true
 
 #### Evaluation-results artifact (`--artifact-dir`)
 
-When `--artifact-dir <path>` is supplied **and** a reference-image comparison ran
-(`--reference`), the CLI writes a self-contained bundle the Evaluator/Generator agent can both
-read and view. The result JSON gains an optional `artifact` block whose paths are relative to the
-bundle directory. Per compared viewport the bundle contains:
+When `--artifact-dir <path>` is supplied, the CLI writes a self-contained bundle the
+Evaluator/Generator agent can both read and view. The result JSON gains an optional `artifact`
+block whose paths are relative to the bundle directory. When a reference-image comparison ran
+(`--reference`), the bundle additionally contains per-viewport visuals. Per compared viewport the
+bundle contains:
 
 ```
 <artifact-dir>/
@@ -82,6 +83,10 @@ If the reference and screenshot dimensions differ, pixelmatch cannot run for tha
 viewport. The bundle is still written with the reference and screenshot images and a
 manifest entry marked `"compared": false` (with a `note` explaining the mismatch); the
 `diff`/`composite` paths are `null` and no `regions/` crops are produced.
+
+Without `--reference` the bundle is data-only: just `manifest.json` and `report.html`
+carrying the scores, verdict, top issues and iteration context (`artifact.viewports` is
+an empty array). No image artifacts are produced.
 
 `--debug-dir` remains a raw dump (now also including `reference-<viewport>.png`); `--artifact-dir`
 is the curated, manifest-described bundle. The two flags are independent and may be used together.

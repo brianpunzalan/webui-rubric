@@ -735,25 +735,24 @@ export const evaluateCommand = new Command('evaluate')
         },
       };
 
-      // Generate the evaluation-results artifact bundle (US: artifact output)
+      // Generate the evaluation-results artifact bundle (US: artifact output).
+      // Always written when --artifact-dir is supplied: with a reference image it
+      // includes the per-viewport visuals, otherwise it is a data-only bundle
+      // (manifest.json + report.html with the scores, top issues and verdict).
       if (options.artifactDir) {
-        if (artifactViewportInputs.length > 0) {
-          const { writeArtifact } = await import('../artifact/index.js');
-          const artifact = await writeArtifact({
-            dir: options.artifactDir,
-            result,
-            viewports: artifactViewportInputs,
-          });
-          (result as Record<string, unknown>).artifact = artifact;
-          logger.info(`Artifact bundle written to ${artifact.dir}`);
-        } else if (!options.reference) {
-          logger.warn(
-            'Artifact bundle requires a reference image (--reference); skipping artifact generation',
+        const { writeArtifact } = await import('../artifact/index.js');
+        const artifact = await writeArtifact({
+          dir: options.artifactDir,
+          result,
+          viewports: artifactViewportInputs,
+        });
+        (result as Record<string, unknown>).artifact = artifact;
+        if (artifactViewportInputs.length === 0) {
+          logger.info(
+            `Artifact bundle written to ${artifact.dir} (data only — no reference image supplied, so no visual artifacts)`,
           );
         } else {
-          logger.warn(
-            'No viewport could be compared against the reference image; skipping artifact generation',
-          );
+          logger.info(`Artifact bundle written to ${artifact.dir}`);
         }
       }
 

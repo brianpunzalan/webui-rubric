@@ -203,14 +203,38 @@ describe('evaluate --artifact-dir', () => {
     expect(manifest.viewports[0].images.composite).toBeNull();
   });
 
-  it('skips artifact generation when no reference image is supplied', async () => {
+  it('writes a data-only bundle when no reference image is supplied', async () => {
     fakeCaptureResult.screenshots = new Map([['desktop', createSolidPng(64, 64, [1, 2, 3, 255])]]);
     const artifactDir = join(tmpDir, 'no-ref-artifact');
 
     const result = await runEvaluate(['http://example.com', '--artifact-dir', artifactDir]);
 
-    expect(result.artifact).toBeUndefined();
-    expect(existsSync(join(artifactDir, 'manifest.json'))).toBe(false);
+    // The bundle exists and is referenced, but carries no per-viewport visuals.
+    const artifact = result.artifact as {
+      manifest_path: string;
+      report_path: string;
+      viewports: unknown[];
+    };
+    expect(artifact).toBeTruthy();
+    expect(artifact.viewports).toHaveLength(0);
+
+    // Data files are written; no image artifacts are produced.
+    expect(existsSync(join(artifactDir, 'manifest.json'))).toBe(true);
+    expect(existsSync(join(artifactDir, 'report.html'))).toBe(true);
+    for (const rel of [
+      'reference-desktop.png',
+      'screenshot-desktop.png',
+      'diff-desktop.png',
+      'composite-desktop.png',
+    ]) {
+      expect(existsSync(join(artifactDir, rel)), `${rel} should not exist`).toBe(false);
+    }
+
+    // The manifest still carries the full verdict + scores.
+    const manifest = JSON.parse(readFileSync(join(artifactDir, 'manifest.json'), 'utf-8'));
+    expect(manifest.verdict.composite_score).toBe(result.composite_score);
+    expect(manifest.verdict.dimensions).toHaveLength(10);
+    expect(manifest.viewports).toHaveLength(0);
   });
 
   it('copies the reference image into --debug-dir', async () => {
