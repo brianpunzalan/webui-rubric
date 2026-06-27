@@ -54,11 +54,16 @@ vi.mock('@webui-rubric/checks', async (importOriginal) => {
 
 describe('evaluate --artifact-dir', () => {
   let tmpDir: string;
+  let originalCwd: string;
   let capturedOutput: string | null;
   let exitSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     tmpDir = mkdtempSync(join(tmpdir(), 'webui-rubric-artifact-'));
+    // Run from the tmp dir so the default --artifact-dir (a relative path) and
+    // any other relative writes land inside it and are cleaned up afterwards.
+    originalCwd = process.cwd();
+    process.chdir(tmpDir);
     capturedOutput = null;
     exitSpy = vi.spyOn(process, 'exit').mockImplementation((code) => {
       throw new Error(`process.exit(${code})`);
@@ -66,6 +71,7 @@ describe('evaluate --artifact-dir', () => {
   });
 
   afterEach(() => {
+    process.chdir(originalCwd);
     rmSync(tmpDir, { recursive: true, force: true });
     exitSpy.mockRestore();
     vi.restoreAllMocks();
@@ -155,14 +161,86 @@ describe('evaluate --artifact-dir', () => {
     expect(manifest.viewports[0].images.composite).toBe('composite-desktop.png');
   });
 
-  it('skips artifact generation when no reference image is supplied', async () => {
+  it('still writes a bundle when the reference dimensions do not match the screenshot', async () => {
+    // The captured screenshot is 64x64 but the reference is 80x80, so pixelmatch
+    // cannot run. The bundle should still carry the two source images plus a
+    // manifest that records the mismatch instead of producing nothing.
+    const screenshot = createSolidPng(64, 64, [255, 0, 0, 255]);
+    const reference = createSolidPng(80, 80, [0, 0, 255, 255]);
+    fakeCaptureResult.screenshots = new Map([['desktop', screenshot]]);
+
+    const refPath = join(tmpDir, 'reference.png');
+    writeFileSync(refPath, reference);
+    const artifactDir = join(tmpDir, 'mismatch-artifact');
+
+    const result = await runEvaluate([
+      'http://example.com',
+      '--reference',
+      refPath,
+      '--artifact-dir',
+      artifactDir,
+      '--viewports',
+      'desktop',
+    ]);
+
+    const artifact = result.artifact as {
+      viewports: Array<{ viewport: string; diff: string | null; composite: string | null }>;
+    };
+    expect(artifact).toBeTruthy();
+    expect(artifact.viewports[0].diff).toBeNull();
+    expect(artifact.viewports[0].composite).toBeNull();
+
+    // Source images and the manifest/report exist; diff/composite do not.
+    for (const rel of [
+      'reference-desktop.png',
+      'screenshot-desktop.png',
+      'manifest.json',
+      'report.html',
+    ]) {
+      expect(existsSync(join(artifactDir, rel)), `${rel} should exist`).toBe(true);
+    }
+    for (const rel of ['diff-desktop.png', 'composite-desktop.png']) {
+      expect(existsSync(join(artifactDir, rel)), `${rel} should not exist`).toBe(false);
+    }
+
+    const manifest = JSON.parse(readFileSync(join(artifactDir, 'manifest.json'), 'utf-8'));
+    expect(manifest.viewports[0].compared).toBe(false);
+    expect(manifest.viewports[0].note).toContain('does not match');
+    expect(manifest.viewports[0].images.composite).toBeNull();
+  });
+
+  it('writes a data-only bundle when no reference image is supplied', async () => {
     fakeCaptureResult.screenshots = new Map([['desktop', createSolidPng(64, 64, [1, 2, 3, 255])]]);
     const artifactDir = join(tmpDir, 'no-ref-artifact');
 
     const result = await runEvaluate(['http://example.com', '--artifact-dir', artifactDir]);
 
-    expect(result.artifact).toBeUndefined();
-    expect(existsSync(join(artifactDir, 'manifest.json'))).toBe(false);
+    // The bundle exists and is referenced, but carries no per-viewport visuals.
+    const artifact = result.artifact as {
+      manifest_path: string;
+      report_path: string;
+      viewports: unknown[];
+    };
+    expect(artifact).toBeTruthy();
+    expect(artifact.viewports).toHaveLength(0);
+
+    // Data files are written; no image artifacts are produced.
+    expect(existsSync(join(artifactDir, 'manifest.json'))).toBe(true);
+    expect(existsSync(join(artifactDir, 'report.html'))).toBe(true);
+    for (const rel of [
+      'reference-desktop.png',
+      'screenshot-desktop.png',
+      'diff-desktop.png',
+      'composite-desktop.png',
+    ]) {
+      expect(existsSync(join(artifactDir, rel)), `${rel} should not exist`).toBe(false);
+    }
+
+    // The manifest still carries the full verdict + scores.
+    const manifest = JSON.parse(readFileSync(join(artifactDir, 'manifest.json'), 'utf-8'));
+    expect(manifest.verdict.composite_score).toBe(result.composite_score);
+    expect(manifest.verdict.dimensions).toHaveLength(10);
+    expect(manifest.viewports).toHaveLength(0);
   });
 
   it('copies the reference image into --debug-dir', async () => {

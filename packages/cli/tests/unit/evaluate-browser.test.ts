@@ -50,6 +50,21 @@ vi.mock('@webui-rubric/checks', async (importOriginal) => {
   };
 });
 
+// The default --artifact-dir would write a bundle to disk on every run; this
+// suite does not exercise artifacts, so stub the writer to keep it off disk.
+vi.mock('../../src/artifact/index.js', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../src/artifact/index.js')>();
+  return {
+    ...actual,
+    writeArtifact: vi.fn(async () => ({
+      dir: '/tmp/mock-artifact',
+      manifest_path: 'manifest.json',
+      report_path: 'report.html',
+      viewports: [],
+    })),
+  };
+});
+
 describe('evaluate browser-engine forwarding', () => {
   let exitSpy: ReturnType<typeof vi.spyOn>;
   let configOverride: Record<string, unknown>;

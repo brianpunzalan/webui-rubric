@@ -15,7 +15,11 @@ export const evaluateCommand = new Command('evaluate')
   .option('--viewports <list>', 'Comma-separated viewport names to capture', 'desktop,mobile')
   .option('--browser <engine>', 'Playwright capture engine: chromium | firefox | webkit')
   .option('--debug-dir <path>', 'Directory for debug artifacts')
-  .option('--artifact-dir <path>', 'Directory for the evaluation-results artifact bundle')
+  .option(
+    '--artifact-dir <path>',
+    'Directory for the evaluation-results artifact bundle',
+    '.webui-rubric/artifacts',
+  )
   .option('--iteration <n>', 'Loop iteration index', parseInt)
   .option('--previous-composite <n>', 'Previous composite score', parseFloat)
   .option('--attempted-fixes <path>', 'Path to JSON file of attempted fix hashes')
@@ -348,6 +352,23 @@ export const evaluateCommand = new Command('evaluate')
             `Reference image (${referenceImage.width}x${referenceImage.height}) does not match screenshot (${screenshotPng.width}x${screenshotPng.height}). ` +
             `Pixel comparison requires identical dimensions. Provide a reference at matching resolution or set an explicit device_pixel_ratio in config.`;
           logger.warn(mismatchMsg);
+
+          // The pixel diff can't run, but the artifact bundle is still useful:
+          // record the reference and screenshot images (no diff/composite) so
+          // --artifact-dir produces something the agent can inspect.
+          artifactViewportInputs.push({
+            viewport: referenceViewport,
+            referenceBuffer: referenceImage.buffer,
+            screenshotBuffer,
+            diffBuffer: null,
+            diff_ratio: -1,
+            diff_pixel_count: 0,
+            total_pixel_count: 0,
+            threshold: config.pixelmatch_threshold ?? 0.1,
+            score: null,
+            diff_regions: [],
+            note: mismatchMsg,
+          });
 
           for (const dim of V1_RUBRIC.dimensions) {
             for (const sub of dim.sub_criteria) {
@@ -718,21 +739,24 @@ export const evaluateCommand = new Command('evaluate')
         },
       };
 
-      // Generate the evaluation-results artifact bundle (US: artifact output)
+      // Generate the evaluation-results artifact bundle (US: artifact output).
+      // Always written when --artifact-dir is supplied: with a reference image it
+      // includes the per-viewport visuals, otherwise it is a data-only bundle
+      // (manifest.json + report.html with the scores, top issues and verdict).
       if (options.artifactDir) {
-        if (artifactViewportInputs.length > 0) {
-          const { writeArtifact } = await import('../artifact/index.js');
-          const artifact = await writeArtifact({
-            dir: options.artifactDir,
-            result,
-            viewports: artifactViewportInputs,
-          });
-          (result as Record<string, unknown>).artifact = artifact;
-          logger.info(`Artifact bundle written to ${artifact.dir}`);
-        } else {
-          logger.warn(
-            'Artifact bundle requires a reference-image comparison (--reference); skipping artifact generation',
+        const { writeArtifact } = await import('../artifact/index.js');
+        const artifact = await writeArtifact({
+          dir: options.artifactDir,
+          result,
+          viewports: artifactViewportInputs,
+        });
+        (result as Record<string, unknown>).artifact = artifact;
+        if (artifactViewportInputs.length === 0) {
+          logger.info(
+            `Artifact bundle written to ${artifact.dir} (data only — no reference image supplied, so no visual artifacts)`,
           );
+        } else {
+          logger.info(`Artifact bundle written to ${artifact.dir}`);
         }
       }
 

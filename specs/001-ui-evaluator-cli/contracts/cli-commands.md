@@ -28,24 +28,24 @@ webui-rubric evaluate <url> [options]
 
 #### Options
 
-| Flag                          | Type      | Default             | Description                                                                                           |
-| ----------------------------- | --------- | ------------------- | ----------------------------------------------------------------------------------------------------- |
-| `--config <path>`             | `string`  | `.webui-rubric.yml` | Path to the project configuration file                                                                |
-| `--out <path>`                | `string`  | (stdout)            | Write JSON artifact to file instead of stdout; summary moves to stdout                                |
-| `--reference <path>`          | `string`  | (none)              | Reference design image (PNG) for pixel comparison                                                     |
-| `--reference-viewport <name>` | `string`  | `"desktop"`         | Which viewport the reference image represents                                                         |
-| `--viewports <list>`          | `string`  | `"desktop,mobile"`  | Comma-separated viewport names to capture                                                             |
-| `--debug-dir <path>`          | `string`  | (none)              | Directory for raw debug artifacts (screenshots, reference image, HAR, diffs). Created with mode 0700. |
-| `--artifact-dir <path>`       | `string`  | (none)              | Directory for the curated evaluation-results artifact bundle (see below). Created with mode 0700.     |
-| `--iteration <n>`             | `number`  | (none)              | Loop iteration index for Evaluator/Generator convergence tracking                                     |
-| `--previous-composite <n>`    | `number`  | (none)              | Previous run's composite score (used to compute delta)                                                |
-| `--attempted-fixes <path>`    | `string`  | (none)              | Path to JSON file listing previously attempted fix hashes                                             |
-| `--allow-overrun`             | `boolean` | `false`             | Allow iterations beyond the configured cap                                                            |
-| `--allow-tool-version-drift`  | `boolean` | `false`             | Proceed when installed tool versions differ from rubric pins                                          |
-| `--no-redact`                 | `boolean` | `false`             | Disable default redaction of sensitive data in HAR/DOM/evidence                                       |
-| `--log-level <level>`         | `string`  | `"info"`            | Log verbosity: `debug`, `info`, `warn`, `error`                                                       |
-| `--quiet`, `-q`               | `boolean` | `false`             | Suppress all log output below `error`                                                                 |
-| `--help`, `-h`                | `boolean` |                     | Show help                                                                                             |
+| Flag                          | Type      | Default                   | Description                                                                                           |
+| ----------------------------- | --------- | ------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `--config <path>`             | `string`  | `.webui-rubric.yml`       | Path to the project configuration file                                                                |
+| `--out <path>`                | `string`  | (stdout)                  | Write JSON artifact to file instead of stdout; summary moves to stdout                                |
+| `--reference <path>`          | `string`  | (none)                    | Reference design image (PNG) for pixel comparison                                                     |
+| `--reference-viewport <name>` | `string`  | `"desktop"`               | Which viewport the reference image represents                                                         |
+| `--viewports <list>`          | `string`  | `"desktop,mobile"`        | Comma-separated viewport names to capture                                                             |
+| `--debug-dir <path>`          | `string`  | (none)                    | Directory for raw debug artifacts (screenshots, reference image, HAR, diffs). Created with mode 0700. |
+| `--artifact-dir <path>`       | `string`  | `.webui-rubric/artifacts` | Directory for the curated evaluation-results artifact bundle (see below). Created with mode 0700.     |
+| `--iteration <n>`             | `number`  | (none)                    | Loop iteration index for Evaluator/Generator convergence tracking                                     |
+| `--previous-composite <n>`    | `number`  | (none)                    | Previous run's composite score (used to compute delta)                                                |
+| `--attempted-fixes <path>`    | `string`  | (none)                    | Path to JSON file listing previously attempted fix hashes                                             |
+| `--allow-overrun`             | `boolean` | `false`                   | Allow iterations beyond the configured cap                                                            |
+| `--allow-tool-version-drift`  | `boolean` | `false`                   | Proceed when installed tool versions differ from rubric pins                                          |
+| `--no-redact`                 | `boolean` | `false`                   | Disable default redaction of sensitive data in HAR/DOM/evidence                                       |
+| `--log-level <level>`         | `string`  | `"info"`                  | Log verbosity: `debug`, `info`, `warn`, `error`                                                       |
+| `--quiet`, `-q`               | `boolean` | `false`                   | Suppress all log output below `error`                                                                 |
+| `--help`, `-h`                | `boolean` |                           | Show help                                                                                             |
 
 #### Output Contract (FR-002)
 
@@ -62,10 +62,11 @@ score=82 blocking=0 issues=5 ship_ready=true
 
 #### Evaluation-results artifact (`--artifact-dir`)
 
-When `--artifact-dir <path>` is supplied **and** a reference-image comparison ran
-(`--reference`), the CLI writes a self-contained bundle the Evaluator/Generator agent can both
-read and view. The result JSON gains an optional `artifact` block whose paths are relative to the
-bundle directory. Per compared viewport the bundle contains:
+When `--artifact-dir <path>` is supplied, the CLI writes a self-contained bundle the
+Evaluator/Generator agent can both read and view. The result JSON gains an optional `artifact`
+block whose paths are relative to the bundle directory. When a reference-image comparison ran
+(`--reference`), the bundle additionally contains per-viewport visuals. Per compared viewport the
+bundle contains:
 
 ```
 <artifact-dir>/
@@ -77,6 +78,15 @@ bundle directory. Per compared viewport the bundle contains:
   manifest.json                 # scores + verdict, top issues + fixes, pixel-diff metrics, iteration context
   report.html                   # offline HTML report binding the visuals to the data
 ```
+
+If the reference and screenshot dimensions differ, pixelmatch cannot run for that
+viewport. The bundle is still written with the reference and screenshot images and a
+manifest entry marked `"compared": false` (with a `note` explaining the mismatch); the
+`diff`/`composite` paths are `null` and no `regions/` crops are produced.
+
+Without `--reference` the bundle is data-only: just `manifest.json` and `report.html`
+carrying the scores, verdict, top issues and iteration context (`artifact.viewports` is
+an empty array). No image artifacts are produced.
 
 `--debug-dir` remains a raw dump (now also including `reference-<viewport>.png`); `--artifact-dir`
 is the curated, manifest-described bundle. The two flags are independent and may be used together.

@@ -4,14 +4,22 @@ import type { EvaluationResult, MappedDiffRegion } from '@webui-rubric/core';
 export interface ArtifactViewportImages {
   reference: string;
   screenshot: string;
-  diff: string;
-  composite: string;
+  /** Null when the pixel diff could not be computed (e.g. dimension mismatch). */
+  diff: string | null;
+  /** Null when no diff was produced, so no side-by-side composite exists. */
+  composite: string | null;
   regions: string[];
 }
 
 /** Pixel-diff metrics plus image paths and DOM-mapped regions for one viewport. */
 export interface ArtifactViewportData {
   viewport: string;
+  /**
+   * True when the reference and screenshot dimensions matched and pixelmatch
+   * ran. When false the metrics below are not meaningful and `note` explains why.
+   */
+  compared: boolean;
+  note?: string;
   diff_ratio: number;
   diff_pixel_count: number;
   total_pixel_count: number;

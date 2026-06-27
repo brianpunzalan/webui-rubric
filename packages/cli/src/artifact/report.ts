@@ -79,17 +79,33 @@ export function buildReportHtml(manifest: ArtifactManifest): string {
         })
         .join('');
 
+      const metrics = vp.compared
+        ? `<p class="metrics">diff ${(vp.diff_ratio * 100).toFixed(2)}% ·
+    ${esc(vp.diff_pixel_count)}/${esc(vp.total_pixel_count)} px ·
+    threshold ${esc(vp.threshold)} ·
+    parity score ${vp.score === null ? 'n/a' : esc(vp.score) + '/4'}</p>`
+        : `<p class="metrics muted">Pixel comparison unavailable${
+            vp.note ? ` — ${esc(vp.note)}` : ''
+          }</p>`;
+
+      // With a matching diff we show the side-by-side composite; otherwise we
+      // fall back to the reference and screenshot stacked so they can still be
+      // compared by eye.
+      const visuals = vp.images.composite
+        ? `<figure class="composite">
+    <img src="${esc(vp.images.composite)}" alt="reference | screenshot | diff">
+    <figcaption>reference&nbsp;|&nbsp;screenshot&nbsp;|&nbsp;diff</figcaption>
+  </figure>`
+        : `<div class="regions">
+    <figure><img src="${esc(vp.images.reference)}" alt="reference"><figcaption>reference</figcaption></figure>
+    <figure><img src="${esc(vp.images.screenshot)}" alt="screenshot"><figcaption>screenshot</figcaption></figure>
+  </div>`;
+
       return `
 <section class="viewport">
   <h3>Viewport: ${esc(vp.viewport)}</h3>
-  <p class="metrics">diff ${(vp.diff_ratio * 100).toFixed(2)}% ·
-    ${esc(vp.diff_pixel_count)}/${esc(vp.total_pixel_count)} px ·
-    threshold ${esc(vp.threshold)} ·
-    parity score ${vp.score === null ? 'n/a' : esc(vp.score) + '/4'}</p>
-  <figure class="composite">
-    <img src="${esc(vp.images.composite)}" alt="reference | screenshot | diff">
-    <figcaption>reference&nbsp;|&nbsp;screenshot&nbsp;|&nbsp;diff</figcaption>
-  </figure>
+  ${metrics}
+  ${visuals}
   ${regionImgs ? `<div class="regions">${regionImgs}</div>` : ''}
   ${regionDetail ? `<details><summary>DOM-mapped diff regions</summary><ul>${regionDetail}</ul></details>` : ''}
 </section>`;

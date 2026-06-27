@@ -109,8 +109,8 @@ const ArtifactViewportImagesSchema = z.object({
   viewport: z.string(),
   reference: z.string(),
   screenshot: z.string(),
-  diff: z.string(),
-  composite: z.string(),
+  diff: z.string().nullable(),
+  composite: z.string().nullable(),
   regions: z.array(z.string()),
 });
 
